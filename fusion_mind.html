@@ -781,6 +781,188 @@
   }
 
   /* ── THEME TOGGLE ── */
+  /* ── HISTORY ── */
+  #history-section { display: none; animation: fadeIn 0.35s ease both; }
+
+  .history-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .history-item {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .history-item:hover { border-color: var(--text-dim); transform: translateX(3px); }
+
+  .history-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .history-title {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .history-sub {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+  }
+
+  .history-badge {
+    display: inline-block;
+    background: var(--border);
+    color: var(--text-dim);
+    font-size: 9px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-right: 6px;
+  }
+
+  .history-actions { display: flex; gap: 8px; align-items: center; }
+
+  .history-del {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text-dim);
+    font-size: 11px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-family: var(--mono);
+    transition: all 0.15s;
+  }
+
+  .history-del:hover { border-color: var(--red); color: var(--red); }
+
+  .history-empty {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 12px;
+    padding: 40px 0;
+  }
+
+  /* ── DASHBOARD ── */
+  #dashboard-section { display: none; animation: fadeIn 0.35s ease both; }
+
+  .dash-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 700px) { .dash-grid { grid-template-columns: 1fr; } }
+
+  .dash-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+  }
+
+  .dash-card-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .dash-stat {
+    font-family: var(--sans);
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--green);
+    line-height: 1;
+  }
+
+  .dash-stat-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  .dash-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .dash-bar-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    width: 80px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .dash-bar-track {
+    flex: 1;
+    height: 14px;
+    background: var(--bg3);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .dash-bar-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 2px;
+    transition: width 0.8s ease;
+  }
+
+  .dash-bar-value {
+    font-size: 10px;
+    color: var(--text);
+    width: 35px;
+    font-family: var(--mono);
+  }
+
+  .dash-chart {
+    width: 100%;
+    height: 160px;
+  }
+
+  .dash-chart line.grid { stroke: var(--border); stroke-width: 0.5; }
+  .dash-chart polyline.line { fill: none; stroke: var(--green); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .dash-chart circle.dot { fill: var(--green); }
+  .dash-chart text { fill: var(--text-dim); font-size: 9px; font-family: var(--mono); }
+
+  .dash-empty {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 12px;
+    padding: 40px 0;
+  }
+
+  .history-btn {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 4px 10px;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .history-btn:hover { border-color: var(--text-dim); color: var(--text); }
+
   .theme-toggle {
     background: var(--bg3);
     border: 1px solid var(--border);
@@ -850,6 +1032,8 @@
   <div class="logo">FUSION<span> MIND</span></div>
   <div class="status-dots">
     <span><span class="dot green"></span>ONLINE</span>
+    <button class="history-btn" onclick="showDashboard()" title="Stats & progress">dashboard</button>
+    <button class="history-btn" onclick="showHistory()" title="Saved quizzes">history</button>
     <button class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark theme">☀ / ☾</button>
   </div>
 </div>
@@ -902,6 +1086,7 @@
               <option value="visual">Visual (image answers)</option>
               <option value="truefalse">True / False</option>
               <option value="matching">Matching (drag & drop)</option>
+              <option value="mixed">Mixed (all types)</option>
             </select>
           </div>
           <div class="field">
@@ -939,6 +1124,7 @@
       <div class="quiz-info">
         <strong id="quiz-file-count"></strong> files · <strong id="quiz-q-count"></strong> questions
       </div>
+      <button class="btn-ghost" onclick="shuffleQuiz()">⇄ shuffle</button>
       <button class="btn-ghost" onclick="saveQuiz()">↓ save</button>
       <button class="btn-ghost" onclick="resetAll()">✕ reset</button>
     </div>
@@ -997,6 +1183,71 @@
       <button class="btn-run" onclick="resetAll()">▶ New Quiz</button>
       <button class="btn-ghost" id="retry-wrong-btn" onclick="retryWrong()">↻ Retry wrong</button>
       <button class="btn-ghost" onclick="reviewQuiz()">⟳ Review</button>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div id="history-section">
+    <div class="panel">
+      <div class="panel-bar">
+        <div class="panel-bar-dot"></div><div class="panel-bar-dot"></div><div class="panel-bar-dot"></div>
+        <span class="panel-label">saved quizzes</span>
+      </div>
+      <div class="panel-body">
+        <div id="history-list" class="history-list"></div>
+      </div>
+    </div>
+    <div class="results-actions">
+      <button class="btn-ghost" onclick="showSection('upload')">← back to upload</button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard-section">
+    <div class="dash-grid">
+      <div class="dash-card">
+        <div class="dash-card-title">total quizzes</div>
+        <div class="dash-stat" id="dash-total">0</div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-title">average score</div>
+        <div class="dash-stat" id="dash-avg">—</div>
+        <div class="dash-stat-label" id="dash-avg-label"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-bar">
+        <div class="panel-bar-dot"></div><div class="panel-bar-dot"></div><div class="panel-bar-dot"></div>
+        <span class="panel-label">score over time</span>
+      </div>
+      <div class="panel-body">
+        <div id="dash-chart-container"></div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px">
+      <div class="panel-bar">
+        <div class="panel-bar-dot"></div><div class="panel-bar-dot"></div><div class="panel-bar-dot"></div>
+        <span class="panel-label">average by quiz type</span>
+      </div>
+      <div class="panel-body">
+        <div id="dash-by-type"></div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px">
+      <div class="panel-bar">
+        <div class="panel-bar-dot"></div><div class="panel-bar-dot"></div><div class="panel-bar-dot"></div>
+        <span class="panel-label">average by difficulty</span>
+      </div>
+      <div class="panel-body">
+        <div id="dash-by-diff"></div>
+      </div>
+    </div>
+
+    <div class="results-actions">
+      <button class="btn-ghost" onclick="showSection('upload')">← back to upload</button>
     </div>
   </div>
 
@@ -1075,6 +1326,7 @@
       questions = data.questions || [];
       if (!questions.length) throw new Error('No questions generated. Try a PDF with more text.');
       answers = {}; current = 0;
+      saveQuizToHistory();
       startQuiz();
     } catch (err) {
       showSection('upload');
@@ -1316,6 +1568,9 @@
 
     document.getElementById('score-big').textContent = `${ok}/${total}`;
 
+    // Save score to history (update most recent entry)
+    saveScoreToHistory(ok, total, pct);
+
     // Animate score ring
     const circumference = 327;
     const offset = circumference - (pct / 100) * circumference;
@@ -1387,6 +1642,19 @@
     showSection('results');
   }
 
+  function shuffleQuiz() {
+    // Fisher-Yates shuffle
+    for (let i = questions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [questions[i], questions[j]] = [questions[j], questions[i]];
+    }
+    answers = {};
+    current = 0;
+    allQuestions = [...questions];
+    allAnswers = {};
+    renderQ();
+  }
+
   function retryWrong() {
     // Save current answers into allAnswers
     questions.forEach((q, i) => {
@@ -1447,11 +1715,268 @@
   }
 
   function showSection(name) {
-    ['upload-section','loading','quiz-section','results-section'].forEach(id => {
+    ['upload-section','loading','quiz-section','results-section','history-section','dashboard-section'].forEach(id => {
       document.getElementById(id).style.display = 'none';
     });
-    const map = { upload:'upload-section', loading:'loading', quiz:'quiz-section', results:'results-section' };
+    const map = { upload:'upload-section', loading:'loading', quiz:'quiz-section', results:'results-section', history:'history-section', dashboard:'dashboard-section' };
     document.getElementById(map[name]).style.display = 'block';
+  }
+
+  // ── QUIZ HISTORY ──
+  function getSavedQuizzes() {
+    try { return JSON.parse(localStorage.getItem('quizHistory') || '[]'); }
+    catch { return []; }
+  }
+
+  function saveQuizToHistory() {
+    if (!questions.length) return;
+    const quizType = document.getElementById('quiz-type').value;
+    const difficulty = document.getElementById('difficulty').value;
+    const fileNames = files.map(f => f.name).join(', ') || 'Unknown';
+
+    const entry = {
+      id: Date.now(),
+      date: new Date().toISOString(),
+      quizType,
+      difficulty,
+      fileNames,
+      questionCount: questions.length,
+      questions: questions,
+    };
+
+    const history = getSavedQuizzes();
+    history.unshift(entry);
+    // Keep max 20 quizzes
+    if (history.length > 20) history.length = 20;
+    localStorage.setItem('quizHistory', JSON.stringify(history));
+  }
+
+  function showHistory() {
+    const history = getSavedQuizzes();
+    const list = document.getElementById('history-list');
+
+    if (!history.length) {
+      list.innerHTML = '<div class="history-empty">No saved quizzes yet. Generate one to get started.</div>';
+      showSection('history');
+      return;
+    }
+
+    list.innerHTML = history.map((entry, idx) => {
+      const date = new Date(entry.date);
+      const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      const typeLabels = { cloze: 'Cloze', template: 'Full Questions', visual: 'Visual', truefalse: 'True/False', matching: 'Matching' };
+      const typeLabel = typeLabels[entry.quizType] || entry.quizType;
+      const shortFiles = entry.fileNames.length > 40 ? entry.fileNames.substring(0, 40) + '...' : entry.fileNames;
+
+      return `<div class="history-item" onclick="loadQuiz(${idx})">
+        <div class="history-meta">
+          <div class="history-title">${shortFiles}</div>
+          <div class="history-sub">
+            <span class="history-badge">${typeLabel}</span>
+            <span class="history-badge">${entry.difficulty}</span>
+            ${entry.questionCount} questions · ${dateStr} ${timeStr}
+          </div>
+        </div>
+        <div class="history-actions">
+          <button class="history-del" onclick="event.stopPropagation(); downloadQuiz(${idx})" style="border-color:var(--green-dim);color:var(--green-dim)">↓ save</button>
+          <button class="history-del" onclick="event.stopPropagation(); deleteQuiz(${idx})">delete</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    showSection('history');
+  }
+
+  function loadQuiz(idx) {
+    const history = getSavedQuizzes();
+    const entry = history[idx];
+    if (!entry) return;
+
+    questions = entry.questions;
+    answers = {};
+    current = 0;
+    allQuestions = [...questions];
+    allAnswers = {};
+
+    document.getElementById('quiz-file-count').textContent = '—';
+    document.getElementById('quiz-q-count').textContent = questions.length;
+    showSection('quiz');
+    renderQ();
+  }
+
+  function downloadQuiz(idx) {
+    const history = getSavedQuizzes();
+    const entry = history[idx];
+    if (!entry) return;
+    const data = JSON.stringify({ questions: entry.questions }, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `quiz_${entry.quizType}_${new Date(entry.date).toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function deleteQuiz(idx) {
+    const history = getSavedQuizzes();
+    history.splice(idx, 1);
+    localStorage.setItem('quizHistory', JSON.stringify(history));
+    showHistory();
+  }
+
+  // ── DASHBOARD ──
+  function saveScoreToHistory(ok, total, pct) {
+    const history = getSavedQuizzes();
+    if (!history.length) return;
+    // Update the most recent entry that doesn't have a score yet,
+    // or the first entry (most recent)
+    const entry = history[0];
+    if (entry && entry.score === undefined) {
+      entry.score = ok;
+      entry.total = total;
+      entry.pct = pct;
+      localStorage.setItem('quizHistory', JSON.stringify(history));
+    }
+  }
+
+  function showDashboard() {
+    const history = getSavedQuizzes();
+    const scored = history.filter(h => h.pct !== undefined);
+
+    // Total quizzes
+    document.getElementById('dash-total').textContent = history.length;
+
+    // Average score
+    if (scored.length) {
+      const avg = Math.round(scored.reduce((s, h) => s + h.pct, 0) / scored.length);
+      document.getElementById('dash-avg').textContent = avg + '%';
+      document.getElementById('dash-avg-label').textContent = `from ${scored.length} completed quiz${scored.length > 1 ? 'zes' : ''}`;
+    } else {
+      document.getElementById('dash-avg').textContent = '—';
+      document.getElementById('dash-avg-label').textContent = 'no completed quizzes yet';
+    }
+
+    // Score over time chart
+    renderScoreChart(scored);
+
+    // Average by quiz type
+    renderBarChart('dash-by-type', scored, 'quizType', {
+      cloze: 'Cloze', template: 'Full Questions', visual: 'Visual',
+      truefalse: 'True/False', matching: 'Matching', mixed: 'Mixed'
+    });
+
+    // Average by difficulty
+    renderBarChart('dash-by-diff', scored, 'difficulty', {
+      easy: 'Easy', medium: 'Medium', hard: 'Hard'
+    });
+
+    showSection('dashboard');
+  }
+
+  function renderScoreChart(scored) {
+    const container = document.getElementById('dash-chart-container');
+    if (scored.length < 2) {
+      container.innerHTML = '<div class="dash-empty">Need at least 2 completed quizzes to show the chart.</div>';
+      return;
+    }
+
+    // Take last 15 entries (oldest first)
+    const data = scored.slice(0, 15).reverse();
+    const w = 500, h = 160, pad = 30;
+    const plotW = w - pad * 2, plotH = h - pad * 2;
+
+    const xStep = plotW / (data.length - 1);
+
+    let points = data.map((d, i) => {
+      const x = pad + i * xStep;
+      const y = pad + plotH - (d.pct / 100) * plotH;
+      return { x, y, pct: d.pct, date: new Date(d.date) };
+    });
+
+    const polyline = points.map(p => `${p.x},${p.y}`).join(' ');
+
+    // Grid lines at 25%, 50%, 75%, 100%
+    let gridLines = '';
+    [0, 25, 50, 75, 100].forEach(v => {
+      const y = pad + plotH - (v / 100) * plotH;
+      gridLines += `<line class="grid" x1="${pad}" y1="${y}" x2="${w - pad}" y2="${y}"/>`;
+      gridLines += `<text x="${pad - 5}" y="${y + 3}" text-anchor="end">${v}</text>`;
+    });
+
+    // X labels (dates)
+    let xLabels = '';
+    const step = Math.max(1, Math.floor(data.length / 5));
+    for (let i = 0; i < data.length; i += step) {
+      const p = points[i];
+      const label = p.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      xLabels += `<text x="${p.x}" y="${h - 2}" text-anchor="middle">${label}</text>`;
+    }
+
+    // Dots
+    const dots = points.map(p =>
+      `<circle class="dot" cx="${p.x}" cy="${p.y}" r="3"><title>${p.pct}%</title></circle>`
+    ).join('');
+
+    // Trend line (simple linear regression)
+    let trendLine = '';
+    if (data.length >= 3) {
+      const n = points.length;
+      const sumX = points.reduce((s, p, i) => s + i, 0);
+      const sumY = points.reduce((s, p) => s + p.pct, 0);
+      const sumXY = points.reduce((s, p, i) => s + i * p.pct, 0);
+      const sumX2 = points.reduce((s, p, i) => s + i * i, 0);
+      const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+      const intercept = (sumY - slope * sumX) / n;
+
+      const y1 = pad + plotH - (intercept / 100) * plotH;
+      const y2 = pad + plotH - ((intercept + slope * (n - 1)) / 100) * plotH;
+      const trendColor = slope >= 0 ? 'rgba(185,122,255,0.3)' : 'rgba(255,77,106,0.3)';
+      trendLine = `<line x1="${points[0].x}" y1="${y1}" x2="${points[n-1].x}" y2="${y2}" stroke="${trendColor}" stroke-width="2" stroke-dasharray="6,4"/>`;
+    }
+
+    container.innerHTML = `
+      <svg class="dash-chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet">
+        ${gridLines}
+        ${xLabels}
+        ${trendLine}
+        <polyline class="line" points="${polyline}"/>
+        ${dots}
+      </svg>
+    `;
+  }
+
+  function renderBarChart(containerId, scored, groupKey, labels) {
+    const container = document.getElementById(containerId);
+    if (!scored.length) {
+      container.innerHTML = '<div class="dash-empty">No data yet.</div>';
+      return;
+    }
+
+    // Group by key and calculate averages
+    const groups = {};
+    scored.forEach(h => {
+      const key = h[groupKey] || 'unknown';
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(h.pct);
+    });
+
+    let html = '';
+    Object.keys(labels).forEach(key => {
+      if (!groups[key]) return;
+      const avg = Math.round(groups[key].reduce((s, v) => s + v, 0) / groups[key].length);
+      const count = groups[key].length;
+      html += `
+        <div class="dash-bar-row">
+          <div class="dash-bar-label">${labels[key]}</div>
+          <div class="dash-bar-track"><div class="dash-bar-fill" style="width:${avg}%"></div></div>
+          <div class="dash-bar-value">${avg}% <span style="color:var(--text-dim);font-size:9px">(${count})</span></div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html || '<div class="dash-empty">No data yet.</div>';
   }
 
   // ── CONFETTI ──

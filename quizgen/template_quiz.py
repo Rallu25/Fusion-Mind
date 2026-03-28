@@ -332,14 +332,29 @@ def generate_template_quiz_from_pdf(pdf_path: str, n_questions: int = 10, seed: 
         if subject and len(subject) < 3:
             continue
 
+        # respinge subiecte prea lungi (>5 cuvinte = probabil fragment de propoziție)
+        subj_words = subject.split()
+        if len(subj_words) > 5:
+            continue
+
+        # respinge dacă subiectul conține cuvinte funcționale (fragment de propoziție)
+        subj_lower_words = [w.lower() for w in subj_words]
+        _BAD_IN_SUBJECT = {"to", "of", "after", "before", "could", "would", "should",
+                           "might", "may", "those", "their", "whose", "which",
+                           "where", "when", "how", "what", "why", "whether",
+                           "because", "although", "since", "while", "until",
+                           "into", "from", "between", "through", "during"}
+        if _BAD_IN_SUBJECT & set(subj_lower_words):
+            continue
+
+        # respinge dacă întrebarea conține cuvinte funcționale care sugerează fragment
+        q_lower = question_text.lower()
+        if "begins after" in q_lower or "could produce" in q_lower or "have been" in q_lower:
+            continue
+
         # respinge răspunsuri trunchiate (se termină cu cuvânt incomplet)
         last_answer_word = answer.split()[-1] if answer.split() else ""
         if last_answer_word and not last_answer_word[-1].isalnum() and last_answer_word[-1] not in ")]}%°":
-            continue
-
-        # respinge dacă subiectul conține "to" (sugerează fragment de propoziție)
-        subj_words = subject.lower().split()
-        if "to" in subj_words:
             continue
 
         # respinge dacă întrebarea conține cuvânt trunchiat la sfârșit

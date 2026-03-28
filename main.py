@@ -1,5 +1,6 @@
 import os
 import uuid
+import random
 
 from fastapi import FastAPI, UploadFile, File, Form, Body
 from quizgen import generate_quiz_from_pdf, generate_template_quiz_from_pdf, generate_image_quiz_from_pdf, generate_truefalse_quiz_from_pdf, generate_matching_quiz_from_pdf
@@ -25,6 +26,43 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 @app.get("/")
 def home():
     return {"message": "API is running."}
+
+
+def _generate_mixed_quiz(file_path: str, n_questions: int, difficulty: str) -> dict:
+    """Generate a mixed quiz combining multiple question types."""
+    # Split n_questions across types: ~30% cloze, ~30% template, ~20% T/F, ~20% matching
+    n_cloze = max(1, round(n_questions * 0.3))
+    n_template = max(1, round(n_questions * 0.3))
+    n_tf = max(1, round(n_questions * 0.2))
+    n_match = max(1, n_questions - n_cloze - n_template - n_tf)
+
+    all_questions = []
+
+    # Generate each type (silently handle failures)
+    r = generate_quiz_from_pdf(file_path, n_questions=n_cloze, difficulty=difficulty)
+    all_questions.extend(r.get("questions", []))
+
+    r = generate_template_quiz_from_pdf(file_path, n_questions=n_template, difficulty=difficulty)
+    all_questions.extend(r.get("questions", []))
+
+    r = generate_truefalse_quiz_from_pdf(file_path, n_questions=n_tf, difficulty=difficulty)
+    all_questions.extend(r.get("questions", []))
+
+    r = generate_matching_quiz_from_pdf(file_path, n_questions=n_match)
+    all_questions.extend(r.get("questions", []))
+
+    random.shuffle(all_questions)
+
+    if not all_questions:
+        return {"error": "Could not generate any questions from this PDF."}
+
+    if len(all_questions) < n_questions:
+        return {
+            "warning": f"Only {len(all_questions)} mixed questions were generated.",
+            "questions": all_questions
+        }
+
+    return {"questions": all_questions[:n_questions]}
 
 
 @app.post("/generate-quiz")
@@ -53,6 +91,8 @@ async def generate_quiz(
             result = generate_truefalse_quiz_from_pdf(file_path, n_questions=n_questions, difficulty=difficulty)
         elif quiz_type == "matching":
             result = generate_matching_quiz_from_pdf(file_path, n_questions=n_questions)
+        elif quiz_type == "mixed":
+            result = _generate_mixed_quiz(file_path, n_questions=n_questions, difficulty=difficulty)
         else:
             result = generate_quiz_from_pdf(file_path, n_questions=n_questions, difficulty=difficulty)
     finally:
@@ -190,6 +230,8 @@ async def generate_quiz_multi(
                 result = generate_truefalse_quiz_from_pdf(file_path, n_questions=n_questions_per_file, difficulty=difficulty)
             elif quiz_type == "matching":
                 result = generate_matching_quiz_from_pdf(file_path, n_questions=n_questions_per_file)
+            elif quiz_type == "mixed":
+                result = _generate_mixed_quiz(file_path, n_questions=n_questions_per_file, difficulty=difficulty)
             else:
                 result = generate_quiz_from_pdf(file_path, n_questions=n_questions_per_file, difficulty=difficulty)
         finally:
