@@ -9,18 +9,22 @@ BAD_TARGETS = {
     "modern", "scientific", "industrial", "astronomical", "optical"
 }
 
-PREFERRED_TARGETS = {
-    "photosynthesis", "chloroplasts", "chlorophyll", "mitochondria",
-    "intelligence", "algorithm", "satellite", "telescope", "encryption",
-    "galaxy", "mars", "jupiter", "database", "cybersecurity",
-    "confidential", "unsupervised", "supervised", "performance",
-    "overfitting", "interconnected", "computational",
-    "sensor", "storage", "researchers", "engineers", "automation",
-    "microcontroller", "localization", "packaging", "antioxidants",
-    "temperature", "pressure", "voltage", "frequency", "observations",
-    "ph", "nacl", "co2", "co₂", "c₆h₁₂o₆", "mol/l", "ghz", "khz", "hz", "ms", "gb", "tb", "a_w"
+def _load_preferred_targets() -> set[str]:
+    """Load preferred targets dynamically from knowledge base keys."""
+    import json, os
+    targets = {
+        "ph", "nacl", "co2", "co₂", "c₆h₁₂o₆", "mol/l",
+        "ghz", "khz", "hz", "ms", "gb", "tb", "a_w"
+    }
+    kb_path = os.path.join("data", "knowledge_base.json")
+    if os.path.exists(kb_path):
+        with open(kb_path, "r", encoding="utf-8") as f:
+            kb = json.load(f)
+            targets.update(kb.keys())
+    return targets
 
-}
+
+PREFERRED_TARGETS = _load_preferred_targets()
 
 
 def pick_target_word(sentence: str, doc_vocab: set[str]) -> str | None:

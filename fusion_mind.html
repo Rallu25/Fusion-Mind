@@ -175,9 +175,7 @@
   }
 
   .panel-bar-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border); }
-  .panel-bar-dot:nth-child(1) { background: #ff5f57; }
-  .panel-bar-dot:nth-child(2) { background: #ffbd2e; }
-  .panel-bar-dot:nth-child(3) { background: #28c840; }
+  .panel-bar-dot { display: none; }
 
   .panel-label {
     margin-left: 8px;
@@ -526,6 +524,67 @@
     .opts.image-opts { grid-template-columns: 1fr; }
   }
 
+  /* ── TRUE/FALSE OPTIONS ── */
+  .opts.tf-opts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .opt-btn.tf-true { border-left: 3px solid var(--green); }
+  .opt-btn.tf-false { border-left: 3px solid var(--red); }
+
+  /* ── MATCHING QUIZ ── */
+  .match-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 12px;
+  }
+
+  .match-col-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .match-item {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .match-item:hover { border-color: var(--text-dim); transform: translateX(2px); }
+  .match-item.selected { border-color: var(--blue); background: rgba(77,184,255,0.08); box-shadow: 0 0 10px rgba(77,184,255,0.2); }
+  .match-item.matched { border-color: var(--green-dim); opacity: 0.5; cursor: default; }
+  .match-item.matched:hover { transform: none; }
+
+  .match-tag {
+    display: inline-block;
+    background: var(--border);
+    color: var(--text-dim);
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 2px;
+    margin-left: 6px;
+  }
+
+  .match-item.matched .match-tag { background: var(--green-dim); color: var(--bg); }
+
+  @media (max-width: 560px) {
+    .match-container { grid-template-columns: 1fr; }
+  }
+
   /* ── EVIDENCE ── */
   .evidence {
     display: none;
@@ -550,6 +609,56 @@
   }
 
   .nav-counter { font-size: 11px; color: var(--muted); letter-spacing: 2px; }
+
+  /* ── QUESTION STEPPER ── */
+  .q-stepper {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .q-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .q-dot:hover { border-color: var(--text-dim); transform: scale(1.1); }
+  .q-dot.active { border-color: var(--green); color: var(--green); box-shadow: var(--green-glow); }
+  .q-dot.answered { background: var(--green-dim); border-color: var(--green-dim); color: var(--bg); }
+
+  /* ── CONFETTI ── */
+  .confetti-piece {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    border-radius: 1px;
+    pointer-events: none;
+    z-index: 9999;
+    animation: confettiFall linear forwards;
+  }
+
+  @keyframes confettiFall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ── SECTION TRANSITIONS ── */
+  #upload-section, #quiz-section, #results-section {
+    animation: fadeIn 0.35s ease both;
+  }
 
   /* ── RESULTS ── */
   #results-section { display: none; animation: fadeIn 0.4s ease both; }
@@ -670,6 +779,69 @@
     0%,100% { opacity: 1; }
     50%      { opacity: 0.5; }
   }
+
+  /* ── THEME TOGGLE ── */
+  .theme-toggle {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 4px 10px;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .theme-toggle:hover { border-color: var(--text-dim); color: var(--text); }
+
+  /* ── KEYBOARD HINTS ── */
+  .kb-hints {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  .kb-hint {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+  }
+
+  .kb-hint kbd {
+    display: inline-block;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text);
+    margin: 0 2px;
+  }
+
+  /* ── LIGHT THEME ── */
+  body.light {
+    --bg:       #f4f6f9;
+    --bg2:      #eaecf0;
+    --bg3:      #ffffff;
+    --border:   #d0d5dd;
+    --green:    #7c3aed;
+    --green-dim:#6d28d9;
+    --green-glow: 0 0 20px rgba(124,58,237,0.25);
+    --blue:     #2563eb;
+    --red:      #dc2626;
+    --yellow:   #d97706;
+    --muted:    #9ca3af;
+    --text:     #1f2937;
+    --text-dim: #6b7280;
+  }
+
+  body.light::before { display: none; }
+  body.light .topbar { background: #ffffff; border-color: #d0d5dd; }
+  body.light .drop-zone { background: #f9fafb; }
 </style>
 </head>
 <body>
@@ -678,7 +850,7 @@
   <div class="logo">FUSION<span> MIND</span></div>
   <div class="status-dots">
     <span><span class="dot green"></span>ONLINE</span>
-    <span><span class="dot blue"></span>v2.0</span>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark theme">☀ / ☾</button>
   </div>
 </div>
 
@@ -728,6 +900,8 @@
               <option value="cloze">Cloze (fill-in-blank)</option>
               <option value="template">Full questions</option>
               <option value="visual">Visual (image answers)</option>
+              <option value="truefalse">True / False</option>
+              <option value="matching">Matching (drag & drop)</option>
             </select>
           </div>
           <div class="field">
@@ -735,9 +909,14 @@
             <input type="number" id="n-questions" value="5" min="1" max="20">
           </div>
           <div class="field">
-            <label>Backend URL</label>
-            <input type="text" id="api-url" value="http://127.0.0.1:8000">
+            <label>Difficulty</label>
+            <select id="difficulty">
+              <option value="easy">Easy</option>
+              <option value="medium" selected>Medium</option>
+              <option value="hard">Hard</option>
+            </select>
           </div>
+          <input type="hidden" id="api-url" value="http://127.0.0.1:8000">
           <button class="btn-run" id="generate-btn" disabled onclick="startGeneration()">
             ▶ RUN
           </button>
@@ -763,6 +942,7 @@
       <button class="btn-ghost" onclick="saveQuiz()">↓ save</button>
       <button class="btn-ghost" onclick="resetAll()">✕ reset</button>
     </div>
+    <div class="q-stepper" id="q-stepper"></div>
     <div class="progress-wrap">
       <div class="progress-fill" id="progress-fill" style="width:0%"></div>
     </div>
@@ -772,11 +952,25 @@
       <span class="nav-counter" id="nav-counter"></span>
       <button class="btn-ghost" id="next-btn" onclick="navigate(1)">next →</button>
     </div>
+    <div class="kb-hints" id="kb-hints">
+      <span class="kb-hint"><kbd>A</kbd><kbd>B</kbd><kbd>C</kbd><kbd>D</kbd> select answer</span>
+      <span class="kb-hint"><kbd>←</kbd><kbd>→</kbd> navigate</span>
+      <span class="kb-hint"><kbd>T</kbd><kbd>F</kbd> true/false</span>
+    </div>
   </div>
 
   <!-- RESULTS -->
   <div id="results-section">
     <div class="score-panel">
+      <div id="score-ring" style="margin:0 auto 16px;width:120px;height:120px;position:relative">
+        <svg viewBox="0 0 120 120" style="transform:rotate(-90deg)">
+          <circle cx="60" cy="60" r="52" fill="none" stroke="var(--border)" stroke-width="6"/>
+          <circle id="score-circle" cx="60" cy="60" r="52" fill="none" stroke="var(--green)" stroke-width="6"
+                  stroke-dasharray="327" stroke-dashoffset="327" stroke-linecap="round"
+                  style="transition: stroke-dashoffset 1.2s ease"/>
+        </svg>
+        <span id="score-pct" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--sans);font-size:28px;font-weight:800;color:var(--green)">0%</span>
+      </div>
       <span class="score-big" id="score-big">—</span>
       <span class="score-label">final score</span>
       <p class="score-msg" id="score-msg"></p>
@@ -801,6 +995,7 @@
 
     <div class="results-actions">
       <button class="btn-run" onclick="resetAll()">▶ New Quiz</button>
+      <button class="btn-ghost" id="retry-wrong-btn" onclick="retryWrong()">↻ Retry wrong</button>
       <button class="btn-ghost" onclick="reviewQuiz()">⟳ Review</button>
     </div>
   </div>
@@ -809,6 +1004,7 @@
 
 <script>
   let files = [], questions = [], answers = {}, current = 0;
+  let allQuestions = [], allAnswers = {};
 
   // ── FILE ──
   const fileInput = document.getElementById('file-input');
@@ -867,6 +1063,7 @@
     files.forEach(f => fd.append('files', f));
     fd.append('n_questions_per_file', n);
     fd.append('quiz_type', quizType);
+    fd.append('difficulty', document.getElementById('difficulty').value);
 
     try {
       setMsg('analyzing text...');
@@ -891,6 +1088,8 @@
 
   // ── QUIZ ──
   function startQuiz() {
+    allQuestions = [...questions];
+    allAnswers = {};
     showSection('quiz');
     document.getElementById('quiz-file-count').textContent = files.length;
     document.getElementById('quiz-q-count').textContent = questions.length;
@@ -898,10 +1097,19 @@
   }
 
   function renderQ() {
+    matchSel = { type: null, idx: null };
+    matchMap = {};
     const q = questions[current], total = questions.length;
     document.getElementById('progress-fill').style.width = `${((current + 1) / total) * 100}%`;
     document.getElementById('nav-counter').textContent = `${current + 1} / ${total}`;
     document.getElementById('prev-btn').disabled = current === 0;
+
+    // Render stepper dots
+    const stepper = document.getElementById('q-stepper');
+    stepper.innerHTML = questions.map((_, i) => {
+      const cls = i === current ? 'active' : answers[i] !== undefined ? 'answered' : '';
+      return `<div class="q-dot ${cls}" onclick="current=${i};renderQ()">${i+1}</div>`;
+    }).join('');
 
     const isLast = current === total - 1;
     const nextBtn = document.getElementById('next-btn');
@@ -919,7 +1127,32 @@
     const letters = ['A','B','C','D'];
 
     const isImageQ = q.options_are_images === true;
-    const optsClass = isImageQ ? 'opts image-opts' : 'opts';
+    const isTF = q.options && q.options.length === 2 && q.options[0] === 'True' && q.options[1] === 'False';
+    const isMatch = q.quiz_type === 'matching';
+
+    if (isMatch) {
+      document.getElementById('question-container').innerHTML = `
+        <div class="q-card">
+          <div class="q-num">// Q_${String(current + 1).padStart(2, '0')}</div>
+          <div class="q-text">${q.question}</div>
+          <div class="match-container">
+            <div>
+              <div class="match-col-label">Terms</div>
+              ${q.terms.map((t, i) => `<div class="match-item" id="mt-${i}" onclick="matchPick('term',${i})">${t} <span class="match-tag" id="mt-tag-${i}">—</span></div>`).join('')}
+            </div>
+            <div>
+              <div class="match-col-label">Definitions</div>
+              ${q.definitions.map((d, i) => `<div class="match-item" id="md-${i}" onclick="matchPick('def',${i})">${d}</div>`).join('')}
+            </div>
+          </div>
+          <div class="evidence" id="evidence">${q.evidence || ''}</div>
+        </div>
+      `;
+      if (answers[current] !== undefined) restoreMatch();
+      return;
+    }
+
+    const optsClass = isImageQ ? 'opts image-opts' : isTF ? 'opts tf-opts' : 'opts';
 
     document.getElementById('question-container').innerHTML = `
       <div class="q-card">
@@ -931,6 +1164,13 @@
               return `<button class="opt-btn image-opt" id="opt-${i}" onclick="pick(${i})">
                 <span class="opt-key">${letters[i]}</span>
                 <img src="data:image/png;base64,${opt}" alt="Option ${letters[i]}">
+              </button>`;
+            }
+            if (isTF) {
+              const tfClass = opt === 'True' ? 'tf-true' : 'tf-false';
+              return `<button class="opt-btn ${tfClass}" id="opt-${i}" onclick="pick(${i})">
+                <span class="opt-key">${opt === 'True' ? 'T' : 'F'}</span>
+                <span>${opt}</span>
               </button>`;
             }
             return `<button class="opt-btn" id="opt-${i}" onclick="pick(${i})">
@@ -969,6 +1209,85 @@
     });
   }
 
+  // ── MATCHING ──
+  let matchSel = { type: null, idx: null };
+  let matchMap = {};  // termIdx -> defIdx for current question
+
+  function matchPick(type, idx) {
+    if (answers[current] !== undefined) return;
+    const q = questions[current];
+    const el = document.getElementById(type === 'term' ? `mt-${idx}` : `md-${idx}`);
+
+    // If already matched, ignore
+    if (el.classList.contains('matched')) return;
+
+    // If nothing selected yet, select this
+    if (!matchSel.type) {
+      matchSel = { type, idx };
+      el.classList.add('selected');
+      return;
+    }
+
+    // If clicking same type, switch selection
+    if (matchSel.type === type) {
+      document.getElementById(matchSel.type === 'term' ? `mt-${matchSel.idx}` : `md-${matchSel.idx}`).classList.remove('selected');
+      matchSel = { type, idx };
+      el.classList.add('selected');
+      return;
+    }
+
+    // We have a term and a def — make the match
+    const termIdx = type === 'term' ? idx : matchSel.idx;
+    const defIdx = type === 'def' ? idx : matchSel.idx;
+
+    // Clear selection styling
+    document.getElementById(`mt-${termIdx}`).classList.remove('selected');
+    document.getElementById(`md-${defIdx}`).classList.remove('selected');
+
+    // Mark as matched
+    document.getElementById(`mt-${termIdx}`).classList.add('matched');
+    document.getElementById(`md-${defIdx}`).classList.add('matched');
+
+    // Show match label
+    const label = String.fromCharCode(65 + Object.keys(matchMap).length);
+    document.getElementById(`mt-tag-${termIdx}`).textContent = label;
+
+    matchMap[termIdx] = defIdx;
+    matchSel = { type: null, idx: null };
+
+    // Check if all matched
+    if (Object.keys(matchMap).length === q.terms.length) {
+      // Calculate score: how many correct
+      let correct = 0;
+      q.terms.forEach((_, i) => {
+        if (matchMap[i] === q.correct_mapping[i]) correct++;
+      });
+      // Store as answer (correct count)
+      answers[current] = { map: { ...matchMap }, correct, total: q.terms.length };
+
+      if (current === questions.length - 1) {
+        const nb = document.getElementById('next-btn');
+        nb.textContent = 'results →'; nb.onclick = showResults;
+      }
+    }
+  }
+
+  function restoreMatch() {
+    const ans = answers[current];
+    if (!ans || !ans.map) return;
+    const q = questions[current];
+    let labelIdx = 0;
+    Object.entries(ans.map).forEach(([tIdx, dIdx]) => {
+      const ti = parseInt(tIdx);
+      const di = parseInt(dIdx);
+      document.getElementById(`mt-${ti}`).classList.add('matched');
+      document.getElementById(`md-${di}`).classList.add('matched');
+      const label = String.fromCharCode(65 + labelIdx);
+      document.getElementById(`mt-tag-${ti}`).textContent = label;
+      labelIdx++;
+    });
+  }
+
   function navigate(dir) {
     const next = current + dir;
     if (next < 0 || next >= questions.length) return;
@@ -977,12 +1296,43 @@
 
   // ── RESULTS ──
   function showResults() {
+    // Sync current answers into allAnswers
+    questions.forEach((q, i) => {
+      const idx = allQuestions.indexOf(q);
+      if (idx !== -1) allAnswers[idx] = answers[i];
+    });
+
     let ok = 0;
-    questions.forEach((q, i) => { if (answers[i] === q.correct_index) ok++; });
+    questions.forEach((q, i) => {
+      if (q.quiz_type === 'matching') {
+        const ans = answers[i];
+        if (ans && ans.correct === ans.total) ok++;
+      } else {
+        if (answers[i] === q.correct_index) ok++;
+      }
+    });
     const total = questions.length;
     const pct = Math.round(ok / total * 100);
 
     document.getElementById('score-big').textContent = `${ok}/${total}`;
+
+    // Animate score ring
+    const circumference = 327;
+    const offset = circumference - (pct / 100) * circumference;
+    document.getElementById('score-circle').style.strokeDashoffset = offset;
+
+    // Animate percentage counter
+    let countVal = 0;
+    const countTarget = pct;
+    const countEl = document.getElementById('score-pct');
+    const countInterval = setInterval(() => {
+      countVal += Math.ceil(countTarget / 30);
+      if (countVal >= countTarget) { countVal = countTarget; clearInterval(countInterval); }
+      countEl.textContent = countVal + '%';
+    }, 30);
+
+    // Confetti on perfect score
+    if (pct === 100) launchConfetti();
 
     const msgs = {
       100: 'perfect performance. you know the material.',
@@ -997,8 +1347,24 @@
     tbody.innerHTML = '';
     questions.forEach((q, i) => {
       const chosen = answers[i];
-      const isOk = chosen === q.correct_index;
       const shortQ = q.question.length > 55 ? q.question.substring(0,55) + '…' : q.question;
+
+      if (q.quiz_type === 'matching') {
+        const ans = chosen || {};
+        const matchOk = ans.correct === ans.total;
+        const chosenCell = ans.correct !== undefined ? `${ans.correct}/${ans.total} pairs` : '—';
+        const correctCell = `${q.terms ? q.terms.length : '?'} pairs`;
+        tbody.innerHTML += `<tr>
+          <td style="color:var(--muted);font-size:10px">${String(i+1).padStart(2,'0')}</td>
+          <td>${shortQ}</td>
+          <td>${chosenCell}</td>
+          <td style="color:var(--green)">${correctCell}</td>
+          <td><span class="badge ${matchOk ? 'ok' : 'fail'}">${matchOk ? 'OK' : 'FAIL'}</span></td>
+        </tr>`;
+        return;
+      }
+
+      const isOk = chosen === q.correct_index;
       const isImg = q.options_are_images === true;
       const chosenCell = chosen !== undefined
         ? (isImg ? `<img src="data:image/png;base64,${q.options[chosen]}" style="max-height:40px;border-radius:3px">` : q.options[chosen])
@@ -1015,10 +1381,47 @@
       </tr>`;
     });
 
+    // Hide retry button if all correct
+    document.getElementById('retry-wrong-btn').style.display = ok < total ? '' : 'none';
+
     showSection('results');
   }
 
-  function reviewQuiz() { current = 0; showSection('quiz'); renderQ(); }
+  function retryWrong() {
+    // Save current answers into allAnswers
+    questions.forEach((q, i) => {
+      const idx = allQuestions.indexOf(q);
+      if (idx !== -1) allAnswers[idx] = answers[i];
+    });
+
+    const wrong = [];
+    questions.forEach((q, i) => {
+      if (answers[i] !== q.correct_index) wrong.push(q);
+    });
+    if (!wrong.length) return;
+    questions = wrong;
+    answers = {};
+    current = 0;
+    document.getElementById('quiz-q-count').textContent = questions.length;
+    showSection('quiz');
+    renderQ();
+  }
+
+  function reviewQuiz() {
+    // Merge latest answers into allAnswers
+    questions.forEach((q, i) => {
+      const idx = allQuestions.indexOf(q);
+      if (idx !== -1) allAnswers[idx] = answers[i];
+    });
+
+    // Restore full quiz with all answers
+    questions = [...allQuestions];
+    answers = { ...allAnswers };
+    current = 0;
+    document.getElementById('quiz-q-count').textContent = questions.length;
+    showSection('quiz');
+    renderQ();
+  }
 
   function saveQuiz() {
     if (!questions.length) return;
@@ -1034,9 +1437,12 @@
 
   function resetAll() {
     files = []; questions = []; answers = {}; current = 0;
+    allQuestions = []; allAnswers = {};
     renderFiles();
     document.getElementById('generate-btn').disabled = true;
     document.getElementById('error-box').style.display = 'none';
+    document.getElementById('score-circle').style.strokeDashoffset = 327;
+    document.getElementById('score-pct').textContent = '0%';
     showSection('upload');
   }
 
@@ -1047,6 +1453,85 @@
     const map = { upload:'upload-section', loading:'loading', quiz:'quiz-section', results:'results-section' };
     document.getElementById(map[name]).style.display = 'block';
   }
+
+  // ── CONFETTI ──
+  function launchConfetti() {
+    const colors = ['#b97aff', '#4db8ff', '#ffd166', '#ff4d6a', '#28c840', '#fff'];
+    for (let i = 0; i < 80; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = Math.random() * 100 + 'vw';
+      piece.style.top = '-10px';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.width = (4 + Math.random() * 8) + 'px';
+      piece.style.height = (4 + Math.random() * 8) + 'px';
+      piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      piece.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+      piece.style.animationDelay = Math.random() * 0.8 + 's';
+      document.body.appendChild(piece);
+      setTimeout(() => piece.remove(), 4000);
+    }
+  }
+
+  // ── THEME TOGGLE ──
+  function toggleTheme() {
+    document.body.classList.toggle('light');
+    localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
+  }
+
+  // Restore theme on load
+  if (localStorage.getItem('theme') === 'light') document.body.classList.add('light');
+
+  // ── KEYBOARD SHORTCUTS ──
+  document.addEventListener('keydown', e => {
+    // Only active during quiz
+    if (document.getElementById('quiz-section').style.display === 'none') return;
+
+    const q = questions[current];
+    if (!q) return;
+
+    const key = e.key.toLowerCase();
+    const isMatch = q.quiz_type === 'matching';
+
+    // Arrow keys: navigate
+    if (key === 'arrowleft') { e.preventDefault(); navigate(-1); return; }
+    if (key === 'arrowright') { e.preventDefault(); navigate(1); return; }
+
+    // Skip shortcuts for matching quiz (uses click interaction)
+    if (isMatch) return;
+
+    const isTF = q.options && q.options.length === 2 && q.options[0] === 'True' && q.options[1] === 'False';
+
+    // A/B/C/D for 4-option questions
+    if (!isTF) {
+      const map = { a: 0, b: 1, c: 2, d: 3 };
+      if (key in map && map[key] < q.options.length) {
+        pick(map[key]);
+        return;
+      }
+      // Also support 1/2/3/4
+      const numMap = { '1': 0, '2': 1, '3': 2, '4': 3 };
+      if (key in numMap && numMap[key] < q.options.length) {
+        pick(numMap[key]);
+        return;
+      }
+    }
+
+    // T/F for true/false
+    if (isTF) {
+      if (key === 't') { pick(0); return; }
+      if (key === 'f') { pick(1); return; }
+    }
+
+    // Enter: go to next or show results
+    if (key === 'enter') {
+      e.preventDefault();
+      if (answers[current] !== undefined) {
+        if (current === questions.length - 1) showResults();
+        else navigate(1);
+      }
+    }
+  });
 </script>
 </body>
 </html>

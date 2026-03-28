@@ -2,7 +2,7 @@ import os
 import uuid
 
 from fastapi import FastAPI, UploadFile, File, Form, Body
-from quizgen import generate_quiz_from_pdf, generate_template_quiz_from_pdf, generate_image_quiz_from_pdf
+from quizgen import generate_quiz_from_pdf, generate_template_quiz_from_pdf, generate_image_quiz_from_pdf, generate_truefalse_quiz_from_pdf, generate_matching_quiz_from_pdf
 from translator import translate_text
 
 from typing import List
@@ -31,7 +31,8 @@ def home():
 async def generate_quiz(
     file: UploadFile = File(...),
     n_questions: int = Form(10),
-    quiz_type: str = Form("cloze")
+    quiz_type: str = Form("cloze"),
+    difficulty: str = Form("medium")
 ):
     if not file.filename.lower().endswith(".pdf"):
         return {"error": "Please upload a PDF file."}
@@ -45,11 +46,15 @@ async def generate_quiz(
 
     try:
         if quiz_type == "template":
-            result = generate_template_quiz_from_pdf(file_path, n_questions=n_questions)
+            result = generate_template_quiz_from_pdf(file_path, n_questions=n_questions, difficulty=difficulty)
         elif quiz_type == "visual":
             result = generate_image_quiz_from_pdf(file_path, n_questions=n_questions)
+        elif quiz_type == "truefalse":
+            result = generate_truefalse_quiz_from_pdf(file_path, n_questions=n_questions, difficulty=difficulty)
+        elif quiz_type == "matching":
+            result = generate_matching_quiz_from_pdf(file_path, n_questions=n_questions)
         else:
-            result = generate_quiz_from_pdf(file_path, n_questions=n_questions)
+            result = generate_quiz_from_pdf(file_path, n_questions=n_questions, difficulty=difficulty)
     finally:
         os.remove(file_path)
     return result
@@ -155,7 +160,8 @@ async def translate_quiz(payload: dict = Body(...)):
 async def generate_quiz_multi(
     files: List[UploadFile] = File(...),
     n_questions_per_file: int = Form(10),
-    quiz_type: str = Form("cloze")
+    quiz_type: str = Form("cloze"),
+    difficulty: str = Form("medium")
 ):
     if not files:
         return {"error": "No files were sent."}
@@ -177,11 +183,15 @@ async def generate_quiz_multi(
 
         try:
             if quiz_type == "template":
-                result = generate_template_quiz_from_pdf(file_path, n_questions=n_questions_per_file)
+                result = generate_template_quiz_from_pdf(file_path, n_questions=n_questions_per_file, difficulty=difficulty)
             elif quiz_type == "visual":
                 result = generate_image_quiz_from_pdf(file_path, n_questions=n_questions_per_file)
+            elif quiz_type == "truefalse":
+                result = generate_truefalse_quiz_from_pdf(file_path, n_questions=n_questions_per_file, difficulty=difficulty)
+            elif quiz_type == "matching":
+                result = generate_matching_quiz_from_pdf(file_path, n_questions=n_questions_per_file)
             else:
-                result = generate_quiz_from_pdf(file_path, n_questions=n_questions_per_file)
+                result = generate_quiz_from_pdf(file_path, n_questions=n_questions_per_file, difficulty=difficulty)
         finally:
             os.remove(file_path)
         questions = result.get("questions", [])

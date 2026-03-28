@@ -182,6 +182,119 @@ def filter_ambiguous_distractors(correct: str, distractors: list[str],
     return filtered
 
 
+# ── GRAMMATICAL VALIDATION ──
+
+_VOWELS = set("aeiouAEIOU")
+
+_NOUN_SUFFIXES = {"tion", "sion", "ment", "ness", "ity", "ance", "ence", "ism",
+                  "ist", "ogy", "ure", "dom", "ship", "hood", "age", "ery"}
+_ADJ_SUFFIXES = {"ous", "ive", "able", "ible", "ful", "less", "ical", "eous",
+                 "ious", "ular", "ary", "ory", "ant", "ent"}
+_VERB_SUFFIXES = {"ate", "ize", "ise", "ify"}
+_ADVERB_SUFFIX = "ly"
+
+# Common verbs that shouldn't be distractors for nouns
+_COMMON_VERBS = {
+    "run", "runs", "running", "make", "makes", "making", "take", "takes",
+    "give", "gives", "go", "goes", "come", "comes", "see", "sees",
+    "know", "knows", "think", "thinks", "find", "finds", "become",
+    "keep", "keeps", "begin", "begins", "seem", "seems", "help", "helps",
+    "show", "shows", "hear", "hears", "play", "plays", "move", "moves",
+    "try", "tries", "ask", "asks", "need", "needs", "call", "calls",
+    "bring", "brings", "write", "writes", "provide", "provides",
+    "happen", "happens", "include", "includes", "allow", "allows",
+}
+
+
+def _guess_word_type(word: str) -> str:
+    """Guess if a word is noun, adjective, verb, or adverb based on suffix."""
+    w = word.lower()
+    if w.endswith(_ADVERB_SUFFIX) and len(w) > 4:
+        return "adverb"
+    for suf in sorted(_VERB_SUFFIXES, key=len, reverse=True):
+        if w.endswith(suf) and len(w) - len(suf) >= 3:
+            return "verb"
+    for suf in sorted(_ADJ_SUFFIXES, key=len, reverse=True):
+        if w.endswith(suf) and len(w) - len(suf) >= 2:
+            return "adjective"
+    for suf in sorted(_NOUN_SUFFIXES, key=len, reverse=True):
+        if w.endswith(suf) and len(w) - len(suf) >= 2:
+            return "noun"
+    return "unknown"
+
+
+def _is_likely_plural(word: str) -> bool:
+    """Check if word looks plural."""
+    w = word.lower()
+    if w.endswith("ss") or w.endswith("us") or w.endswith("is"):
+        return False
+    if w.endswith("ies") or w.endswith("es") or w.endswith("s"):
+        return True
+    return False
+
+
+def _get_preceding_word(sentence: str, target: str) -> str:
+    """Get the word immediately before the target in the sentence."""
+    words = sentence.split()
+    target_lower = target.lower()
+    for i, w in enumerate(words):
+        if normalize_word(w) == normalize_word(target_lower) and i > 0:
+            return words[i - 1].lower().strip(".,;:()\"'")
+    return ""
+
+
+def grammatical_filter(correct: str, distractors: list[str],
+                       sentence: str) -> list[str]:
+    """Filter distractors that don't fit grammatically in the sentence context."""
+    correct_lower = correct.lower()
+    preceding = _get_preceding_word(sentence, correct)
+    correct_type = _guess_word_type(correct_lower)
+    correct_plural = _is_likely_plural(correct_lower)
+
+    filtered = []
+    for d in distractors:
+        d_lower = d.lower()
+
+        # 1. Article agreement: "a" + consonant, "an" + vowel
+        if preceding == "a" and d_lower and d_lower[0] in _VOWELS:
+            continue
+        if preceding == "an" and d_lower and d_lower[0] not in _VOWELS:
+            continue
+
+        # 2. Number agreement: plural target needs plural distractor
+        d_plural = _is_likely_plural(d_lower)
+        if correct_plural != d_plural:
+            # Exception: some words don't follow simple plural rules
+            # Only enforce if both are clearly regular words
+            if len(correct_lower) > 4 and len(d_lower) > 4:
+                continue
+
+        # 3. Word type consistency
+        d_type = _guess_word_type(d_lower)
+        if correct_type != "unknown" and d_type != "unknown":
+            if correct_type != d_type:
+                # Nouns and adjectives can sometimes interchange, allow it
+                if not ({correct_type, d_type} <= {"noun", "adjective"}):
+                    continue
+
+        # 4. Don't use common verbs as distractors for nouns
+        if preceding in ("the", "a", "an", "this", "that", "each", "every"):
+            if d_lower in _COMMON_VERBS:
+                continue
+
+        # 5. Adverbs should not be distractors for non-adverbs
+        if d_lower.endswith("ly") and not correct_lower.endswith("ly"):
+            if len(d_lower) > 4:
+                continue
+        if correct_lower.endswith("ly") and not d_lower.endswith("ly"):
+            if len(correct_lower) > 4:
+                continue
+
+        filtered.append(d)
+
+    return filtered
+
+
 def format_options(correct: str, distractors: list[str]) -> list[str]:
     formatted = []
 
@@ -199,8 +312,8 @@ def pick_distractors(correct: str, vocab: set[str], sentence: str,
     if all_sentences is None:
         all_sentences = []
 
-    kb_distractors = get_kb_distractors(correct, sentence, k=k + 2)
-    doc_distractors = get_doc_distractors(correct, vocab, sentence, k=k * 3)
+    kb_distractors = get_kb_distractors(correct, sentence, k=k + 4)
+    doc_distractors = get_doc_distractors(correct, vocab, sentence, k=k * 4)
 
     # combinăm toți candidații
     combined = kb_distractors[:]
@@ -212,5 +325,8 @@ def pick_distractors(correct: str, vocab: set[str], sentence: str,
 
     # filtrăm distractorii ambigui
     combined = filter_ambiguous_distractors(correct, combined, sentence, all_sentences)
+
+    # filtrăm distractorii care nu se potrivesc gramatical
+    combined = grammatical_filter(correct, combined, sentence)
 
     return format_options(correct, combined[:k])

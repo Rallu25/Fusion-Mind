@@ -7,6 +7,18 @@ from .tfidf_rank import rank_sentences
 from .distractors import build_vocab, normalize_word, shares_stem, KNOWLEDGE_BASE
 from .template_patterns import match_sentence, clean_answer
 
+# Import shared difficulty filter (will be available after __init__ loads)
+def _filter_by_difficulty(candidates, difficulty, n):
+    sorted_c = sorted(candidates, key=lambda x: x["quality_score"], reverse=True)
+    if difficulty == "easy":
+        return sorted_c[:n]
+    elif difficulty == "hard":
+        return sorted_c[-n:] if len(sorted_c) >= n else sorted_c
+    else:
+        mid = len(sorted_c) // 4
+        end = mid + n
+        return sorted_c[mid:end] if end <= len(sorted_c) else sorted_c[mid:]
+
 
 # Regex simplu pentru extragerea sintagmelor nominale (fallback distractors)
 _NP_PATTERN = re.compile(
@@ -265,7 +277,7 @@ def score_template_question(
     return score
 
 
-def generate_template_quiz_from_pdf(pdf_path: str, n_questions: int = 10, seed: int = 42) -> dict:
+def generate_template_quiz_from_pdf(pdf_path: str, n_questions: int = 10, seed: int = 42, difficulty: str = "medium") -> dict:
     """Generează un quiz cu întrebări complete (template-based) din PDF."""
     random.seed(seed)
 
@@ -406,10 +418,10 @@ def generate_template_quiz_from_pdf(pdf_path: str, n_questions: int = 10, seed: 
     # Pasul 3: sortează și selectează
     candidates.sort(key=lambda x: x["quality_score"], reverse=True)
 
-    MIN_QUALITY_SCORE = 40
+    MIN_QUALITY_SCORE = 20 if difficulty == "hard" else 30 if difficulty == "medium" else 40
     filtered = [q for q in candidates if q["quality_score"] >= MIN_QUALITY_SCORE]
 
-    questions = filtered[:n_questions]
+    questions = _filter_by_difficulty(filtered, difficulty, n_questions)
 
     clean_questions = []
     for q in questions:

@@ -8,6 +8,8 @@ from .distractors import build_vocab, pick_distractors, normalize_word, KNOWLEDG
 from .cloze import pick_target_word, make_cloze
 from .template_quiz import generate_template_quiz_from_pdf
 from .image_quiz import generate_image_quiz_from_pdf
+from .truefalse_quiz import generate_truefalse_quiz_from_pdf
+from .matching_quiz import generate_matching_quiz_from_pdf
 
 
 BAD_STARTS = {
@@ -77,7 +79,29 @@ def score_question(sentence: str, target: str, options: list[str]) -> int:
     return score
 
 
-def generate_quiz_from_pdf(pdf_path: str, n_questions: int = 10, seed: int = 42) -> dict:
+def _filter_by_difficulty(candidates: list[dict], difficulty: str, n: int) -> list[dict]:
+    """Select questions based on difficulty level.
+    Easy = highest quality scores (clearest questions).
+    Hard = lowest quality scores (trickier/more nuanced).
+    Medium = middle range.
+    """
+    if not candidates:
+        return []
+
+    sorted_c = sorted(candidates, key=lambda x: x["quality_score"], reverse=True)
+
+    if difficulty == "easy":
+        return sorted_c[:n]
+    elif difficulty == "hard":
+        # Take from the bottom but still above minimum threshold
+        return sorted_c[-n:] if len(sorted_c) >= n else sorted_c
+    else:  # medium
+        mid = len(sorted_c) // 4
+        end = mid + n
+        return sorted_c[mid:end] if end <= len(sorted_c) else sorted_c[mid:]
+
+
+def generate_quiz_from_pdf(pdf_path: str, n_questions: int = 10, seed: int = 42, difficulty: str = "medium") -> dict:
     random.seed(seed)
 
     text = extract_text_from_pdf(pdf_path)
@@ -148,12 +172,10 @@ def generate_quiz_from_pdf(pdf_path: str, n_questions: int = 10, seed: int = 42)
         used_questions.add(question_text)
         used_targets.add(target_norm)
 
-    candidates.sort(key=lambda x: x["quality_score"], reverse=True)
-
-    MIN_QUALITY_SCORE = 60
+    MIN_QUALITY_SCORE = 40 if difficulty == "hard" else 50 if difficulty == "medium" else 60
     filtered_candidates = [q for q in candidates if q["quality_score"] >= MIN_QUALITY_SCORE]
 
-    questions = filtered_candidates[:n_questions]
+    questions = _filter_by_difficulty(filtered_candidates, difficulty, n_questions)
 
     clean_questions = []
     for q in questions:
