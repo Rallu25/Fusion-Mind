@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FUSION MIND</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #080c10;
+    --bg2:      #0d1117;
+    --bg3:      #111820;
+    --border:   #1e2d3d;
+    --green:    #b97aff;
+    --green-dim:#8a4fd4;
+    --green-glow: 0 0 20px rgba(185,122,255,0.4);
+    --blue:     #4db8ff;
+    --red:      #ff4d6a;
+    --yellow:   #ffd166;
+    --muted:    #445566;
+    --text:     #c8d8e8;
+    --text-dim: #6a8099;
+    --mono:     'Space Mono', monospace;
+    --sans:     'Syne', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  ::selection { background: var(--green); color: var(--bg); }
+
+  body {
+    font-family: var(--mono);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 3px,
+      rgba(0,0,0,0.07) 3px,
+      rgba(0,0,0,0.07) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* grid bg */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(185,122,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(185,122,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(8,12,16,0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: 17px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--green);
+    text-shadow: var(--green-glow);
+  }
+
+  .logo span { color: var(--text-dim); font-weight: 400; }
+
+  .status-dots {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+  }
+
+  .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+  .dot.green { background: #b97aff; box-shadow: 0 0 8px #b97aff; animation: blink 2s infinite; }
+  .dot.blue  { background: var(--blue); }
+
+  @keyframes blink {
+    0%,100% { opacity: 1; }
+    50%      { opacity: 0.3; }
+  }
+
+  /* ── LAYOUT ── */
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* ── TERMINAL HEADER ── */
+  .terminal-header {
+    margin-bottom: 48px;
+    animation: fadeIn 0.5s ease both;
+  }
+
+  .terminal-path {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+
+  .terminal-path .hl { color: var(--green); }
+
+  .terminal-title {
+    font-family: var(--sans);
+    font-size: clamp(36px, 7vw, 64px);
+    font-weight: 800;
+    line-height: 1.0;
+    color: var(--text);
+    letter-spacing: -1px;
+    margin-bottom: 10px;
+  }
+
+  .terminal-title .accent { color: var(--green); text-shadow: var(--green-glow); }
+
+  .terminal-sub {
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+  }
+
+  .terminal-sub::before { content: '> '; color: var(--green); }
+
+  /* ── PANEL ── */
+  .panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    margin-bottom: 16px;
+    animation: fadeIn 0.5s ease both;
+    overflow: hidden;
+  }
+
+  .panel-bar {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .panel-bar-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border); }
+  .panel-bar-dot:nth-child(1) { background: #ff5f57; }
+  .panel-bar-dot:nth-child(2) { background: #ffbd2e; }
+  .panel-bar-dot:nth-child(3) { background: #28c840; }
+
+  .panel-label {
+    margin-left: 8px;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .panel-body { padding: 24px; }
+
+  /* ── DROP ZONE ── */
+  .drop-zone {
+    border: 1px dashed var(--border);
+    border-radius: 2px;
+    padding: 36px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    background: rgba(185,122,255,0.01);
+  }
+
+  .drop-zone:hover, .drop-zone.drag-over {
+    border-color: var(--green-dim);
+    background: rgba(185,122,255,0.04);
+  }
+
+  .drop-zone:hover .dz-icon { text-shadow: var(--green-glow); color: var(--green); }
+
+  .drop-zone input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .dz-icon {
+    font-size: 32px;
+    display: block;
+    margin-bottom: 12px;
+    color: var(--green-dim);
+    transition: all 0.2s;
+  }
+
+  .dz-title {
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .dz-sub { font-size: 11px; color: var(--text-dim); }
+
+  /* ── FILE LIST ── */
+  #file-list { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; }
+
+  .file-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    font-size: 12px;
+    animation: slideIn 0.25s ease both;
+  }
+
+  .file-row .fname { flex: 1; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-row .fsize { color: var(--muted); font-size: 10px; }
+  .file-tag { font-size: 10px; background: rgba(185,122,255,0.1); color: var(--green); padding: 2px 7px; border-radius: 2px; letter-spacing: 1px; }
+
+  .file-rm {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    transition: color 0.15s;
+    font-family: var(--mono);
+  }
+  .file-rm:hover { color: var(--red); }
+
+  /* ── CONTROLS ── */
+  .controls-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 12px;
+    align-items: end;
+  }
+
+  @media (max-width: 560px) { .controls-row { grid-template-columns: 1fr; } }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+
+  .field label {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .field input, .field select {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 9px 12px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .field input:focus, .field select:focus { border-color: var(--green-dim); }
+
+  /* ── BUTTON ── */
+  .btn-run {
+    background: var(--green);
+    color: var(--bg);
+    border: none;
+    padding: 10px 28px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+    white-space: nowrap;
+    align-self: end;
+  }
+
+  .btn-run:hover:not(:disabled) {
+    background: #00ffaa;
+    box-shadow: var(--green-glow);
+    transform: translateY(-1px);
+  }
+
+  .btn-run:disabled { opacity: 0.25; cursor: not-allowed; }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 9px 20px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+
+  .btn-ghost:hover { border-color: var(--text-dim); color: var(--text); }
+  .btn-ghost:disabled { opacity: 0.25; cursor: default; }
+
+  /* ── ERROR ── */
+  .error-msg {
+    display: none;
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: rgba(255,77,106,0.08);
+    border: 1px solid rgba(255,77,106,0.3);
+    color: var(--red);
+    font-size: 12px;
+    border-radius: 2px;
+  }
+
+  .error-msg::before { content: '[ERR] '; }
+
+  /* ── LOADING ── */
+  #loading { display: none; text-align: center; padding: 64px 24px; animation: fadeIn 0.4s ease both; }
+
+  .loading-ascii {
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+    animation: pulse 1.5s ease infinite;
+  }
+
+  .loading-bar-wrap {
+    width: 280px;
+    margin: 0 auto 16px;
+    height: 2px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .loading-bar {
+    height: 100%;
+    width: 30%;
+    background: var(--green);
+    box-shadow: 0 0 10px #b97aff;
+    animation: scanBar 1.2s ease-in-out infinite;
+    border-radius: 99px;
+  }
+
+  @keyframes scanBar {
+    0%   { margin-left: 0%; width: 20%; }
+    50%  { margin-left: 70%; width: 30%; }
+    100% { margin-left: 0%; width: 20%; }
+  }
+
+  #loading-msg { font-size: 11px; color: var(--text-dim); letter-spacing: 1px; }
+
+  /* ── QUIZ ── */
+  #quiz-section { display: none; }
+
+  .quiz-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .quiz-info { font-size: 10px; color: var(--text-dim); letter-spacing: 2px; text-transform: uppercase; }
+  .quiz-info strong { color: var(--green); }
+
+  .progress-wrap { width: 100%; height: 2px; background: var(--border); margin-bottom: 28px; }
+  .progress-fill { height: 100%; background: var(--green); box-shadow: 0 0 8px #b97aff; transition: width 0.4s ease; }
+
+  /* ── QUESTION ── */
+  .q-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 28px;
+    margin-bottom: 14px;
+    animation: fadeIn 0.3s ease both;
+  }
+
+  .q-num {
+    font-size: 10px;
+    color: var(--green);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .q-text {
+    font-family: var(--sans);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.5;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+
+  .blank {
+    display: inline-block;
+    width: 70px;
+    border-bottom: 2px solid var(--green);
+    margin: 0 3px;
+    position: relative;
+    top: -1px;
+    box-shadow: 0 2px 8px rgba(0,255,136,0.3);
+  }
+
+  /* ── OPTIONS ── */
+  .opts { display: flex; flex-direction: column; gap: 8px; }
+
+  .opt-btn {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+    text-align: left;
+    transition: all 0.15s;
+  }
+
+  .opt-btn:hover:not(:disabled) {
+    border-color: var(--green-dim);
+    background: rgba(185,122,255,0.04);
+    transform: translateX(4px);
+  }
+
+  .opt-key {
+    width: 24px;
+    height: 24px;
+    border-radius: 2px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    color: var(--text-dim);
+  }
+
+  .opt-btn.selected { border-color: var(--blue); background: rgba(77,184,255,0.08); }
+  .opt-btn.selected .opt-key { background: var(--blue); color: var(--bg); border-color: var(--blue); box-shadow: 0 0 20px rgba(77,184,255,0.4); }
+
+  .opt-btn.correct { border-color: var(--green); background: rgba(185,122,255,0.06); }
+  .opt-btn.correct .opt-key { background: var(--green); color: var(--bg); border-color: var(--green); box-shadow: var(--green-glow); }
+
+  .opt-btn.wrong { border-color: var(--red); background: rgba(255,77,106,0.06); }
+  .opt-btn.wrong .opt-key { background: var(--red); color: white; border-color: var(--red); }
+
+  .opt-btn:disabled { cursor: default; }
+
+  /* ── IMAGE OPTIONS ── */
+  .opts.image-opts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .opt-btn.image-opt {
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    min-height: 160px;
+  }
+
+  .opt-btn.image-opt img {
+    max-width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    border-radius: 4px;
+    margin-top: 8px;
+  }
+
+  @media (max-width: 560px) {
+    .opts.image-opts { grid-template-columns: 1fr; }
+  }
+
+  /* ── EVIDENCE ── */
+  .evidence {
+    display: none;
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-left: 2px solid #8a4fd4;
+    background: rgba(185,122,255,0.03);
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    animation: fadeIn 0.3s ease both;
+  }
+
+  .evidence::before { content: '// context  '; color: #8a4fd4; display: block; margin-bottom: 4px; font-size: 10px; letter-spacing: 1px; }
+
+  /* ── NAV ── */
+  .quiz-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+  }
+
+  .nav-counter { font-size: 11px; color: var(--muted); letter-spacing: 2px; }
+
+  /* ── RESULTS ── */
+  #results-section { display: none; animation: fadeIn 0.4s ease both; }
+
+  .score-panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 48px 32px;
+    text-align: center;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .score-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #b97aff, transparent);
+    animation: sweep 2s ease infinite;
+  }
+
+  @keyframes sweep {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .score-big {
+    font-family: var(--sans);
+    font-size: 80px;
+    font-weight: 800;
+    color: var(--green);
+    text-shadow: var(--green-glow);
+    line-height: 1;
+    display: block;
+    letter-spacing: -2px;
+  }
+
+  .score-label {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 8px;
+    display: block;
+  }
+
+  .score-msg {
+    margin-top: 20px;
+    font-size: 13px;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  .score-msg::before { content: '> '; color: var(--green); font-style: normal; }
+
+  /* ── SUMMARY TABLE ── */
+  .sum-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  .sum-table th {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sum-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(30,45,61,0.5);
+    color: var(--text-dim);
+    vertical-align: top;
+  }
+
+  .sum-table tr:last-child td { border-bottom: none; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-size: 10px;
+    letter-spacing: 1px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .badge.ok { background: rgba(185,122,255,0.12); color: #b97aff; border: 1px solid rgba(185,122,255,0.25); }
+  .badge.fail { background: rgba(255,77,106,0.1); color: var(--red); border: 1px solid rgba(255,77,106,0.2); }
+
+  .results-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50%      { opacity: 0.5; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">FUSION<span> MIND</span></div>
+  <div class="status-dots">
+    <span><span class="dot green"></span>ONLINE</span>
+    <span><span class="dot blue"></span>v2.0</span>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="terminal-header">
+    <div class="terminal-path">
+      <span class="hl">~/fusion/mind</span> — PDF Analysis Engine
+    </div>
+    <div class="terminal-title">
+      Generate<br><span class="accent">quizzes</span> from PDF
+    </div>
+    <div class="terminal-sub">
+      Upload one or more PDF documents to automatically generate multiple-choice questions
+    </div>
+  </div>
+
+  <!-- UPLOAD -->
+  <div id="upload-section">
+    <div class="panel" style="animation-delay:0.05s">
+      <div class="panel-bar">
+        <div class="panel-bar-dot"></div><div class="panel-bar-dot"></div><div class="panel-bar-dot"></div>
+        <span class="panel-label">01 — input files</span>
+      </div>
+      <div class="panel-body">
+        <div class="drop-zone" id="drop-zone">
+          <input type="file" id="file-input" accept=".pdf" multiple>
+          <span class="dz-icon">⬡</span>
+          <div class="dz-title">Drag PDFs into this area</div>
+          <div class="dz-sub">or click to select — supports multiple files</div>
+        </div>
+        <div id="file-list"></div>
+      </div>
+    </div>
+
+    <div class="panel" style="animation-delay:0.12s">
+      <div class="panel-bar">
+        <div class="panel-bar-dot"></div><div class="panel-bar-dot"></div><div class="panel-bar-dot"></div>
+        <span class="panel-label">02 — parameters</span>
+      </div>
+      <div class="panel-body">
+        <div class="controls-row">
+          <div class="field">
+            <label>Quiz Type</label>
+            <select id="quiz-type">
+              <option value="cloze">Cloze (fill-in-blank)</option>
+              <option value="template">Full questions</option>
+              <option value="visual">Visual (image answers)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Questions / PDF</label>
+            <input type="number" id="n-questions" value="5" min="1" max="20">
+          </div>
+          <div class="field">
+            <label>Backend URL</label>
+            <input type="text" id="api-url" value="http://127.0.0.1:8000">
+          </div>
+          <button class="btn-run" id="generate-btn" disabled onclick="startGeneration()">
+            ▶ RUN
+          </button>
+        </div>
+        <div class="error-msg" id="error-box"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loading">
+    <div class="loading-ascii">[ PROCESSING PDF ]</div>
+    <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
+    <div id="loading-msg">analyzing documents...</div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-section">
+    <div class="quiz-topbar">
+      <div class="quiz-info">
+        <strong id="quiz-file-count"></strong> files · <strong id="quiz-q-count"></strong> questions
+      </div>
+      <button class="btn-ghost" onclick="saveQuiz()">↓ save</button>
+      <button class="btn-ghost" onclick="resetAll()">✕ reset</button>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div id="question-container"></div>
+    <div class="quiz-nav">
+      <button class="btn-ghost" id="prev-btn" onclick="navigate(-1)" disabled>← prev</button>
+      <span class="nav-counter" id="nav-counter"></span>
+      <button class="btn-ghost" id="next-btn" onclick="navigate(1)">next →</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results-section">
+    <div class="score-panel">
+      <span class="score-big" id="score-big">—</span>
+      <span class="score-label">final score</span>
+      <p class="score-msg" id="score-msg"></p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-bar">
+        <div class="panel-bar-dot"></div><div class="panel-bar-dot"></div><div class="panel-bar-dot"></div>
+        <span class="panel-label">answer report</span>
+      </div>
+      <div class="panel-body" style="padding:0">
+        <table class="sum-table">
+          <thead>
+            <tr>
+              <th>#</th><th>Question</th><th>Chosen</th><th>Correct</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="summary-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="results-actions">
+      <button class="btn-run" onclick="resetAll()">▶ New Quiz</button>
+      <button class="btn-ghost" onclick="reviewQuiz()">⟳ Review</button>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+  let files = [], questions = [], answers = {}, current = 0;
+
+  // ── FILE ──
+  const fileInput = document.getElementById('file-input');
+  const dropZone  = document.getElementById('drop-zone');
+
+  fileInput.addEventListener('change', e => addFiles([...e.target.files]));
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault(); dropZone.classList.remove('drag-over');
+    addFiles([...e.dataTransfer.files].filter(f => f.name.endsWith('.pdf')));
+  });
+
+  function addFiles(newFiles) {
+    newFiles.forEach(f => { if (!files.find(x => x.name === f.name)) files.push(f); });
+    renderFiles();
+    document.getElementById('generate-btn').disabled = !files.length;
+    fileInput.value = '';
+  }
+
+  function removeFile(name) {
+    files = files.filter(f => f.name !== name);
+    renderFiles();
+    document.getElementById('generate-btn').disabled = !files.length;
+  }
+
+  function renderFiles() {
+    const el = document.getElementById('file-list');
+    el.innerHTML = '';
+    files.forEach(f => {
+      const kb = (f.size / 1024).toFixed(0);
+      const row = document.createElement('div');
+      row.className = 'file-row';
+      row.innerHTML = `
+        <span class="file-tag">PDF</span>
+        <span class="fname">${f.name}</span>
+        <span class="fsize">${kb} KB</span>
+        <button class="file-rm" onclick="removeFile('${f.name}')">✕</button>
+      `;
+      el.appendChild(row);
+    });
+  }
+
+  // ── GENERATE ──
+  async function startGeneration() {
+    if (!files.length) return;
+    const n      = parseInt(document.getElementById('n-questions').value) || 5;
+    const apiUrl = document.getElementById('api-url').value.replace(/\/$/, '');
+
+    showSection('loading');
+    setMsg('sending files...');
+
+    const quizType = document.getElementById('quiz-type').value;
+
+    const fd = new FormData();
+    files.forEach(f => fd.append('files', f));
+    fd.append('n_questions_per_file', n);
+    fd.append('quiz_type', quizType);
+
+    try {
+      setMsg('analyzing text...');
+      const res = await fetch(`${apiUrl}/generate-quiz-multi`, { method: 'POST', body: fd });
+      if (!res.ok) throw new Error(`server ${res.status}`);
+      setMsg('building questions...');
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      questions = data.questions || [];
+      if (!questions.length) throw new Error('No questions generated. Try a PDF with more text.');
+      answers = {}; current = 0;
+      startQuiz();
+    } catch (err) {
+      showSection('upload');
+      const box = document.getElementById('error-box');
+      box.style.display = 'block';
+      box.textContent = err.message;
+    }
+  }
+
+  function setMsg(t) { document.getElementById('loading-msg').textContent = t; }
+
+  // ── QUIZ ──
+  function startQuiz() {
+    showSection('quiz');
+    document.getElementById('quiz-file-count').textContent = files.length;
+    document.getElementById('quiz-q-count').textContent = questions.length;
+    renderQ();
+  }
+
+  function renderQ() {
+    const q = questions[current], total = questions.length;
+    document.getElementById('progress-fill').style.width = `${((current + 1) / total) * 100}%`;
+    document.getElementById('nav-counter').textContent = `${current + 1} / ${total}`;
+    document.getElementById('prev-btn').disabled = current === 0;
+
+    const isLast = current === total - 1;
+    const nextBtn = document.getElementById('next-btn');
+    const answered = answers[current] !== undefined;
+
+    if (isLast && answered) {
+      nextBtn.textContent = 'results →';
+      nextBtn.onclick = showResults;
+    } else {
+      nextBtn.textContent = isLast ? 'finish →' : 'next →';
+      nextBtn.onclick = () => navigate(1);
+    }
+
+    const qText = q.question.replace(/____/g, '<span class="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>');
+    const letters = ['A','B','C','D'];
+
+    const isImageQ = q.options_are_images === true;
+    const optsClass = isImageQ ? 'opts image-opts' : 'opts';
+
+    document.getElementById('question-container').innerHTML = `
+      <div class="q-card">
+        <div class="q-num">// Q_${String(current + 1).padStart(2, '0')}</div>
+        <div class="q-text">${qText}</div>
+        <div class="${optsClass}">
+          ${q.options.map((opt, i) => {
+            if (isImageQ) {
+              return `<button class="opt-btn image-opt" id="opt-${i}" onclick="pick(${i})">
+                <span class="opt-key">${letters[i]}</span>
+                <img src="data:image/png;base64,${opt}" alt="Option ${letters[i]}">
+              </button>`;
+            }
+            return `<button class="opt-btn" id="opt-${i}" onclick="pick(${i})">
+              <span class="opt-key">${letters[i]}</span>
+              <span>${opt}</span>
+            </button>`;
+          }).join('')}
+        </div>
+        <div class="evidence" id="evidence">${q.evidence}</div>
+      </div>
+    `;
+
+    if (answered) restoreQ();
+  }
+
+  function pick(idx) {
+    if (answers[current] !== undefined) return;
+    answers[current] = idx;
+    questions[current].options.forEach((_, i) => {
+      const btn = document.getElementById(`opt-${i}`);
+      btn.disabled = true;
+      if (i === idx) btn.classList.add('selected');
+    });
+    if (current === questions.length - 1) {
+      const nb = document.getElementById('next-btn');
+      nb.textContent = 'results →'; nb.onclick = showResults;
+    }
+  }
+
+  function restoreQ() {
+    const chosen = answers[current];
+    questions[current].options.forEach((_, i) => {
+      const btn = document.getElementById(`opt-${i}`);
+      btn.disabled = true;
+      if (i === chosen) btn.classList.add('selected');
+    });
+  }
+
+  function navigate(dir) {
+    const next = current + dir;
+    if (next < 0 || next >= questions.length) return;
+    current = next; renderQ();
+  }
+
+  // ── RESULTS ──
+  function showResults() {
+    let ok = 0;
+    questions.forEach((q, i) => { if (answers[i] === q.correct_index) ok++; });
+    const total = questions.length;
+    const pct = Math.round(ok / total * 100);
+
+    document.getElementById('score-big').textContent = `${ok}/${total}`;
+
+    const msgs = {
+      100: 'perfect performance. you know the material.',
+      75:  'excellent result. almost perfect.',
+      50:  'good, but there is room for improvement.',
+      0:   'study the documents again and try once more.'
+    };
+    const key = pct === 100 ? 100 : pct >= 75 ? 75 : pct >= 50 ? 50 : 0;
+    document.getElementById('score-msg').textContent = msgs[key];
+
+    const tbody = document.getElementById('summary-body');
+    tbody.innerHTML = '';
+    questions.forEach((q, i) => {
+      const chosen = answers[i];
+      const isOk = chosen === q.correct_index;
+      const shortQ = q.question.length > 55 ? q.question.substring(0,55) + '…' : q.question;
+      const isImg = q.options_are_images === true;
+      const chosenCell = chosen !== undefined
+        ? (isImg ? `<img src="data:image/png;base64,${q.options[chosen]}" style="max-height:40px;border-radius:3px">` : q.options[chosen])
+        : '—';
+      const correctCell = isImg
+        ? `<img src="data:image/png;base64,${q.options[q.correct_index]}" style="max-height:40px;border-radius:3px">`
+        : q.options[q.correct_index];
+      tbody.innerHTML += `<tr>
+        <td style="color:var(--muted);font-size:10px">${String(i+1).padStart(2,'0')}</td>
+        <td>${shortQ}</td>
+        <td>${chosenCell}</td>
+        <td style="color:var(--green)">${correctCell}</td>
+        <td><span class="badge ${isOk ? 'ok' : 'fail'}">${isOk ? 'OK' : 'FAIL'}</span></td>
+      </tr>`;
+    });
+
+    showSection('results');
+  }
+
+  function reviewQuiz() { current = 0; showSection('quiz'); renderQ(); }
+
+  function saveQuiz() {
+    if (!questions.length) return;
+    const data = JSON.stringify({ questions }, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `quiz_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function resetAll() {
+    files = []; questions = []; answers = {}; current = 0;
+    renderFiles();
+    document.getElementById('generate-btn').disabled = true;
+    document.getElementById('error-box').style.display = 'none';
+    showSection('upload');
+  }
+
+  function showSection(name) {
+    ['upload-section','loading','quiz-section','results-section'].forEach(id => {
+      document.getElementById(id).style.display = 'none';
+    });
+    const map = { upload:'upload-section', loading:'loading', quiz:'quiz-section', results:'results-section' };
+    document.getElementById(map[name]).style.display = 'block';
+  }
+</script>
+</body>
+</html>
