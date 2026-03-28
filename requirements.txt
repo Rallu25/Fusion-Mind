@@ -6,3 +6,4 @@ pypdf
 numpy
 scikit-learn
 PyMuPDF
+pytest
