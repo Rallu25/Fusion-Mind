@@ -5,6 +5,7 @@ from .pdf_text import extract_text_from_pdf
 from .preprocess import split_sentences
 from .tfidf_rank import rank_sentences
 from .template_patterns import clean_subject, clean_answer, _subject_valid
+from .kb_expand import expand_knowledge_base
 
 # Patterns that extract term-definition pairs
 _DEFINITION_PATTERNS = [
@@ -109,6 +110,11 @@ def generate_matching_quiz_from_pdf(pdf_path: str, n_questions: int = 10, seed: 
         return {
             "error": "Too little usable text after segmentation. Try a clearer PDF with selectable text."
         }
+
+    try:
+        expand_knowledge_base(sentences)
+    except Exception:
+        pass
 
     ranked = rank_sentences(sentences, top_k=220)
     all_pairs = _extract_pairs(sentences, ranked)

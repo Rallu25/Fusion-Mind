@@ -1,303 +1,1777 @@
 {
-  "photosynthesis": ["respiration", "fermentation", "transpiration"],
-  "chloroplasts": ["mitochondria", "nucleus", "ribosome"],
-  "chlorophyll": ["hemoglobin", "melanin", "keratin"],
-  "mitochondria": ["chloroplasts", "nucleus", "ribosome"],
-  "intelligence": ["reasoning", "perception", "cognition"],
-  "computational": ["mathematical", "statistical", "symbolic"],
-  "performance": ["accuracy", "efficiency", "robustness", "stability"],
-  "fluctuations": ["variations", "deviations", "oscillations"],
-  "interconnected": ["linked", "networked", "layered"],
-  "unsupervised": ["supervised", "reinforcement", "semi-supervised"],
-  "algorithm": ["procedure", "heuristic", "protocol", "method"],
-  "satellite": ["asteroid", "comet", "planet", "orbiter"],
-  "confidential": ["private", "secure", "restricted"],
-  "database": ["spreadsheet", "repository", "catalog", "archive"],
-  "encryption": ["hashing", "encoding", "compression", "obfuscation"],
-  "telescope": ["microscope", "spectrometer", "periscope", "instrument"],
-  "galaxy": ["nebula", "constellation", "quasar", "cluster"],
-  "mars": ["venus", "jupiter", "mercury"],
-  "jupiter": ["mars", "saturn", "neptune"],
-  "sun": ["star", "planet", "satellite"],
-  "gravitational": ["magnetic", "electrical", "nuclear"],
-  "scientific": ["empirical", "systematic", "analytical"],
-  "instrument": ["device", "apparatus", "tool"],
-  "contains": ["includes", "holds", "stores"],
-  "located": ["positioned", "situated", "placed"],
-  "packaging": ["wrapping", "containerization", "encapsulation", "sealing"],
-  "antioxidants": ["preservatives", "stabilizers", "chelators", "inhibitors"],
-  "cybersecurity": ["network security", "information security", "application security", "protection"],
-  "scientists": ["researchers", "analysts", "investigators", "experts"],
-  "earth": ["mars", "venus", "mercury"],
-  "localization": ["mapping", "navigation", "tracking", "positioning"],
-  "microcontroller": ["microprocessor", "controller", "processor", "chip"],
-  "temperature": ["pressure", "humidity", "voltage", "heat"],
-  "sensor": ["detector", "probe", "transducer", "receiver"],
-  "actuator": ["motor", "driver", "mechanism", "controller"],
-  "automation": ["control", "operation", "mechanization", "regulation"],
-  "voltage": ["potential", "signal", "current", "supply"],
-  "frequency": ["rate", "oscillation", "cycle", "period"],
-  "storage": ["memory", "capacity", "repository", "buffer"],
-  "query": ["request", "command", "instruction", "operation"],
-  "index": ["pointer", "reference", "mapping", "structure"],
-  "schema": ["design", "structure", "layout", "framework"],
-  "transaction": ["operation", "procedure", "interaction", "execution"],
-  "model": ["system", "framework", "architecture", "representation"],
-  "dataset": ["collection", "repository", "archive", "record"],
-  "training": ["learning", "optimization", "adaptation", "calibration"],
-  "prediction": ["estimation", "inference", "forecast", "projection"],
-  "feature": ["attribute", "variable", "parameter", "indicator"],
-  "classification": ["categorization", "grouping", "segmentation", "sorting"],
-  "regression": ["approximation", "fitting", "modeling", "prediction"],
-  "solution": ["mixture", "compound", "preparation", "substance"],
-  "concentration": ["ratio", "proportion", "level", "intensity"],
-  "reaction": ["process", "interaction", "transformation", "change"],
-  "molecule": ["compound", "structure", "particle", "entity"],
-  "pressure": ["force", "stress", "load", "intensity"],
-  "ph": ["acidity", "alkalinity", "level", "measure"],
-  "radiation": ["emission", "signal", "wave", "energy"],
-  "wavelength": ["frequency", "signal", "spectrum", "range"],
-  "researchers": ["scientists", "investigators", "analysts", "experts"],
-  "engineers": ["designers", "developers", "technicians", "specialists"],
-  "measurements": ["observations", "records", "readings", "values"],
-  "observations": ["measurements", "records", "evaluations", "findings"],
-  "analysis": ["evaluation", "study", "examination", "inspection"],
-  "system": ["structure", "framework", "mechanism", "model"],
-  "pasteurization": ["heating", "sterilization", "treatment", "processing"],
-  "moisture": ["humidity", "water", "content", "level"],
-  "fermentation": ["conversion", "reaction", "process", "transformation"],
-  "stability": ["durability", "resistance", "consistency", "balance"],
-  "technicians": ["operators", "analysts", "inspectors", "specialists"],
-  "timestamps": ["dates", "records", "markers", "entries"],
-  "proportional": ["integral", "derivative", "linear", "relative"],
-  "laboratories": ["facilities", "workshops", "centers", "stations"],
-  "nacl": ["co2", "c6h12o6", "h2o", "kcl"],
-  "co2": ["nacl", "o2", "h2o", "nh3"],
-  "mol/l": ["g/l", "mg/l", "mmol/l", "kg/l"],
-  "ghz": ["khz", "hz", "mhz", "thz"],
-  "khz": ["hz", "ghz", "mhz", "thz"],
-  "hz": ["khz", "ghz", "mhz", "thz"],
-  "ms": ["s", "ns", "min", "hr"],
-  "gb": ["tb", "mb", "kb", "pb"],
-  "tb": ["gb", "mb", "kb", "pb"],
-  "a_w": ["ph", "moisture", "humidity", "acidity"],
-
-  "neuron": ["synapse", "dendrite", "axon", "glial cell"],
-  "synapse": ["neuron", "dendrite", "axon", "receptor"],
-  "dendrite": ["axon", "synapse", "soma", "neuron"],
-  "axon": ["dendrite", "synapse", "soma", "myelin"],
-  "dna": ["rna", "protein", "chromosome", "gene"],
-  "rna": ["dna", "protein", "ribosome", "enzyme"],
-  "gene": ["allele", "chromosome", "genome", "trait"],
-  "chromosome": ["gene", "genome", "allele", "dna"],
-  "protein": ["enzyme", "lipid", "carbohydrate", "amino acid"],
-  "enzyme": ["protein", "catalyst", "substrate", "inhibitor"],
-  "cell": ["tissue", "organ", "organism", "membrane"],
-  "membrane": ["cell wall", "cytoplasm", "nucleus", "barrier"],
-  "cytoplasm": ["nucleus", "membrane", "organelle", "ribosome"],
-  "ribosome": ["nucleus", "mitochondria", "chloroplast", "lysosome"],
-  "lysosome": ["ribosome", "vacuole", "peroxisome", "endosome"],
-  "vacuole": ["lysosome", "vesicle", "cytoplasm", "organelle"],
-  "ecosystem": ["biome", "habitat", "community", "population"],
-  "habitat": ["ecosystem", "biome", "niche", "environment"],
-  "population": ["community", "species", "ecosystem", "organism"],
-  "species": ["genus", "family", "population", "organism"],
-  "evolution": ["mutation", "adaptation", "selection", "speciation"],
-  "mutation": ["variation", "recombination", "deletion", "insertion"],
-  "adaptation": ["evolution", "mutation", "selection", "trait"],
-  "metabolism": ["catabolism", "anabolism", "digestion", "synthesis"],
-  "osmosis": ["diffusion", "filtration", "absorption", "transport"],
-  "diffusion": ["osmosis", "convection", "conduction", "absorption"],
-  "bacteria": ["virus", "fungus", "parasite", "archaea"],
-  "virus": ["bacteria", "fungus", "parasite", "prion"],
-  "antibody": ["antigen", "pathogen", "vaccine", "immunoglobulin"],
-  "antigen": ["antibody", "pathogen", "allergen", "toxin"],
-  "vaccine": ["antibiotic", "antiviral", "immunization", "serum"],
-  "antibiotic": ["antiviral", "antifungal", "antiseptic", "vaccine"],
-
-  "velocity": ["acceleration", "displacement", "momentum", "speed"],
-  "acceleration": ["velocity", "force", "momentum", "displacement"],
-  "momentum": ["velocity", "energy", "force", "impulse"],
-  "force": ["torque", "momentum", "pressure", "energy"],
-  "torque": ["force", "moment", "angular momentum", "rotation"],
-  "friction": ["resistance", "drag", "inertia", "tension"],
-  "inertia": ["momentum", "mass", "friction", "resistance"],
-  "gravity": ["magnetism", "electrostatic force", "friction", "tension"],
-  "magnetism": ["gravity", "electricity", "electrostatic force", "induction"],
-  "electricity": ["magnetism", "conductivity", "resistance", "current"],
-  "current": ["voltage", "resistance", "power", "charge"],
-  "resistance": ["conductance", "impedance", "capacitance", "inductance"],
-  "capacitance": ["inductance", "resistance", "impedance", "reactance"],
-  "inductance": ["capacitance", "resistance", "impedance", "reactance"],
-  "amplitude": ["frequency", "wavelength", "period", "phase"],
-  "entropy": ["enthalpy", "energy", "disorder", "temperature"],
-  "enthalpy": ["entropy", "energy", "heat", "work"],
-  "thermodynamics": ["kinetics", "mechanics", "dynamics", "statics"],
-  "kinetics": ["thermodynamics", "dynamics", "statics", "equilibrium"],
-  "elasticity": ["plasticity", "viscosity", "rigidity", "flexibility"],
-  "density": ["mass", "volume", "weight", "concentration"],
-  "refraction": ["reflection", "diffraction", "absorption", "scattering"],
-  "reflection": ["refraction", "diffraction", "absorption", "transmission"],
-  "diffraction": ["refraction", "reflection", "interference", "scattering"],
-  "photon": ["electron", "proton", "neutron", "quark"],
-  "electron": ["proton", "neutron", "photon", "positron"],
-  "proton": ["neutron", "electron", "quark", "meson"],
-  "neutron": ["proton", "electron", "neutrino", "quark"],
-  "atom": ["molecule", "ion", "isotope", "element"],
-  "ion": ["atom", "molecule", "isotope", "radical"],
-  "isotope": ["ion", "atom", "element", "allotrope"],
-
-  "catalyst": ["inhibitor", "reactant", "product", "enzyme"],
-  "oxidation": ["reduction", "combustion", "corrosion", "decomposition"],
-  "reduction": ["oxidation", "electrolysis", "neutralization", "precipitation"],
-  "acid": ["base", "salt", "buffer", "indicator"],
-  "base": ["acid", "salt", "alkali", "buffer"],
-  "polymer": ["monomer", "oligomer", "copolymer", "resin"],
-  "monomer": ["polymer", "dimer", "oligomer", "unit"],
-  "solvent": ["solute", "solution", "suspension", "emulsion"],
-  "solute": ["solvent", "solution", "precipitate", "residue"],
-  "electrolyte": ["non-electrolyte", "conductor", "insulator", "ion"],
-  "covalent": ["ionic", "metallic", "hydrogen", "van der waals"],
-  "ionic": ["covalent", "metallic", "polar", "non-polar"],
-  "compound": ["element", "mixture", "alloy", "molecule"],
-  "element": ["compound", "mixture", "isotope", "allotrope"],
-  "valence": ["oxidation state", "electron", "bond", "orbital"],
-  "equilibrium": ["reaction", "balance", "steady state", "stability"],
-  "titration": ["dilution", "filtration", "distillation", "chromatography"],
-  "distillation": ["filtration", "evaporation", "condensation", "chromatography"],
-  "chromatography": ["spectroscopy", "electrophoresis", "titration", "distillation"],
-  "spectroscopy": ["chromatography", "microscopy", "diffraction", "spectrometry"],
-
-  "neural network": ["decision tree", "support vector machine", "random forest", "logistic regression"],
-  "decision tree": ["random forest", "neural network", "gradient boosting", "naive bayes"],
-  "random forest": ["decision tree", "gradient boosting", "bagging", "neural network"],
-  "gradient boosting": ["random forest", "adaboost", "xgboost", "bagging"],
-  "logistic regression": ["linear regression", "neural network", "svm", "naive bayes"],
-  "linear regression": ["logistic regression", "polynomial regression", "ridge regression", "lasso"],
-  "clustering": ["classification", "regression", "dimensionality reduction", "segmentation"],
-  "overfitting": ["underfitting", "regularization", "bias", "variance"],
-  "underfitting": ["overfitting", "bias", "complexity", "capacity"],
-  "regularization": ["normalization", "standardization", "dropout", "penalty"],
-  "normalization": ["standardization", "regularization", "scaling", "transformation"],
-  "gradient descent": ["stochastic gradient descent", "adam", "momentum", "learning rate"],
-  "backpropagation": ["forward propagation", "gradient descent", "chain rule", "weight update"],
-  "convolution": ["pooling", "padding", "stride", "filter"],
-  "pooling": ["convolution", "stride", "downsampling", "subsampling"],
-  "dropout": ["regularization", "batch normalization", "weight decay", "early stopping"],
-  "batch normalization": ["layer normalization", "dropout", "weight normalization", "group normalization"],
-  "activation function": ["loss function", "objective function", "cost function", "transfer function"],
-  "sigmoid": ["relu", "tanh", "softmax", "leaky relu"],
-  "relu": ["sigmoid", "tanh", "softmax", "elu"],
-  "softmax": ["sigmoid", "relu", "argmax", "log-softmax"],
-  "autoencoder": ["variational autoencoder", "gan", "encoder", "decoder"],
-  "transformer": ["rnn", "lstm", "attention", "cnn"],
-  "lstm": ["gru", "rnn", "transformer", "attention"],
-  "rnn": ["lstm", "gru", "transformer", "cnn"],
-  "cnn": ["rnn", "transformer", "autoencoder", "gan"],
-  "gan": ["autoencoder", "vae", "discriminator", "generator"],
-  "attention": ["self-attention", "transformer", "encoder", "decoder"],
-  "epoch": ["batch", "iteration", "step", "cycle"],
-  "batch size": ["learning rate", "epoch", "iteration", "step"],
-  "learning rate": ["batch size", "momentum", "weight decay", "optimizer"],
-  "optimizer": ["gradient descent", "adam", "sgd", "rmsprop"],
-  "precision": ["recall", "accuracy", "f1-score", "specificity"],
-  "recall": ["precision", "sensitivity", "f1-score", "specificity"],
-  "accuracy": ["precision", "recall", "f1-score", "error rate"],
-  "f1-score": ["precision", "recall", "accuracy", "auc"],
-  "cross-validation": ["train-test split", "k-fold", "bootstrap", "holdout"],
-  "hyperparameter": ["parameter", "weight", "bias", "threshold"],
-  "bias": ["variance", "weight", "error", "offset"],
-  "variance": ["bias", "standard deviation", "covariance", "spread"],
-  "embedding": ["encoding", "representation", "vector", "feature map"],
-  "tokenization": ["stemming", "lemmatization", "parsing", "segmentation"],
-  "stemming": ["lemmatization", "tokenization", "normalization", "parsing"],
-  "lemmatization": ["stemming", "tokenization", "morphology", "parsing"],
-  "corpus": ["document", "vocabulary", "lexicon", "dataset"],
-  "supervised": ["unsupervised", "semi-supervised", "reinforcement", "self-supervised"],
-  "reinforcement": ["supervised", "unsupervised", "reward", "policy"],
-  "dimensionality reduction": ["feature selection", "pca", "t-sne", "feature extraction"],
-  "pca": ["t-sne", "lda", "svd", "ica"],
-  "k-means": ["dbscan", "hierarchical clustering", "gaussian mixture", "spectral clustering"],
-  "svm": ["logistic regression", "decision tree", "neural network", "naive bayes"],
-
-  "server": ["client", "host", "node", "endpoint"],
-  "client": ["server", "browser", "user agent", "consumer"],
-  "protocol": ["standard", "specification", "interface", "format"],
-  "tcp": ["udp", "http", "ip", "icmp"],
-  "udp": ["tcp", "http", "ip", "icmp"],
-  "http": ["https", "ftp", "tcp", "websocket"],
-  "api": ["sdk", "library", "interface", "endpoint"],
-  "frontend": ["backend", "middleware", "client", "ui"],
-  "backend": ["frontend", "middleware", "server", "api"],
-  "compiler": ["interpreter", "assembler", "linker", "debugger"],
-  "interpreter": ["compiler", "runtime", "virtual machine", "debugger"],
-  "stack": ["queue", "heap", "array", "linked list"],
-  "queue": ["stack", "deque", "priority queue", "buffer"],
-  "array": ["list", "vector", "matrix", "tuple"],
-  "linked list": ["array", "tree", "graph", "stack"],
-  "tree": ["graph", "linked list", "heap", "trie"],
-  "graph": ["tree", "network", "matrix", "grid"],
-  "hash table": ["array", "tree", "dictionary", "set"],
-  "binary search": ["linear search", "interpolation search", "depth-first search", "breadth-first search"],
-  "sorting": ["searching", "filtering", "merging", "partitioning"],
-  "recursion": ["iteration", "loop", "backtracking", "divide and conquer"],
-  "thread": ["process", "coroutine", "fiber", "task"],
-  "process": ["thread", "service", "daemon", "job"],
-  "cache": ["buffer", "memory", "register", "storage"],
-  "latency": ["throughput", "bandwidth", "delay", "jitter"],
-  "throughput": ["latency", "bandwidth", "capacity", "rate"],
-  "bandwidth": ["throughput", "latency", "capacity", "frequency"],
-  "firewall": ["proxy", "gateway", "router", "switch"],
-  "router": ["switch", "gateway", "hub", "bridge"],
-  "authentication": ["authorization", "encryption", "verification", "identification"],
-  "authorization": ["authentication", "permission", "access control", "privilege"],
-  "malware": ["virus", "trojan", "ransomware", "spyware"],
-  "phishing": ["spoofing", "malware", "social engineering", "brute force"],
-  "vulnerability": ["exploit", "threat", "risk", "weakness"],
-
-  "mean": ["median", "mode", "average", "expected value"],
-  "median": ["mean", "mode", "quartile", "percentile"],
-  "standard deviation": ["variance", "range", "interquartile range", "mean absolute deviation"],
-  "correlation": ["covariance", "regression", "causation", "association"],
-  "probability": ["likelihood", "frequency", "chance", "odds"],
-  "hypothesis": ["theory", "assumption", "conjecture", "proposition"],
-  "distribution": ["density", "frequency", "histogram", "probability"],
-  "normal distribution": ["uniform distribution", "binomial distribution", "poisson distribution", "exponential distribution"],
-  "sample": ["population", "subset", "group", "cohort"],
-  "population": ["sample", "census", "group", "dataset"],
-  "confidence interval": ["prediction interval", "margin of error", "significance level", "p-value"],
-  "p-value": ["significance level", "confidence interval", "test statistic", "alpha"],
-
-  "derivative": ["integral", "limit", "gradient", "slope"],
-  "integral": ["derivative", "summation", "area", "antiderivative"],
-  "matrix": ["vector", "tensor", "scalar", "array"],
-  "vector": ["matrix", "scalar", "tensor", "direction"],
-  "eigenvalue": ["eigenvector", "determinant", "trace", "singular value"],
-  "determinant": ["eigenvalue", "trace", "rank", "inverse"],
-  "logarithm": ["exponent", "power", "root", "antilogarithm"],
-  "polynomial": ["linear", "quadratic", "cubic", "exponential"],
-  "function": ["relation", "mapping", "transformation", "operator"],
-  "limit": ["derivative", "continuity", "convergence", "infinity"],
-  "convergence": ["divergence", "stability", "limit", "equilibrium"],
-  "divergence": ["convergence", "instability", "gradient", "curl"],
-
-  "economics": ["finance", "accounting", "business", "commerce"],
-  "inflation": ["deflation", "recession", "stagnation", "depreciation"],
-  "supply": ["demand", "production", "distribution", "inventory"],
-  "demand": ["supply", "consumption", "market", "need"],
-  "gdp": ["gnp", "revenue", "income", "output"],
-  "investment": ["savings", "expenditure", "capital", "asset"],
-  "profit": ["revenue", "loss", "income", "cost"],
-  "liability": ["asset", "equity", "debt", "obligation"],
-
-  "lithosphere": ["hydrosphere", "atmosphere", "biosphere", "crust"],
-  "atmosphere": ["lithosphere", "hydrosphere", "stratosphere", "troposphere"],
-  "erosion": ["weathering", "deposition", "sedimentation", "corrosion"],
-  "weathering": ["erosion", "decomposition", "degradation", "dissolution"],
-  "tectonic": ["volcanic", "seismic", "geological", "structural"],
-  "glacier": ["iceberg", "snowfield", "permafrost", "moraine"],
-  "ocean": ["sea", "lake", "river", "estuary"],
-  "continent": ["island", "peninsula", "archipelago", "landmass"],
-  "climate": ["weather", "season", "temperature", "precipitation"],
-  "precipitation": ["evaporation", "condensation", "rainfall", "humidity"]
+  "photosynthesis": [
+    "respiration",
+    "fermentation",
+    "transpiration"
+  ],
+  "chloroplasts": [
+    "mitochondria",
+    "nucleus",
+    "ribosome"
+  ],
+  "chlorophyll": [
+    "hemoglobin",
+    "melanin",
+    "keratin"
+  ],
+  "mitochondria": [
+    "chloroplasts",
+    "nucleus",
+    "ribosome"
+  ],
+  "intelligence": [
+    "reasoning",
+    "perception",
+    "cognition"
+  ],
+  "computational": [
+    "mathematical",
+    "statistical",
+    "symbolic"
+  ],
+  "performance": [
+    "accuracy",
+    "efficiency",
+    "robustness",
+    "stability"
+  ],
+  "fluctuations": [
+    "variations",
+    "deviations",
+    "oscillations"
+  ],
+  "interconnected": [
+    "linked",
+    "networked",
+    "layered"
+  ],
+  "unsupervised": [
+    "supervised",
+    "reinforcement",
+    "semi-supervised"
+  ],
+  "algorithm": [
+    "procedure",
+    "heuristic",
+    "protocol",
+    "method"
+  ],
+  "satellite": [
+    "asteroid",
+    "comet",
+    "planet",
+    "orbiter"
+  ],
+  "confidential": [
+    "private",
+    "secure",
+    "restricted"
+  ],
+  "database": [
+    "spreadsheet",
+    "repository",
+    "catalog",
+    "archive"
+  ],
+  "encryption": [
+    "hashing",
+    "encoding",
+    "compression",
+    "obfuscation"
+  ],
+  "telescope": [
+    "microscope",
+    "spectrometer",
+    "periscope",
+    "instrument"
+  ],
+  "galaxy": [
+    "nebula",
+    "constellation",
+    "quasar",
+    "cluster"
+  ],
+  "mars": [
+    "venus",
+    "jupiter",
+    "mercury"
+  ],
+  "jupiter": [
+    "mars",
+    "saturn",
+    "neptune"
+  ],
+  "sun": [
+    "star",
+    "planet",
+    "satellite"
+  ],
+  "gravitational": [
+    "magnetic",
+    "electrical",
+    "nuclear"
+  ],
+  "scientific": [
+    "empirical",
+    "systematic",
+    "analytical"
+  ],
+  "instrument": [
+    "device",
+    "apparatus",
+    "tool"
+  ],
+  "contains": [
+    "includes",
+    "holds",
+    "stores"
+  ],
+  "located": [
+    "positioned",
+    "situated",
+    "placed"
+  ],
+  "packaging": [
+    "wrapping",
+    "containerization",
+    "encapsulation",
+    "sealing"
+  ],
+  "antioxidants": [
+    "preservatives",
+    "stabilizers",
+    "chelators",
+    "inhibitors"
+  ],
+  "cybersecurity": [
+    "network security",
+    "information security",
+    "application security",
+    "protection"
+  ],
+  "scientists": [
+    "researchers",
+    "analysts",
+    "investigators",
+    "experts"
+  ],
+  "earth": [
+    "mars",
+    "venus",
+    "mercury"
+  ],
+  "localization": [
+    "mapping",
+    "navigation",
+    "tracking",
+    "positioning"
+  ],
+  "microcontroller": [
+    "microprocessor",
+    "controller",
+    "processor",
+    "chip"
+  ],
+  "temperature": [
+    "pressure",
+    "humidity",
+    "voltage",
+    "heat"
+  ],
+  "sensor": [
+    "detector",
+    "probe",
+    "transducer",
+    "receiver"
+  ],
+  "actuator": [
+    "motor",
+    "driver",
+    "mechanism",
+    "controller"
+  ],
+  "automation": [
+    "control",
+    "operation",
+    "mechanization",
+    "regulation"
+  ],
+  "voltage": [
+    "potential",
+    "signal",
+    "current",
+    "supply"
+  ],
+  "frequency": [
+    "rate",
+    "oscillation",
+    "cycle",
+    "period"
+  ],
+  "storage": [
+    "memory",
+    "capacity",
+    "repository",
+    "buffer"
+  ],
+  "query": [
+    "request",
+    "command",
+    "instruction",
+    "operation"
+  ],
+  "index": [
+    "pointer",
+    "reference",
+    "mapping",
+    "structure"
+  ],
+  "schema": [
+    "design",
+    "structure",
+    "layout",
+    "framework"
+  ],
+  "transaction": [
+    "operation",
+    "procedure",
+    "interaction",
+    "execution"
+  ],
+  "model": [
+    "system",
+    "framework",
+    "architecture",
+    "representation"
+  ],
+  "dataset": [
+    "collection",
+    "repository",
+    "archive",
+    "record"
+  ],
+  "training": [
+    "learning",
+    "optimization",
+    "adaptation",
+    "calibration"
+  ],
+  "prediction": [
+    "estimation",
+    "inference",
+    "forecast",
+    "projection"
+  ],
+  "feature": [
+    "attribute",
+    "variable",
+    "parameter",
+    "indicator"
+  ],
+  "classification": [
+    "categorization",
+    "grouping",
+    "segmentation",
+    "sorting"
+  ],
+  "regression": [
+    "approximation",
+    "fitting",
+    "modeling",
+    "prediction"
+  ],
+  "solution": [
+    "mixture",
+    "compound",
+    "preparation",
+    "substance"
+  ],
+  "concentration": [
+    "ratio",
+    "proportion",
+    "level",
+    "intensity"
+  ],
+  "reaction": [
+    "process",
+    "interaction",
+    "transformation",
+    "change"
+  ],
+  "molecule": [
+    "compound",
+    "structure",
+    "particle",
+    "entity"
+  ],
+  "pressure": [
+    "force",
+    "stress",
+    "load",
+    "intensity"
+  ],
+  "ph": [
+    "acidity",
+    "alkalinity",
+    "level",
+    "measure"
+  ],
+  "radiation": [
+    "emission",
+    "signal",
+    "wave",
+    "energy"
+  ],
+  "wavelength": [
+    "frequency",
+    "signal",
+    "spectrum",
+    "range"
+  ],
+  "researchers": [
+    "scientists",
+    "investigators",
+    "analysts",
+    "experts"
+  ],
+  "engineers": [
+    "designers",
+    "developers",
+    "technicians",
+    "specialists"
+  ],
+  "measurements": [
+    "observations",
+    "records",
+    "readings",
+    "values"
+  ],
+  "observations": [
+    "measurements",
+    "records",
+    "evaluations",
+    "findings"
+  ],
+  "analysis": [
+    "evaluation",
+    "study",
+    "examination",
+    "inspection"
+  ],
+  "system": [
+    "structure",
+    "framework",
+    "mechanism",
+    "model"
+  ],
+  "pasteurization": [
+    "heating",
+    "sterilization",
+    "treatment",
+    "processing"
+  ],
+  "moisture": [
+    "humidity",
+    "water",
+    "content",
+    "level"
+  ],
+  "fermentation": [
+    "conversion",
+    "reaction",
+    "process",
+    "transformation"
+  ],
+  "stability": [
+    "durability",
+    "resistance",
+    "consistency",
+    "balance"
+  ],
+  "technicians": [
+    "operators",
+    "analysts",
+    "inspectors",
+    "specialists"
+  ],
+  "timestamps": [
+    "dates",
+    "records",
+    "markers",
+    "entries"
+  ],
+  "proportional": [
+    "integral",
+    "derivative",
+    "linear",
+    "relative"
+  ],
+  "laboratories": [
+    "facilities",
+    "workshops",
+    "centers",
+    "stations"
+  ],
+  "nacl": [
+    "co2",
+    "c6h12o6",
+    "h2o",
+    "kcl"
+  ],
+  "co2": [
+    "nacl",
+    "o2",
+    "h2o",
+    "nh3"
+  ],
+  "mol/l": [
+    "g/l",
+    "mg/l",
+    "mmol/l",
+    "kg/l"
+  ],
+  "ghz": [
+    "khz",
+    "hz",
+    "mhz",
+    "thz"
+  ],
+  "khz": [
+    "hz",
+    "ghz",
+    "mhz",
+    "thz"
+  ],
+  "hz": [
+    "khz",
+    "ghz",
+    "mhz",
+    "thz"
+  ],
+  "ms": [
+    "s",
+    "ns",
+    "min",
+    "hr"
+  ],
+  "gb": [
+    "tb",
+    "mb",
+    "kb",
+    "pb"
+  ],
+  "tb": [
+    "gb",
+    "mb",
+    "kb",
+    "pb"
+  ],
+  "a_w": [
+    "ph",
+    "moisture",
+    "humidity",
+    "acidity"
+  ],
+  "neuron": [
+    "synapse",
+    "dendrite",
+    "axon",
+    "glial cell"
+  ],
+  "synapse": [
+    "neuron",
+    "dendrite",
+    "axon",
+    "receptor"
+  ],
+  "dendrite": [
+    "axon",
+    "synapse",
+    "soma",
+    "neuron"
+  ],
+  "axon": [
+    "dendrite",
+    "synapse",
+    "soma",
+    "myelin"
+  ],
+  "dna": [
+    "rna",
+    "protein",
+    "chromosome",
+    "gene"
+  ],
+  "rna": [
+    "dna",
+    "protein",
+    "ribosome",
+    "enzyme"
+  ],
+  "gene": [
+    "allele",
+    "chromosome",
+    "genome",
+    "trait"
+  ],
+  "chromosome": [
+    "gene",
+    "genome",
+    "allele",
+    "dna"
+  ],
+  "protein": [
+    "enzyme",
+    "lipid",
+    "carbohydrate",
+    "amino acid"
+  ],
+  "enzyme": [
+    "protein",
+    "catalyst",
+    "substrate",
+    "inhibitor"
+  ],
+  "cell": [
+    "tissue",
+    "organ",
+    "organism",
+    "membrane"
+  ],
+  "membrane": [
+    "cell wall",
+    "cytoplasm",
+    "nucleus",
+    "barrier"
+  ],
+  "cytoplasm": [
+    "nucleus",
+    "membrane",
+    "organelle",
+    "ribosome"
+  ],
+  "ribosome": [
+    "nucleus",
+    "mitochondria",
+    "chloroplast",
+    "lysosome"
+  ],
+  "lysosome": [
+    "ribosome",
+    "vacuole",
+    "peroxisome",
+    "endosome"
+  ],
+  "vacuole": [
+    "lysosome",
+    "vesicle",
+    "cytoplasm",
+    "organelle"
+  ],
+  "ecosystem": [
+    "biome",
+    "habitat",
+    "community",
+    "population"
+  ],
+  "habitat": [
+    "ecosystem",
+    "biome",
+    "niche",
+    "environment"
+  ],
+  "population": [
+    "sample",
+    "census",
+    "group",
+    "dataset"
+  ],
+  "species": [
+    "genus",
+    "family",
+    "population",
+    "organism"
+  ],
+  "evolution": [
+    "mutation",
+    "adaptation",
+    "selection",
+    "speciation"
+  ],
+  "mutation": [
+    "variation",
+    "recombination",
+    "deletion",
+    "insertion"
+  ],
+  "adaptation": [
+    "evolution",
+    "mutation",
+    "selection",
+    "trait"
+  ],
+  "metabolism": [
+    "catabolism",
+    "anabolism",
+    "digestion",
+    "synthesis"
+  ],
+  "osmosis": [
+    "diffusion",
+    "filtration",
+    "absorption",
+    "transport"
+  ],
+  "diffusion": [
+    "osmosis",
+    "convection",
+    "conduction",
+    "absorption"
+  ],
+  "bacteria": [
+    "virus",
+    "fungus",
+    "parasite",
+    "archaea"
+  ],
+  "virus": [
+    "bacteria",
+    "fungus",
+    "parasite",
+    "prion"
+  ],
+  "antibody": [
+    "antigen",
+    "pathogen",
+    "vaccine",
+    "immunoglobulin"
+  ],
+  "antigen": [
+    "antibody",
+    "pathogen",
+    "allergen",
+    "toxin"
+  ],
+  "vaccine": [
+    "antibiotic",
+    "antiviral",
+    "immunization",
+    "serum"
+  ],
+  "antibiotic": [
+    "antiviral",
+    "antifungal",
+    "antiseptic",
+    "vaccine"
+  ],
+  "velocity": [
+    "acceleration",
+    "displacement",
+    "momentum",
+    "speed"
+  ],
+  "acceleration": [
+    "velocity",
+    "force",
+    "momentum",
+    "displacement"
+  ],
+  "momentum": [
+    "velocity",
+    "energy",
+    "force",
+    "impulse"
+  ],
+  "force": [
+    "torque",
+    "momentum",
+    "pressure",
+    "energy"
+  ],
+  "torque": [
+    "force",
+    "moment",
+    "angular momentum",
+    "rotation"
+  ],
+  "friction": [
+    "resistance",
+    "drag",
+    "inertia",
+    "tension"
+  ],
+  "inertia": [
+    "momentum",
+    "mass",
+    "friction",
+    "resistance"
+  ],
+  "gravity": [
+    "magnetism",
+    "electrostatic force",
+    "friction",
+    "tension"
+  ],
+  "magnetism": [
+    "gravity",
+    "electricity",
+    "electrostatic force",
+    "induction"
+  ],
+  "electricity": [
+    "magnetism",
+    "conductivity",
+    "resistance",
+    "current"
+  ],
+  "current": [
+    "voltage",
+    "resistance",
+    "power",
+    "charge"
+  ],
+  "resistance": [
+    "conductance",
+    "impedance",
+    "capacitance",
+    "inductance"
+  ],
+  "capacitance": [
+    "inductance",
+    "resistance",
+    "impedance",
+    "reactance"
+  ],
+  "inductance": [
+    "capacitance",
+    "resistance",
+    "impedance",
+    "reactance"
+  ],
+  "amplitude": [
+    "frequency",
+    "wavelength",
+    "period",
+    "phase"
+  ],
+  "entropy": [
+    "enthalpy",
+    "energy",
+    "disorder",
+    "temperature"
+  ],
+  "enthalpy": [
+    "entropy",
+    "energy",
+    "heat",
+    "work"
+  ],
+  "thermodynamics": [
+    "kinetics",
+    "mechanics",
+    "dynamics",
+    "statics"
+  ],
+  "kinetics": [
+    "thermodynamics",
+    "dynamics",
+    "statics",
+    "equilibrium"
+  ],
+  "elasticity": [
+    "plasticity",
+    "viscosity",
+    "rigidity",
+    "flexibility"
+  ],
+  "density": [
+    "mass",
+    "volume",
+    "weight",
+    "concentration"
+  ],
+  "refraction": [
+    "reflection",
+    "diffraction",
+    "absorption",
+    "scattering"
+  ],
+  "reflection": [
+    "refraction",
+    "diffraction",
+    "absorption",
+    "transmission"
+  ],
+  "diffraction": [
+    "refraction",
+    "reflection",
+    "interference",
+    "scattering"
+  ],
+  "photon": [
+    "electron",
+    "proton",
+    "neutron",
+    "quark"
+  ],
+  "electron": [
+    "proton",
+    "neutron",
+    "photon",
+    "positron"
+  ],
+  "proton": [
+    "neutron",
+    "electron",
+    "quark",
+    "meson"
+  ],
+  "neutron": [
+    "proton",
+    "electron",
+    "neutrino",
+    "quark"
+  ],
+  "atom": [
+    "molecule",
+    "ion",
+    "isotope",
+    "element"
+  ],
+  "ion": [
+    "atom",
+    "molecule",
+    "isotope",
+    "radical"
+  ],
+  "isotope": [
+    "ion",
+    "atom",
+    "element",
+    "allotrope"
+  ],
+  "catalyst": [
+    "inhibitor",
+    "reactant",
+    "product",
+    "enzyme"
+  ],
+  "oxidation": [
+    "reduction",
+    "combustion",
+    "corrosion",
+    "decomposition"
+  ],
+  "reduction": [
+    "oxidation",
+    "electrolysis",
+    "neutralization",
+    "precipitation"
+  ],
+  "acid": [
+    "base",
+    "salt",
+    "buffer",
+    "indicator"
+  ],
+  "base": [
+    "acid",
+    "salt",
+    "alkali",
+    "buffer"
+  ],
+  "polymer": [
+    "monomer",
+    "oligomer",
+    "copolymer",
+    "resin"
+  ],
+  "monomer": [
+    "polymer",
+    "dimer",
+    "oligomer",
+    "unit"
+  ],
+  "solvent": [
+    "solute",
+    "solution",
+    "suspension",
+    "emulsion"
+  ],
+  "solute": [
+    "solvent",
+    "solution",
+    "precipitate",
+    "residue"
+  ],
+  "electrolyte": [
+    "non-electrolyte",
+    "conductor",
+    "insulator",
+    "ion"
+  ],
+  "covalent": [
+    "ionic",
+    "metallic",
+    "hydrogen",
+    "van der waals"
+  ],
+  "ionic": [
+    "covalent",
+    "metallic",
+    "polar",
+    "non-polar"
+  ],
+  "compound": [
+    "element",
+    "mixture",
+    "alloy",
+    "molecule"
+  ],
+  "element": [
+    "compound",
+    "mixture",
+    "isotope",
+    "allotrope"
+  ],
+  "valence": [
+    "oxidation state",
+    "electron",
+    "bond",
+    "orbital"
+  ],
+  "equilibrium": [
+    "reaction",
+    "balance",
+    "steady state",
+    "stability"
+  ],
+  "titration": [
+    "dilution",
+    "filtration",
+    "distillation",
+    "chromatography"
+  ],
+  "distillation": [
+    "filtration",
+    "evaporation",
+    "condensation",
+    "chromatography"
+  ],
+  "chromatography": [
+    "spectroscopy",
+    "electrophoresis",
+    "titration",
+    "distillation"
+  ],
+  "spectroscopy": [
+    "chromatography",
+    "microscopy",
+    "diffraction",
+    "spectrometry"
+  ],
+  "neural network": [
+    "decision tree",
+    "support vector machine",
+    "random forest",
+    "logistic regression"
+  ],
+  "decision tree": [
+    "random forest",
+    "neural network",
+    "gradient boosting",
+    "naive bayes"
+  ],
+  "random forest": [
+    "decision tree",
+    "gradient boosting",
+    "bagging",
+    "neural network"
+  ],
+  "gradient boosting": [
+    "random forest",
+    "adaboost",
+    "xgboost",
+    "bagging"
+  ],
+  "logistic regression": [
+    "linear regression",
+    "neural network",
+    "svm",
+    "naive bayes"
+  ],
+  "linear regression": [
+    "logistic regression",
+    "polynomial regression",
+    "ridge regression",
+    "lasso"
+  ],
+  "clustering": [
+    "classification",
+    "regression",
+    "dimensionality reduction",
+    "segmentation"
+  ],
+  "overfitting": [
+    "underfitting",
+    "regularization",
+    "bias",
+    "variance"
+  ],
+  "underfitting": [
+    "overfitting",
+    "bias",
+    "complexity",
+    "capacity"
+  ],
+  "regularization": [
+    "normalization",
+    "standardization",
+    "dropout",
+    "penalty"
+  ],
+  "normalization": [
+    "standardization",
+    "regularization",
+    "scaling",
+    "transformation"
+  ],
+  "gradient descent": [
+    "stochastic gradient descent",
+    "adam",
+    "momentum",
+    "learning rate"
+  ],
+  "backpropagation": [
+    "forward propagation",
+    "gradient descent",
+    "chain rule",
+    "weight update"
+  ],
+  "convolution": [
+    "pooling",
+    "padding",
+    "stride",
+    "filter"
+  ],
+  "pooling": [
+    "convolution",
+    "stride",
+    "downsampling",
+    "subsampling"
+  ],
+  "dropout": [
+    "regularization",
+    "batch normalization",
+    "weight decay",
+    "early stopping"
+  ],
+  "batch normalization": [
+    "layer normalization",
+    "dropout",
+    "weight normalization",
+    "group normalization"
+  ],
+  "activation function": [
+    "loss function",
+    "objective function",
+    "cost function",
+    "transfer function"
+  ],
+  "sigmoid": [
+    "relu",
+    "tanh",
+    "softmax",
+    "leaky relu"
+  ],
+  "relu": [
+    "sigmoid",
+    "tanh",
+    "softmax",
+    "elu"
+  ],
+  "softmax": [
+    "sigmoid",
+    "relu",
+    "argmax",
+    "log-softmax"
+  ],
+  "autoencoder": [
+    "variational autoencoder",
+    "gan",
+    "encoder",
+    "decoder"
+  ],
+  "transformer": [
+    "rnn",
+    "lstm",
+    "attention",
+    "cnn"
+  ],
+  "lstm": [
+    "gru",
+    "rnn",
+    "transformer",
+    "attention"
+  ],
+  "rnn": [
+    "lstm",
+    "gru",
+    "transformer",
+    "cnn"
+  ],
+  "cnn": [
+    "rnn",
+    "transformer",
+    "autoencoder",
+    "gan"
+  ],
+  "gan": [
+    "autoencoder",
+    "vae",
+    "discriminator",
+    "generator"
+  ],
+  "attention": [
+    "self-attention",
+    "transformer",
+    "encoder",
+    "decoder"
+  ],
+  "epoch": [
+    "batch",
+    "iteration",
+    "step",
+    "cycle"
+  ],
+  "batch size": [
+    "learning rate",
+    "epoch",
+    "iteration",
+    "step"
+  ],
+  "learning rate": [
+    "batch size",
+    "momentum",
+    "weight decay",
+    "optimizer"
+  ],
+  "optimizer": [
+    "gradient descent",
+    "adam",
+    "sgd",
+    "rmsprop"
+  ],
+  "precision": [
+    "recall",
+    "accuracy",
+    "f1-score",
+    "specificity"
+  ],
+  "recall": [
+    "precision",
+    "sensitivity",
+    "f1-score",
+    "specificity"
+  ],
+  "accuracy": [
+    "precision",
+    "recall",
+    "f1-score",
+    "error rate"
+  ],
+  "f1-score": [
+    "precision",
+    "recall",
+    "accuracy",
+    "auc"
+  ],
+  "cross-validation": [
+    "train-test split",
+    "k-fold",
+    "bootstrap",
+    "holdout"
+  ],
+  "hyperparameter": [
+    "parameter",
+    "weight",
+    "bias",
+    "threshold"
+  ],
+  "bias": [
+    "variance",
+    "weight",
+    "error",
+    "offset"
+  ],
+  "variance": [
+    "bias",
+    "standard deviation",
+    "covariance",
+    "spread"
+  ],
+  "embedding": [
+    "encoding",
+    "representation",
+    "vector",
+    "feature map"
+  ],
+  "tokenization": [
+    "stemming",
+    "lemmatization",
+    "parsing",
+    "segmentation"
+  ],
+  "stemming": [
+    "lemmatization",
+    "tokenization",
+    "normalization",
+    "parsing"
+  ],
+  "lemmatization": [
+    "stemming",
+    "tokenization",
+    "morphology",
+    "parsing"
+  ],
+  "corpus": [
+    "document",
+    "vocabulary",
+    "lexicon",
+    "dataset"
+  ],
+  "supervised": [
+    "unsupervised",
+    "semi-supervised",
+    "reinforcement",
+    "self-supervised"
+  ],
+  "reinforcement": [
+    "supervised",
+    "unsupervised",
+    "reward",
+    "policy"
+  ],
+  "dimensionality reduction": [
+    "feature selection",
+    "pca",
+    "t-sne",
+    "feature extraction"
+  ],
+  "pca": [
+    "t-sne",
+    "lda",
+    "svd",
+    "ica"
+  ],
+  "k-means": [
+    "dbscan",
+    "hierarchical clustering",
+    "gaussian mixture",
+    "spectral clustering"
+  ],
+  "svm": [
+    "logistic regression",
+    "decision tree",
+    "neural network",
+    "naive bayes"
+  ],
+  "server": [
+    "client",
+    "host",
+    "node",
+    "endpoint"
+  ],
+  "client": [
+    "server",
+    "browser",
+    "user agent",
+    "consumer"
+  ],
+  "protocol": [
+    "standard",
+    "specification",
+    "interface",
+    "format"
+  ],
+  "tcp": [
+    "udp",
+    "http",
+    "ip",
+    "icmp"
+  ],
+  "udp": [
+    "tcp",
+    "http",
+    "ip",
+    "icmp"
+  ],
+  "http": [
+    "https",
+    "ftp",
+    "tcp",
+    "websocket"
+  ],
+  "api": [
+    "sdk",
+    "library",
+    "interface",
+    "endpoint"
+  ],
+  "frontend": [
+    "backend",
+    "middleware",
+    "client",
+    "ui"
+  ],
+  "backend": [
+    "frontend",
+    "middleware",
+    "server",
+    "api"
+  ],
+  "compiler": [
+    "interpreter",
+    "assembler",
+    "linker",
+    "debugger"
+  ],
+  "interpreter": [
+    "compiler",
+    "runtime",
+    "virtual machine",
+    "debugger"
+  ],
+  "stack": [
+    "queue",
+    "heap",
+    "array",
+    "linked list"
+  ],
+  "queue": [
+    "stack",
+    "deque",
+    "priority queue",
+    "buffer"
+  ],
+  "array": [
+    "list",
+    "vector",
+    "matrix",
+    "tuple"
+  ],
+  "linked list": [
+    "array",
+    "tree",
+    "graph",
+    "stack"
+  ],
+  "tree": [
+    "graph",
+    "linked list",
+    "heap",
+    "trie"
+  ],
+  "graph": [
+    "tree",
+    "network",
+    "matrix",
+    "grid"
+  ],
+  "hash table": [
+    "array",
+    "tree",
+    "dictionary",
+    "set"
+  ],
+  "binary search": [
+    "linear search",
+    "interpolation search",
+    "depth-first search",
+    "breadth-first search"
+  ],
+  "sorting": [
+    "searching",
+    "filtering",
+    "merging",
+    "partitioning"
+  ],
+  "recursion": [
+    "iteration",
+    "loop",
+    "backtracking",
+    "divide and conquer"
+  ],
+  "thread": [
+    "process",
+    "coroutine",
+    "fiber",
+    "task"
+  ],
+  "process": [
+    "thread",
+    "service",
+    "daemon",
+    "job"
+  ],
+  "cache": [
+    "buffer",
+    "memory",
+    "register",
+    "storage"
+  ],
+  "latency": [
+    "throughput",
+    "bandwidth",
+    "delay",
+    "jitter"
+  ],
+  "throughput": [
+    "latency",
+    "bandwidth",
+    "capacity",
+    "rate"
+  ],
+  "bandwidth": [
+    "throughput",
+    "latency",
+    "capacity",
+    "frequency"
+  ],
+  "firewall": [
+    "proxy",
+    "gateway",
+    "router",
+    "switch"
+  ],
+  "router": [
+    "switch",
+    "gateway",
+    "hub",
+    "bridge"
+  ],
+  "authentication": [
+    "authorization",
+    "encryption",
+    "verification",
+    "identification"
+  ],
+  "authorization": [
+    "authentication",
+    "permission",
+    "access control",
+    "privilege"
+  ],
+  "malware": [
+    "virus",
+    "trojan",
+    "ransomware",
+    "spyware"
+  ],
+  "phishing": [
+    "spoofing",
+    "malware",
+    "social engineering",
+    "brute force"
+  ],
+  "vulnerability": [
+    "exploit",
+    "threat",
+    "risk",
+    "weakness"
+  ],
+  "mean": [
+    "median",
+    "mode",
+    "average",
+    "expected value"
+  ],
+  "median": [
+    "mean",
+    "mode",
+    "quartile",
+    "percentile"
+  ],
+  "standard deviation": [
+    "variance",
+    "range",
+    "interquartile range",
+    "mean absolute deviation"
+  ],
+  "correlation": [
+    "covariance",
+    "regression",
+    "causation",
+    "association"
+  ],
+  "probability": [
+    "likelihood",
+    "frequency",
+    "chance",
+    "odds"
+  ],
+  "hypothesis": [
+    "theory",
+    "assumption",
+    "conjecture",
+    "proposition"
+  ],
+  "distribution": [
+    "density",
+    "frequency",
+    "histogram",
+    "probability"
+  ],
+  "normal distribution": [
+    "uniform distribution",
+    "binomial distribution",
+    "poisson distribution",
+    "exponential distribution"
+  ],
+  "sample": [
+    "population",
+    "subset",
+    "group",
+    "cohort"
+  ],
+  "confidence interval": [
+    "prediction interval",
+    "margin of error",
+    "significance level",
+    "p-value"
+  ],
+  "p-value": [
+    "significance level",
+    "confidence interval",
+    "test statistic",
+    "alpha"
+  ],
+  "derivative": [
+    "integral",
+    "limit",
+    "gradient",
+    "slope"
+  ],
+  "integral": [
+    "derivative",
+    "summation",
+    "area",
+    "antiderivative"
+  ],
+  "matrix": [
+    "vector",
+    "tensor",
+    "scalar",
+    "array"
+  ],
+  "vector": [
+    "matrix",
+    "scalar",
+    "tensor",
+    "direction"
+  ],
+  "eigenvalue": [
+    "eigenvector",
+    "determinant",
+    "trace",
+    "singular value"
+  ],
+  "determinant": [
+    "eigenvalue",
+    "trace",
+    "rank",
+    "inverse"
+  ],
+  "logarithm": [
+    "exponent",
+    "power",
+    "root",
+    "antilogarithm"
+  ],
+  "polynomial": [
+    "linear",
+    "quadratic",
+    "cubic",
+    "exponential"
+  ],
+  "function": [
+    "relation",
+    "mapping",
+    "transformation",
+    "operator"
+  ],
+  "limit": [
+    "derivative",
+    "continuity",
+    "convergence",
+    "infinity"
+  ],
+  "convergence": [
+    "divergence",
+    "stability",
+    "limit",
+    "equilibrium"
+  ],
+  "divergence": [
+    "convergence",
+    "instability",
+    "gradient",
+    "curl"
+  ],
+  "economics": [
+    "finance",
+    "accounting",
+    "business",
+    "commerce"
+  ],
+  "inflation": [
+    "deflation",
+    "recession",
+    "stagnation",
+    "depreciation"
+  ],
+  "supply": [
+    "demand",
+    "production",
+    "distribution",
+    "inventory"
+  ],
+  "demand": [
+    "supply",
+    "consumption",
+    "market",
+    "need"
+  ],
+  "gdp": [
+    "gnp",
+    "revenue",
+    "income",
+    "output"
+  ],
+  "investment": [
+    "savings",
+    "expenditure",
+    "capital",
+    "asset"
+  ],
+  "profit": [
+    "revenue",
+    "loss",
+    "income",
+    "cost"
+  ],
+  "liability": [
+    "asset",
+    "equity",
+    "debt",
+    "obligation"
+  ],
+  "lithosphere": [
+    "hydrosphere",
+    "atmosphere",
+    "biosphere",
+    "crust"
+  ],
+  "atmosphere": [
+    "lithosphere",
+    "hydrosphere",
+    "stratosphere",
+    "troposphere"
+  ],
+  "erosion": [
+    "weathering",
+    "deposition",
+    "sedimentation",
+    "corrosion"
+  ],
+  "weathering": [
+    "erosion",
+    "decomposition",
+    "degradation",
+    "dissolution"
+  ],
+  "tectonic": [
+    "volcanic",
+    "seismic",
+    "geological",
+    "structural"
+  ],
+  "glacier": [
+    "iceberg",
+    "snowfield",
+    "permafrost",
+    "moraine"
+  ],
+  "ocean": [
+    "sea",
+    "lake",
+    "river",
+    "estuary"
+  ],
+  "continent": [
+    "island",
+    "peninsula",
+    "archipelago",
+    "landmass"
+  ],
+  "climate": [
+    "weather",
+    "season",
+    "temperature",
+    "precipitation"
+  ],
+  "precipitation": [
+    "evaporation",
+    "condensation",
+    "rainfall",
+    "humidity"
+  ],
+  "african lion": [
+    "African Elephant",
+    "Tigers Bengal Tiger",
+    "Mountain Gorilla",
+    "Cheetah"
+  ],
+  "african elephant": [
+    "African Lion",
+    "Tigers Bengal Tiger",
+    "Mountain Gorilla",
+    "Cheetah"
+  ],
+  "tigers bengal tiger": [
+    "African Lion",
+    "African Elephant",
+    "Mountain Gorilla",
+    "Cheetah"
+  ],
+  "mountain gorilla": [
+    "African Lion",
+    "African Elephant",
+    "Tigers Bengal Tiger",
+    "Cheetah"
+  ],
+  "cheetah": [
+    "African Lion",
+    "African Elephant",
+    "Tigers Bengal Tiger",
+    "Mountain Gorilla"
+  ],
+  "polar bear": [
+    "African Lion",
+    "African Elephant",
+    "Tigers Bengal Tiger",
+    "Mountain Gorilla"
+  ],
+  "humpback whale": [
+    "African Lion",
+    "African Elephant",
+    "Tigers Bengal Tiger",
+    "Mountain Gorilla"
+  ],
+  "snow leopard": [
+    "African Lion",
+    "African Elephant",
+    "Tigers Bengal Tiger",
+    "Mountain Gorilla"
+  ]
 }

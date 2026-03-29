@@ -10,6 +10,7 @@ from .template_quiz import generate_template_quiz_from_pdf
 from .image_quiz import generate_image_quiz_from_pdf
 from .truefalse_quiz import generate_truefalse_quiz_from_pdf
 from .matching_quiz import generate_matching_quiz_from_pdf
+from .kb_expand import expand_knowledge_base
 
 
 BAD_STARTS = {
@@ -111,6 +112,12 @@ def generate_quiz_from_pdf(pdf_path: str, n_questions: int = 10, seed: int = 42,
         return {
             "error": "Too little usable text after segmentation. Try a clearer PDF with selectable text."
         }
+
+    # Auto-expand knowledge base with terms from this PDF
+    try:
+        expand_knowledge_base(sentences)
+    except Exception:
+        pass  # don't fail quiz generation if KB expansion fails
 
     vocab = build_vocab(sentences)
     ranked_sentences = rank_sentences(sentences, top_k=220)

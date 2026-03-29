@@ -5,6 +5,7 @@ from .pdf_text import extract_text_from_pdf
 from .preprocess import split_sentences
 from .tfidf_rank import rank_sentences
 from .distractors import build_vocab, normalize_word, KNOWLEDGE_BASE
+from .kb_expand import expand_knowledge_base
 
 
 BAD_STARTS = {"it", "they", "this", "that", "these", "those", "as", "such"}
@@ -172,6 +173,11 @@ def generate_truefalse_quiz_from_pdf(pdf_path: str, n_questions: int = 10, seed:
         return {
             "error": "Too little usable text after segmentation. Try a clearer PDF with selectable text."
         }
+
+    try:
+        expand_knowledge_base(sentences)
+    except Exception:
+        pass
 
     vocab = build_vocab(sentences)
     ranked_sentences = rank_sentences(sentences, top_k=220)

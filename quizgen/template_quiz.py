@@ -6,6 +6,7 @@ from .preprocess import split_sentences
 from .tfidf_rank import rank_sentences
 from .distractors import build_vocab, normalize_word, shares_stem, KNOWLEDGE_BASE
 from .template_patterns import match_sentence, clean_answer
+from .kb_expand import expand_knowledge_base
 
 # Import shared difficulty filter (will be available after __init__ loads)
 def _filter_by_difficulty(candidates, difficulty, n):
@@ -288,6 +289,11 @@ def generate_template_quiz_from_pdf(pdf_path: str, n_questions: int = 10, seed: 
         return {
             "error": "Too little usable text after segmentation. Try a clearer PDF with selectable text."
         }
+
+    try:
+        expand_knowledge_base(sentences)
+    except Exception:
+        pass
 
     ranked_sentences = rank_sentences(sentences, top_k=220)
 

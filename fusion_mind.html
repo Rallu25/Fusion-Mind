@@ -1179,6 +1179,23 @@
       </div>
     </div>
 
+    <div class="panel" style="margin-top:16px">
+      <div class="panel-bar">
+        <div class="panel-bar-dot"></div><div class="panel-bar-dot"></div><div class="panel-bar-dot"></div>
+        <span class="panel-label">email results</span>
+      </div>
+      <div class="panel-body">
+        <div class="controls-row" style="grid-template-columns:1fr auto">
+          <div class="field">
+            <label>Email address</label>
+            <input type="email" id="email-input" placeholder="your@email.com">
+          </div>
+          <button class="btn-run" id="email-btn" onclick="sendEmail()">✉ Send</button>
+        </div>
+        <div id="email-msg" style="display:none;margin-top:10px;font-size:12px;font-family:var(--mono)"></div>
+      </div>
+    </div>
+
     <div class="results-actions">
       <button class="btn-run" onclick="resetAll()">▶ New Quiz</button>
       <button class="btn-ghost" id="retry-wrong-btn" onclick="retryWrong()">↻ Retry wrong</button>
@@ -1701,6 +1718,85 @@
     a.download = `quiz_${new Date().toISOString().slice(0,10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  async function sendEmail() {
+    const email = document.getElementById('email-input').value.trim();
+    const msgBox = document.getElementById('email-msg');
+    const btn = document.getElementById('email-btn');
+
+    if (!email || !email.includes('@')) {
+      msgBox.style.display = 'block';
+      msgBox.style.color = 'var(--red)';
+      msgBox.textContent = 'Please enter a valid email address.';
+      return;
+    }
+
+    // Build results summary
+    let ok = 0;
+    const rows = [];
+    questions.forEach((q, i) => {
+      const isMatch = q.quiz_type === 'matching';
+      let correct = false;
+      let chosenText = '—';
+      let correctText = '—';
+
+      if (isMatch) {
+        const ans = answers[i] || {};
+        correct = ans.correct === ans.total;
+        chosenText = ans.correct !== undefined ? `${ans.correct}/${ans.total} pairs` : '—';
+        correctText = `${q.terms ? q.terms.length : '?'} pairs`;
+      } else {
+        correct = answers[i] === q.correct_index;
+        chosenText = answers[i] !== undefined ? (q.options_are_images ? '[image]' : q.options[answers[i]]) : '—';
+        correctText = q.options_are_images ? '[image]' : q.options[q.correct_index];
+      }
+
+      if (correct) ok++;
+      rows.push({
+        question: q.question.substring(0, 80),
+        chosen: chosenText,
+        correct_answer: correctText,
+        status: correct ? 'OK' : 'FAIL'
+      });
+    });
+
+    const apiUrl = document.getElementById('api-url').value.replace(/\/$/, '');
+
+    btn.disabled = true;
+    btn.textContent = 'sending...';
+    msgBox.style.display = 'none';
+
+    try {
+      const res = await fetch(`${apiUrl}/send-results-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          score: ok,
+          total: questions.length,
+          pct: Math.round(ok / questions.length * 100),
+          rows
+        })
+      });
+
+      const data = await res.json();
+      msgBox.style.display = 'block';
+      if (data.success) {
+        msgBox.style.color = 'var(--green)';
+        msgBox.textContent = 'Results sent successfully!';
+      } else {
+        msgBox.style.color = 'var(--red)';
+        msgBox.textContent = data.error || 'Failed to send email.';
+      }
+    } catch (err) {
+      msgBox.style.display = 'block';
+      msgBox.style.color = 'var(--red)';
+      msgBox.textContent = 'Could not reach server: ' + err.message;
+    }
+
+    btn.disabled = false;
+    btn.textContent = '✉ Send';
   }
 
   function resetAll() {
