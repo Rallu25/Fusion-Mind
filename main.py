@@ -8,16 +8,22 @@ load_dotenv()
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-from fastapi import FastAPI, UploadFile, File, Form, Body
+from fastapi import FastAPI, UploadFile, File, Form, Body, Header
+from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from quizgen import generate_quiz_from_pdf, generate_template_quiz_from_pdf, generate_image_quiz_from_pdf, generate_truefalse_quiz_from_pdf, generate_matching_quiz_from_pdf
 from translator import translate_text
+from database import init_db, create_teacher, get_teacher_by_username, get_teacher_by_id, create_shared_quiz, get_shared_quiz, get_teacher_quizzes, delete_shared_quiz, save_submission, get_quiz_submissions, student_already_submitted
+from auth import hash_password, verify_password, create_token, verify_token
 
-from typing import List
-from fastapi import FastAPI, UploadFile, File, Form, Body
+from typing import List, Optional
 from fastapi.middleware.cors import CORSMiddleware
 import json
 
 app = FastAPI(title="NLP Disertatie Quiz Generator")
+
+# Initialize database on startup
+init_db()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -29,9 +35,10 @@ UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
-@app.get("/")
-def home():
-    return {"message": "API is running."}
+@app.get("/", response_class=HTMLResponse)
+async def home():
+    with open("fusion_mind.html", "r", encoding="utf-8") as f:
+        return f.read()
 
 
 def _generate_mixed_quiz(file_path: str, n_questions: int, difficulty: str) -> dict:
@@ -343,3 +350,244 @@ async def send_results_email(payload: dict = Body(...)):
         return {"success": True}
     except Exception as e:
         return {"success": False, "error": str(e)}
+
+
+# ── AUTH ENDPOINTS ──
+
+def _get_teacher_from_token(authorization: Optional[str]) -> dict | None:
+    if not authorization or not authorization.startswith("Bearer "):
+        return None
+    token = authorization[7:]
+    teacher_id = verify_token(token)
+    if teacher_id is None:
+        return None
+    return get_teacher_by_id(teacher_id)
+
+
+@app.post("/auth/register")
+async def auth_register(payload: dict = Body(...)):
+    username = payload.get("username", "").strip()
+    password = payload.get("password", "")
+    email = payload.get("email", "").strip()
+
+    if not username or len(username) < 3:
+        return {"error": "Username must be at least 3 characters."}
+    if not password or len(password) < 4:
+        return {"error": "Password must be at least 4 characters."}
+
+    pw_hash = hash_password(password)
+    teacher_id = create_teacher(username, pw_hash, email)
+
+    if teacher_id == -1:
+        return {"error": "Username already exists."}
+
+    token = create_token(teacher_id)
+    return {"success": True, "token": token, "username": username}
+
+
+@app.post("/auth/login")
+async def auth_login(payload: dict = Body(...)):
+    username = payload.get("username", "").strip()
+    password = payload.get("password", "")
+
+    teacher = get_teacher_by_username(username)
+    if not teacher or not verify_password(password, teacher["password_hash"]):
+        return {"error": "Invalid username or password."}
+
+    token = create_token(teacher["id"])
+    return {"success": True, "token": token, "username": teacher["username"]}
+
+
+@app.get("/auth/me")
+async def auth_me(authorization: Optional[str] = Header(None)):
+    teacher = _get_teacher_from_token(authorization)
+    if not teacher:
+        return {"error": "Not authenticated."}
+    return {"username": teacher["username"], "email": teacher.get("email", "")}
+
+
+# ── TEACHER ENDPOINTS ──
+
+@app.post("/teacher/create-quiz")
+async def teacher_create_quiz(
+    file: UploadFile = File(...),
+    title: str = Form("Quiz"),
+    quiz_type: str = Form("cloze"),
+    difficulty: str = Form("medium"),
+    n_questions: int = Form(10),
+    timer_minutes: int = Form(0),
+    show_answers: int = Form(0),
+    authorization: Optional[str] = Header(None)
+):
+    teacher = _get_teacher_from_token(authorization)
+    if not teacher:
+        return {"error": "Not authenticated."}
+
+    if not file.filename.lower().endswith(".pdf"):
+        return {"error": "Please upload a PDF file."}
+
+    filename = f"{uuid.uuid4().hex}.pdf"
+    file_path = os.path.join(UPLOAD_DIR, filename)
+
+    content = await file.read()
+    with open(file_path, "wb") as f:
+        f.write(content)
+
+    try:
+        if quiz_type == "template":
+            result = generate_template_quiz_from_pdf(file_path, n_questions=n_questions, difficulty=difficulty)
+        elif quiz_type == "visual":
+            result = generate_image_quiz_from_pdf(file_path, n_questions=n_questions)
+        elif quiz_type == "truefalse":
+            result = generate_truefalse_quiz_from_pdf(file_path, n_questions=n_questions, difficulty=difficulty)
+        elif quiz_type == "matching":
+            result = generate_matching_quiz_from_pdf(file_path, n_questions=n_questions)
+        elif quiz_type == "mixed":
+            result = _generate_mixed_quiz(file_path, n_questions=n_questions, difficulty=difficulty)
+        else:
+            result = generate_quiz_from_pdf(file_path, n_questions=n_questions, difficulty=difficulty)
+    finally:
+        os.remove(file_path)
+
+    if "error" in result:
+        return result
+
+    questions = result.get("questions", [])
+    if not questions:
+        return {"error": "No questions generated."}
+
+    quiz_id = uuid.uuid4().hex[:12]
+    questions_json = json.dumps(questions)
+
+    ok = create_shared_quiz(
+        quiz_id=quiz_id,
+        teacher_id=teacher["id"],
+        title=title,
+        quiz_type=quiz_type,
+        difficulty=difficulty,
+        questions_json=questions_json,
+        timer_minutes=timer_minutes,
+        show_answers=show_answers,
+    )
+
+    if not ok:
+        return {"error": "Failed to save quiz."}
+
+    return {
+        "success": True,
+        "quiz_id": quiz_id,
+        "question_count": len(questions),
+    }
+
+
+@app.get("/teacher/my-quizzes")
+async def teacher_my_quizzes(authorization: Optional[str] = Header(None)):
+    teacher = _get_teacher_from_token(authorization)
+    if not teacher:
+        return {"error": "Not authenticated."}
+
+    quizzes = get_teacher_quizzes(teacher["id"])
+    # Add submission count
+    for q in quizzes:
+        subs = get_quiz_submissions(q["id"])
+        q["submission_count"] = len(subs)
+
+    return {"quizzes": quizzes}
+
+
+@app.get("/teacher/quiz/{quiz_id}/results")
+async def teacher_quiz_results(quiz_id: str, authorization: Optional[str] = Header(None)):
+    teacher = _get_teacher_from_token(authorization)
+    if not teacher:
+        return {"error": "Not authenticated."}
+
+    quiz = get_shared_quiz(quiz_id)
+    if not quiz or quiz["teacher_id"] != teacher["id"]:
+        return {"error": "Quiz not found."}
+
+    submissions = get_quiz_submissions(quiz_id)
+    # Parse answers JSON for each submission
+    for s in submissions:
+        s["answers"] = json.loads(s["answers_json"])
+        del s["answers_json"]
+
+    return {
+        "quiz": {
+            "id": quiz["id"],
+            "title": quiz["title"],
+            "quiz_type": quiz["quiz_type"],
+            "timer_minutes": quiz["timer_minutes"],
+            "questions": json.loads(quiz["questions_json"]),
+        },
+        "submissions": submissions,
+    }
+
+
+@app.delete("/teacher/quiz/{quiz_id}")
+async def teacher_delete_quiz(quiz_id: str, authorization: Optional[str] = Header(None)):
+    teacher = _get_teacher_from_token(authorization)
+    if not teacher:
+        return {"error": "Not authenticated."}
+
+    deleted = delete_shared_quiz(quiz_id, teacher["id"])
+    return {"success": deleted}
+
+
+# ── STUDENT ENDPOINTS ──
+
+@app.get("/quiz/{quiz_id}")
+async def get_quiz_for_student(quiz_id: str):
+    quiz = get_shared_quiz(quiz_id)
+    if not quiz:
+        return {"error": "Quiz not found."}
+
+    questions = json.loads(quiz["questions_json"])
+
+    return {
+        "title": quiz["title"],
+        "quiz_type": quiz["quiz_type"],
+        "timer_minutes": quiz["timer_minutes"],
+        "show_answers": quiz["show_answers"],
+        "question_count": len(questions),
+        "questions": questions,
+    }
+
+
+@app.post("/quiz/{quiz_id}/submit")
+async def submit_quiz(quiz_id: str, payload: dict = Body(...)):
+    quiz = get_shared_quiz(quiz_id)
+    if not quiz:
+        return {"error": "Quiz not found."}
+
+    student_name = payload.get("student_name", "").strip()
+    if not student_name:
+        return {"error": "Please enter your name."}
+
+    # Check if already submitted
+    if student_already_submitted(quiz_id, student_name):
+        return {"error": "You have already submitted this quiz."}
+
+    answers = payload.get("answers", {})
+    score = payload.get("score", 0)
+    total = payload.get("total", 0)
+    pct = payload.get("pct", 0)
+
+    answers_json = json.dumps(answers)
+    save_submission(quiz_id, student_name, answers_json, score, total, pct)
+
+    return {"success": True, "score": score, "total": total, "pct": pct}
+
+
+# ── SERVE STATIC HTML ──
+
+@app.get("/teacher", response_class=HTMLResponse)
+async def serve_teacher_dashboard():
+    with open("teacher_dashboard.html", "r", encoding="utf-8") as f:
+        return f.read()
+
+
+@app.get("/student/{quiz_id}", response_class=HTMLResponse)
+async def serve_student_quiz(quiz_id: str):
+    with open("student_quiz.html", "r", encoding="utf-8") as f:
+        html = f.read()
+    return html.replace("{{QUIZ_ID}}", quiz_id)

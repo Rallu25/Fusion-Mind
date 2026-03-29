@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FUSION MIND — Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c10; --bg2: #0d1117; --bg3: #111820; --border: #1e2d3d;
+    --green: #b97aff; --green-dim: #8a4fd4; --green-glow: 0 0 20px rgba(185,122,255,0.4);
+    --blue: #4db8ff; --red: #ff4d6a; --muted: #445566;
+    --text: #c8d8e8; --text-dim: #6a8099;
+    --mono: 'Space Mono', monospace; --sans: 'Syne', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--mono); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  .app { max-width: 760px; margin: 0 auto; padding: 20px; }
+
+  .header { text-align: center; padding: 30px 0 20px; }
+  .header h1 { font-family: var(--sans); font-size: 24px; color: var(--green); letter-spacing: 3px; }
+  .header .sub { font-size: 12px; color: var(--text-dim); margin-top: 6px; }
+
+  .panel { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 16px; }
+  .panel-body { padding: 20px; }
+  .panel-title { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 12px; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .field label { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+  .field input { background: var(--bg3); border: 1px solid var(--border); border-radius: 2px; padding: 10px 12px; color: var(--text); font-family: var(--mono); font-size: 13px; outline: none; }
+  .field input:focus { border-color: var(--green-dim); }
+
+  .btn { background: var(--green); color: var(--bg); border: none; padding: 12px 28px; font-family: var(--sans); font-weight: 700; font-size: 14px; letter-spacing: 1px; cursor: pointer; border-radius: 2px; transition: all 0.2s; }
+  .btn:hover { filter: brightness(1.15); }
+  .btn:disabled { opacity: 0.4; cursor: default; }
+
+  .btn-ghost { background: none; border: 1px solid var(--border); color: var(--text-dim); padding: 8px 16px; font-family: var(--mono); font-size: 12px; cursor: pointer; border-radius: 2px; transition: all 0.15s; }
+  .btn-ghost:hover { border-color: var(--text-dim); color: var(--text); }
+
+  .timer-bar { text-align: center; padding: 10px; font-size: 18px; font-family: var(--sans); font-weight: 800; color: var(--green); }
+  .timer-bar.warning { color: var(--yellow, #ffd166); }
+  .timer-bar.danger { color: var(--red); animation: pulse 0.5s infinite; }
+
+  .progress-wrap { height: 3px; background: var(--bg3); border-radius: 2px; margin-bottom: 16px; }
+  .progress-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.3s; }
+
+  .q-card { animation: fadeIn 0.3s ease both; }
+  .q-num { font-size: 10px; color: var(--muted); letter-spacing: 2px; margin-bottom: 10px; }
+  .q-text { font-family: var(--sans); font-size: 18px; font-weight: 700; line-height: 1.5; margin-bottom: 20px; }
+
+  .opts { display: flex; flex-direction: column; gap: 8px; }
+  .opt-btn { display: flex; align-items: center; gap: 14px; background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 12px 16px; cursor: pointer; transition: all 0.15s; color: var(--text-dim); font-family: var(--mono); font-size: 13px; text-align: left; }
+  .opt-btn:hover { border-color: var(--text-dim); transform: translateX(4px); }
+  .opt-btn:disabled { cursor: default; transform: none; }
+  .opt-btn.selected { border-color: var(--blue); background: rgba(77,184,255,0.08); }
+  .opt-btn.correct { border-color: var(--green); background: rgba(185,122,255,0.06); }
+  .opt-btn.wrong { border-color: var(--red); background: rgba(255,77,106,0.06); }
+  .opt-key { width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .opt-btn.selected .opt-key { background: var(--blue); color: var(--bg); border-color: var(--blue); }
+
+  .opts.tf-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .opt-btn.tf-true { border-left: 3px solid var(--green); }
+  .opt-btn.tf-false { border-left: 3px solid var(--red); }
+
+  .opts.image-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .opt-btn.image-opt { flex-direction: column; align-items: center; padding: 10px; min-height: 160px; }
+  .opt-btn.image-opt img { max-width: 100%; max-height: 200px; object-fit: contain; border-radius: 4px; margin-top: 8px; }
+
+  .match-container { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px; }
+  .match-col-label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 8px; }
+  .match-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 10px 14px; margin-bottom: 8px; font-size: 12px; color: var(--text); cursor: pointer; transition: all 0.15s; user-select: none; }
+  .match-item:hover { border-color: var(--text-dim); }
+  .match-item.selected { border-color: var(--blue); background: rgba(77,184,255,0.08); }
+  .match-item.matched { border-color: var(--green-dim); opacity: 0.5; cursor: default; }
+  .match-tag { display: inline-block; background: var(--border); color: var(--text-dim); font-size: 9px; padding: 1px 6px; border-radius: 2px; margin-left: 6px; }
+  .match-item.matched .match-tag { background: var(--green-dim); color: var(--bg); }
+
+  .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
+  .nav-counter { font-size: 11px; color: var(--muted); }
+
+  .score-panel { text-align: center; padding: 40px 20px; }
+  .score-big { font-family: var(--sans); font-size: 64px; font-weight: 800; color: var(--green); }
+  .score-label { font-size: 10px; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; display: block; margin-top: 6px; }
+  .score-msg { margin-top: 16px; font-size: 13px; color: var(--text-dim); font-style: italic; }
+
+  .msg { padding: 10px; font-size: 12px; margin-top: 10px; border-radius: 2px; }
+  .msg.err { color: var(--red); background: rgba(255,77,106,0.08); border: 1px solid rgba(255,77,106,0.2); }
+  .msg.ok { color: var(--green); background: rgba(185,122,255,0.08); border: 1px solid rgba(185,122,255,0.2); }
+
+  .hidden { display: none; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>FUSION MIND</h1>
+    <div class="sub">Quiz Assessment</div>
+  </div>
+
+  <!-- INTRO -->
+  <div id="intro-section">
+    <div class="panel"><div class="panel-body">
+      <div class="panel-title" id="quiz-title-label">Loading quiz...</div>
+      <div id="quiz-info" style="font-size:13px;color:var(--text-dim);margin-bottom:16px"></div>
+      <div class="field">
+        <label>Your Name</label>
+        <input type="text" id="student-name" placeholder="Enter your full name">
+      </div>
+      <div id="intro-msg" class="msg err hidden"></div>
+      <button class="btn" id="start-btn" onclick="startQuiz()" disabled>Start Quiz</button>
+    </div></div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-section" class="hidden">
+    <div id="timer-bar" class="timer-bar hidden"></div>
+    <div class="progress-wrap"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div id="question-container"></div>
+    <div class="nav">
+      <button class="btn-ghost" id="prev-btn" onclick="navigate(-1)" disabled>← prev</button>
+      <span class="nav-counter" id="nav-counter"></span>
+      <button class="btn-ghost" id="next-btn" onclick="navigate(1)">next →</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results-section" class="hidden">
+    <div class="panel"><div class="panel-body score-panel">
+      <div class="score-big" id="score-big">—</div>
+      <span class="score-label">your score</span>
+      <p class="score-msg" id="score-msg"></p>
+    </div></div>
+    <div id="results-detail"></div>
+  </div>
+</div>
+
+<script>
+  const QUIZ_ID = "{{QUIZ_ID}}";
+  const API = window.location.origin;
+  let quizData = null, questions = [], answers = {}, current = 0;
+  let timerInterval = null, timeLeft = 0;
+  let matchSel = { type: null, idx: null }, matchMap = {};
+
+  // Load quiz data
+  async function loadQuiz() {
+    try {
+      const res = await fetch(`${API}/quiz/${QUIZ_ID}`);
+      const data = await res.json();
+      if (data.error) { showError(data.error); return; }
+      quizData = data;
+      questions = data.questions;
+      document.getElementById('quiz-title-label').textContent = data.title;
+      let info = `${data.question_count} questions · ${data.quiz_type}`;
+      if (data.timer_minutes > 0) info += ` · ${data.timer_minutes} min timer`;
+      document.getElementById('quiz-info').textContent = info;
+      document.getElementById('start-btn').disabled = false;
+    } catch (e) {
+      showError('Could not load quiz: ' + e.message);
+    }
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('intro-msg');
+    el.textContent = msg; el.classList.remove('hidden');
+  }
+
+  function startQuiz() {
+    const name = document.getElementById('student-name').value.trim();
+    if (!name) { showError('Please enter your name.'); return; }
+    document.getElementById('intro-section').classList.add('hidden');
+    document.getElementById('quiz-section').classList.remove('hidden');
+    if (quizData.timer_minutes > 0) {
+      timeLeft = quizData.timer_minutes * 60;
+      document.getElementById('timer-bar').classList.remove('hidden');
+      timerInterval = setInterval(tickTimer, 1000);
+      tickTimer();
+    }
+    renderQ();
+  }
+
+  function tickTimer() {
+    if (timeLeft <= 0) { clearInterval(timerInterval); submitQuiz(); return; }
+    const min = Math.floor(timeLeft / 60), sec = timeLeft % 60;
+    const el = document.getElementById('timer-bar');
+    el.textContent = `${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+    el.className = 'timer-bar' + (timeLeft <= 60 ? ' danger' : timeLeft <= 180 ? ' warning' : '');
+    timeLeft--;
+  }
+
+  function renderQ() {
+    matchSel = { type: null, idx: null }; matchMap = {};
+    const q = questions[current], total = questions.length;
+    document.getElementById('progress-fill').style.width = `${((current+1)/total)*100}%`;
+    document.getElementById('nav-counter').textContent = `${current+1} / ${total}`;
+    document.getElementById('prev-btn').disabled = current === 0;
+
+    const isLast = current === total - 1;
+    const nextBtn = document.getElementById('next-btn');
+    const answered = answers[current] !== undefined;
+    if (isLast && answered) {
+      nextBtn.textContent = 'submit →'; nextBtn.onclick = submitQuiz;
+    } else {
+      nextBtn.textContent = isLast ? 'submit →' : 'next →';
+      nextBtn.onclick = isLast ? submitQuiz : () => navigate(1);
+    }
+
+    const isImageQ = q.options_are_images === true;
+    const isTF = q.options && q.options.length === 2 && q.options[0] === 'True' && q.options[1] === 'False';
+    const isMatch = q.quiz_type === 'matching';
+    const letters = ['A','B','C','D'];
+
+    if (isMatch) {
+      document.getElementById('question-container').innerHTML = `
+        <div class="q-card">
+          <div class="q-num">// Q_${String(current+1).padStart(2,'0')}</div>
+          <div class="q-text">${q.question}</div>
+          <div class="match-container">
+            <div><div class="match-col-label">Terms</div>
+              ${q.terms.map((t,i) => `<div class="match-item" id="mt-${i}" onclick="matchPick('term',${i})">${t} <span class="match-tag" id="mt-tag-${i}">—</span></div>`).join('')}
+            </div>
+            <div><div class="match-col-label">Definitions</div>
+              ${q.definitions.map((d,i) => `<div class="match-item" id="md-${i}" onclick="matchPick('def',${i})">${d}</div>`).join('')}
+            </div>
+          </div>
+        </div>`;
+      if (answered) restoreMatch();
+      return;
+    }
+
+    const optsClass = isImageQ ? 'opts image-opts' : isTF ? 'opts tf-opts' : 'opts';
+    document.getElementById('question-container').innerHTML = `
+      <div class="q-card">
+        <div class="q-num">// Q_${String(current+1).padStart(2,'0')}</div>
+        <div class="q-text">${q.question.replace(/____/g, '<span style="border-bottom:2px solid var(--green);padding:0 12px">&nbsp;</span>')}</div>
+        <div class="${optsClass}">
+          ${q.options.map((opt,i) => {
+            if (isImageQ) return `<button class="opt-btn image-opt" id="opt-${i}" onclick="pick(${i})"><span class="opt-key">${letters[i]}</span><img src="data:image/png;base64,${opt}"></button>`;
+            if (isTF) return `<button class="opt-btn ${opt==='True'?'tf-true':'tf-false'}" id="opt-${i}" onclick="pick(${i})"><span class="opt-key">${opt==='True'?'T':'F'}</span><span>${opt}</span></button>`;
+            return `<button class="opt-btn" id="opt-${i}" onclick="pick(${i})"><span class="opt-key">${letters[i]}</span><span>${opt}</span></button>`;
+          }).join('')}
+        </div>
+      </div>`;
+    if (answered) restoreQ();
+  }
+
+  function pick(idx) {
+    answers[current] = idx;
+    // Clear all selections, highlight new one
+    questions[current].options.forEach((_,i) => {
+      const btn = document.getElementById(`opt-${i}`);
+      btn.classList.remove('selected');
+      if (i === idx) btn.classList.add('selected');
+    });
+    updateSubmitBtn();
+  }
+
+  function restoreQ() {
+    const chosen = answers[current];
+    questions[current].options.forEach((_,i) => {
+      const btn = document.getElementById(`opt-${i}`);
+      btn.classList.remove('selected');
+      if (i === chosen) btn.classList.add('selected');
+    });
+  }
+
+  function matchPick(type, idx) {
+    if (answers[current] !== undefined) return;
+    const q = questions[current];
+    const el = document.getElementById(type === 'term' ? `mt-${idx}` : `md-${idx}`);
+    if (el.classList.contains('matched')) return;
+    if (!matchSel.type) { matchSel = {type, idx}; el.classList.add('selected'); return; }
+    if (matchSel.type === type) {
+      document.getElementById(matchSel.type === 'term' ? `mt-${matchSel.idx}` : `md-${matchSel.idx}`).classList.remove('selected');
+      matchSel = {type, idx}; el.classList.add('selected'); return;
+    }
+    const termIdx = type === 'term' ? idx : matchSel.idx;
+    const defIdx = type === 'def' ? idx : matchSel.idx;
+    document.getElementById(`mt-${termIdx}`).classList.remove('selected');
+    document.getElementById(`md-${defIdx}`).classList.remove('selected');
+    document.getElementById(`mt-${termIdx}`).classList.add('matched');
+    document.getElementById(`md-${defIdx}`).classList.add('matched');
+    const label = String.fromCharCode(65 + Object.keys(matchMap).length);
+    document.getElementById(`mt-tag-${termIdx}`).textContent = label;
+    matchMap[termIdx] = defIdx;
+    matchSel = { type: null, idx: null };
+    if (Object.keys(matchMap).length === q.terms.length) {
+      let correct = 0;
+      q.terms.forEach((_,i) => { if (matchMap[i] === q.correct_mapping[i]) correct++; });
+      answers[current] = { map: {...matchMap}, correct, total: q.terms.length };
+      updateSubmitBtn();
+    }
+  }
+
+  function restoreMatch() {
+    const ans = answers[current];
+    if (!ans || !ans.map) return;
+    let li = 0;
+    Object.entries(ans.map).forEach(([tIdx, dIdx]) => {
+      document.getElementById(`mt-${tIdx}`).classList.add('matched');
+      document.getElementById(`md-${dIdx}`).classList.add('matched');
+      document.getElementById(`mt-tag-${tIdx}`).textContent = String.fromCharCode(65 + li++);
+    });
+  }
+
+  function navigate(dir) {
+    const next = current + dir;
+    if (next < 0 || next >= questions.length) return;
+    current = next; renderQ();
+  }
+
+  function updateSubmitBtn() {
+    if (current === questions.length - 1) {
+      const nb = document.getElementById('next-btn');
+      nb.textContent = 'submit →'; nb.onclick = submitQuiz;
+    }
+  }
+
+  async function submitQuiz() {
+    if (timerInterval) clearInterval(timerInterval);
+    let ok = 0;
+    questions.forEach((q,i) => {
+      if (q.quiz_type === 'matching') {
+        const ans = answers[i];
+        if (ans && ans.correct === ans.total) ok++;
+      } else {
+        if (answers[i] === q.correct_index) ok++;
+      }
+    });
+    const total = questions.length;
+    const pct = Math.round(ok / total * 100);
+
+    // Submit to server
+    try {
+      const res = await fetch(`${API}/quiz/${QUIZ_ID}/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          student_name: document.getElementById('student-name').value.trim(),
+          answers, score: ok, total, pct
+        })
+      });
+      const data = await res.json();
+      if (data.error) console.warn(data.error);
+    } catch (e) { console.warn('Submit failed:', e); }
+
+    // Show results
+    document.getElementById('quiz-section').classList.add('hidden');
+    document.getElementById('results-section').classList.remove('hidden');
+    document.getElementById('score-big').textContent = `${ok}/${total}`;
+
+    const msgs = { 100: 'Perfect!', 75: 'Excellent!', 50: 'Good effort.', 0: 'Keep studying.' };
+    const key = pct === 100 ? 100 : pct >= 75 ? 75 : pct >= 50 ? 50 : 0;
+    document.getElementById('score-msg').textContent = `${pct}% — ${msgs[key]}`;
+
+    // Show correct answers if enabled
+    if (quizData.show_answers) {
+      let html = '<div class="panel" style="margin-top:16px"><div class="panel-body"><div class="panel-title">Answer Review</div>';
+      questions.forEach((q,i) => {
+        if (q.quiz_type === 'matching') return;
+        const chosen = answers[i];
+        const isOk = chosen === q.correct_index;
+        const color = isOk ? 'var(--green)' : 'var(--red)';
+        html += `<div style="margin-bottom:12px;padding:8px 0;border-bottom:1px solid var(--border)">`;
+        html += `<div style="font-size:12px;color:${color};font-weight:700">${isOk ? 'CORRECT' : 'WRONG'}</div>`;
+        html += `<div style="font-size:13px;margin:4px 0">${q.question.substring(0,100)}</div>`;
+        if (!isOk && !q.options_are_images) {
+          html += `<div style="font-size:11px;color:var(--text-dim)">Correct: ${q.options[q.correct_index]}</div>`;
+        }
+        html += `</div>`;
+      });
+      html += '</div></div>';
+      document.getElementById('results-detail').innerHTML = html;
+    }
+  }
+
+  loadQuiz();
+</script>
+</body>
+</html>

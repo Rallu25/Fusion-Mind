@@ -1032,6 +1032,7 @@
   <div class="logo">FUSION<span> MIND</span></div>
   <div class="status-dots">
     <span><span class="dot green"></span>ONLINE</span>
+    <a href="/teacher" style="text-decoration:none"><button class="history-btn" title="Teacher panel">teacher</button></a>
     <button class="history-btn" onclick="showDashboard()" title="Stats & progress">dashboard</button>
     <button class="history-btn" onclick="showHistory()" title="Saved quizzes">history</button>
     <button class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark theme">☀ / ☾</button>
@@ -1456,11 +1457,10 @@
   }
 
   function pick(idx) {
-    if (answers[current] !== undefined) return;
     answers[current] = idx;
     questions[current].options.forEach((_, i) => {
       const btn = document.getElementById(`opt-${i}`);
-      btn.disabled = true;
+      btn.classList.remove('selected');
       if (i === idx) btn.classList.add('selected');
     });
     if (current === questions.length - 1) {
@@ -1473,7 +1473,7 @@
     const chosen = answers[current];
     questions[current].options.forEach((_, i) => {
       const btn = document.getElementById(`opt-${i}`);
-      btn.disabled = true;
+      btn.classList.remove('selected');
       if (i === chosen) btn.classList.add('selected');
     });
   }

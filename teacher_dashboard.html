@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FUSION MIND — Teacher Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c10; --bg2: #0d1117; --bg3: #111820; --border: #1e2d3d;
+    --green: #b97aff; --green-dim: #8a4fd4; --green-glow: 0 0 20px rgba(185,122,255,0.4);
+    --blue: #4db8ff; --red: #ff4d6a; --muted: #445566;
+    --text: #c8d8e8; --text-dim: #6a8099;
+    --mono: 'Space Mono', monospace; --sans: 'Syne', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--mono); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  .topbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; background: var(--bg2); border-bottom: 1px solid var(--border); }
+  .logo { font-family: var(--sans); font-weight: 800; font-size: 17px; letter-spacing: 3px; color: var(--green); }
+  .logo span { color: var(--text-dim); font-weight: 400; }
+  .topbar-right { display: flex; gap: 12px; align-items: center; font-size: 11px; color: var(--muted); }
+  .topbar-btn { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 4px 10px; color: var(--text-dim); font-family: var(--mono); font-size: 11px; cursor: pointer; }
+  .topbar-btn:hover { border-color: var(--text-dim); color: var(--text); }
+
+  .app { max-width: 900px; margin: 0 auto; padding: 20px; }
+
+  .panel { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 16px; animation: fadeIn 0.3s ease both; }
+  .panel-bar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  .panel-label { font-size: 10px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
+  .panel-body { padding: 20px; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .field label { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+  .field input, .field select { background: var(--bg3); border: 1px solid var(--border); border-radius: 2px; padding: 9px 12px; color: var(--text); font-family: var(--mono); font-size: 13px; outline: none; }
+  .field input:focus, .field select:focus { border-color: var(--green-dim); }
+
+  .btn { background: var(--green); color: var(--bg); border: none; padding: 10px 24px; font-family: var(--sans); font-weight: 700; font-size: 13px; letter-spacing: 1px; cursor: pointer; border-radius: 2px; }
+  .btn:hover { filter: brightness(1.15); }
+  .btn:disabled { opacity: 0.4; }
+  .btn-ghost { background: none; border: 1px solid var(--border); color: var(--text-dim); padding: 8px 14px; font-family: var(--mono); font-size: 11px; cursor: pointer; border-radius: 2px; }
+  .btn-ghost:hover { border-color: var(--text-dim); color: var(--text); }
+  .btn-danger { background: none; border: 1px solid rgba(255,77,106,0.3); color: var(--red); padding: 6px 12px; font-family: var(--mono); font-size: 10px; cursor: pointer; border-radius: 2px; }
+  .btn-danger:hover { border-color: var(--red); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 600px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  .msg { padding: 10px; font-size: 12px; margin-top: 10px; border-radius: 2px; }
+  .msg.err { color: var(--red); background: rgba(255,77,106,0.08); border: 1px solid rgba(255,77,106,0.2); }
+  .msg.ok { color: var(--green); background: rgba(185,122,255,0.08); border: 1px solid rgba(185,122,255,0.2); }
+
+  .quiz-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .quiz-card:hover { border-color: var(--text-dim); }
+  .quiz-card-info { display: flex; flex-direction: column; gap: 4px; }
+  .quiz-card-title { font-family: var(--sans); font-size: 14px; font-weight: 700; }
+  .quiz-card-sub { font-size: 10px; color: var(--text-dim); }
+  .quiz-card-actions { display: flex; gap: 8px; align-items: center; }
+
+  .badge { display: inline-block; background: var(--border); color: var(--text-dim); font-size: 9px; padding: 2px 8px; border-radius: 2px; letter-spacing: 1px; text-transform: uppercase; margin-right: 4px; }
+
+  .link-box { background: var(--bg); border: 1px solid var(--green-dim); border-radius: 4px; padding: 10px 14px; font-size: 12px; color: var(--green); word-break: break-all; cursor: pointer; margin-top: 10px; }
+  .link-box:hover { background: rgba(185,122,255,0.05); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { text-align: left; padding: 8px 10px; font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 10px; border-bottom: 1px solid rgba(30,45,61,0.5); }
+
+  .hidden { display: none; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">FUSION<span> MIND</span> · Teacher</div>
+  <div class="topbar-right">
+    <span id="user-label"></span>
+    <button class="topbar-btn" id="logout-btn" onclick="logout()" style="display:none">logout</button>
+    <a href="/" style="text-decoration:none"><button class="topbar-btn">guest mode</button></a>
+  </div>
+</div>
+
+<div class="app">
+  <!-- AUTH -->
+  <div id="auth-section">
+    <div class="panel">
+      <div class="panel-bar"><span class="panel-label">teacher login</span></div>
+      <div class="panel-body">
+        <div id="auth-forms">
+          <div class="grid-2">
+            <div class="field"><label>Username</label><input type="text" id="auth-user"></div>
+            <div class="field"><label>Password</label><input type="password" id="auth-pass"></div>
+          </div>
+          <div class="field" id="email-field" style="display:none"><label>Email (optional)</label><input type="email" id="auth-email"></div>
+          <div style="display:flex;gap:10px">
+            <button class="btn" id="login-btn" onclick="login()">Login</button>
+            <button class="btn-ghost" id="register-toggle" onclick="toggleRegister()">Register instead</button>
+          </div>
+          <div id="auth-msg" class="msg err hidden"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard-section" class="hidden">
+
+    <!-- CREATE QUIZ -->
+    <div class="panel">
+      <div class="panel-bar"><span class="panel-label">create quiz</span></div>
+      <div class="panel-body">
+        <div class="field">
+          <label>Quiz Title</label>
+          <input type="text" id="quiz-title" value="Quiz" placeholder="e.g. Biology Chapter 5">
+        </div>
+        <div class="field">
+          <label>PDF File</label>
+          <input type="file" id="quiz-file" accept=".pdf" style="padding:8px">
+        </div>
+        <div class="grid-3">
+          <div class="field"><label>Quiz Type</label>
+            <select id="quiz-type">
+              <option value="cloze">Cloze</option>
+              <option value="template">Full Questions</option>
+              <option value="truefalse">True / False</option>
+              <option value="matching">Matching</option>
+              <option value="mixed">Mixed</option>
+            </select>
+          </div>
+          <div class="field"><label>Difficulty</label>
+            <select id="quiz-diff">
+              <option value="easy">Easy</option>
+              <option value="medium" selected>Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+          <div class="field"><label>Questions</label>
+            <input type="number" id="quiz-n" value="10" min="1" max="30">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><label>Timer (minutes, 0=off)</label>
+            <input type="number" id="quiz-timer" value="0" min="0" max="180">
+          </div>
+          <div class="field"><label>Show answers after submit</label>
+            <select id="quiz-show-answers">
+              <option value="0">No</option>
+              <option value="1">Yes</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn" id="create-btn" onclick="createQuiz()">Generate & Share</button>
+        <div id="create-msg" class="hidden"></div>
+        <div id="share-link" class="hidden"></div>
+      </div>
+    </div>
+
+    <!-- MY QUIZZES -->
+    <div class="panel">
+      <div class="panel-bar"><span class="panel-label">my quizzes</span></div>
+      <div class="panel-body">
+        <div id="quizzes-list"></div>
+      </div>
+    </div>
+
+    <!-- RESULTS VIEW (shown when clicking a quiz) -->
+    <div id="results-panel" class="panel hidden">
+      <div class="panel-bar"><span class="panel-label" id="results-title">results</span></div>
+      <div class="panel-body">
+        <div id="results-content"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = window.location.origin;
+  let token = localStorage.getItem('teacherToken') || '';
+  let isRegisterMode = false;
+
+  // Check if already logged in
+  async function checkAuth() {
+    if (!token) return;
+    const res = await fetch(`${API}/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+    const data = await res.json();
+    if (data.username) {
+      showDashboard(data.username);
+    } else {
+      token = ''; localStorage.removeItem('teacherToken');
+    }
+  }
+
+  function toggleRegister() {
+    isRegisterMode = !isRegisterMode;
+    document.getElementById('email-field').style.display = isRegisterMode ? 'block' : 'none';
+    document.getElementById('login-btn').textContent = isRegisterMode ? 'Register' : 'Login';
+    document.getElementById('register-toggle').textContent = isRegisterMode ? 'Login instead' : 'Register instead';
+  }
+
+  async function login() {
+    const username = document.getElementById('auth-user').value.trim();
+    const password = document.getElementById('auth-pass').value;
+    const email = document.getElementById('auth-email').value.trim();
+    const msgEl = document.getElementById('auth-msg');
+
+    const endpoint = isRegisterMode ? '/auth/register' : '/auth/login';
+    const body = isRegisterMode ? { username, password, email } : { username, password };
+
+    try {
+      const res = await fetch(`${API}${endpoint}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (data.error) { msgEl.textContent = data.error; msgEl.className = 'msg err'; msgEl.classList.remove('hidden'); return; }
+      token = data.token;
+      localStorage.setItem('teacherToken', token);
+      showDashboard(data.username);
+    } catch (e) {
+      msgEl.textContent = 'Connection error: ' + e.message; msgEl.className = 'msg err'; msgEl.classList.remove('hidden');
+    }
+  }
+
+  function showDashboard(username) {
+    document.getElementById('auth-section').classList.add('hidden');
+    document.getElementById('dashboard-section').classList.remove('hidden');
+    document.getElementById('user-label').textContent = username;
+    document.getElementById('logout-btn').style.display = '';
+    loadQuizzes();
+  }
+
+  function logout() {
+    token = ''; localStorage.removeItem('teacherToken');
+    location.reload();
+  }
+
+  // ── CREATE QUIZ ──
+  async function createQuiz() {
+    const fileInput = document.getElementById('quiz-file');
+    if (!fileInput.files.length) { showCreateMsg('Please select a PDF file.', true); return; }
+
+    const btn = document.getElementById('create-btn');
+    btn.disabled = true; btn.textContent = 'Generating...';
+
+    const fd = new FormData();
+    fd.append('file', fileInput.files[0]);
+    fd.append('title', document.getElementById('quiz-title').value);
+    fd.append('quiz_type', document.getElementById('quiz-type').value);
+    fd.append('difficulty', document.getElementById('quiz-diff').value);
+    fd.append('n_questions', document.getElementById('quiz-n').value);
+    fd.append('timer_minutes', document.getElementById('quiz-timer').value);
+    fd.append('show_answers', document.getElementById('quiz-show-answers').value);
+
+    try {
+      const res = await fetch(`${API}/teacher/create-quiz`, {
+        method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: fd
+      });
+      const data = await res.json();
+      if (data.error) { showCreateMsg(data.error, true); return; }
+
+      const link = `${window.location.origin}/student/${data.quiz_id}`;
+      showCreateMsg(`Quiz created! ${data.question_count} questions.`, false);
+      document.getElementById('share-link').innerHTML = `
+        <div class="link-box" onclick="navigator.clipboard.writeText('${link}');this.style.borderColor='var(--green)'"
+             title="Click to copy">${link}</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-top:4px">Click the link to copy it</div>`;
+      document.getElementById('share-link').classList.remove('hidden');
+      loadQuizzes();
+    } catch (e) {
+      showCreateMsg('Error: ' + e.message, true);
+    }
+    btn.disabled = false; btn.textContent = 'Generate & Share';
+  }
+
+  function showCreateMsg(text, isErr) {
+    const el = document.getElementById('create-msg');
+    el.textContent = text;
+    el.className = isErr ? 'msg err' : 'msg ok';
+    el.classList.remove('hidden');
+  }
+
+  // ── MY QUIZZES ──
+  async function loadQuizzes() {
+    const res = await fetch(`${API}/teacher/my-quizzes`, { headers: { 'Authorization': `Bearer ${token}` } });
+    const data = await res.json();
+    const list = document.getElementById('quizzes-list');
+
+    if (!data.quizzes || !data.quizzes.length) {
+      list.innerHTML = '<div style="color:var(--text-dim);font-size:12px;padding:10px 0">No quizzes yet. Create one above.</div>';
+      return;
+    }
+
+    list.innerHTML = data.quizzes.map(q => {
+      const date = new Date(q.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const link = `${window.location.origin}/student/${q.id}`;
+      return `<div class="quiz-card">
+        <div class="quiz-card-info">
+          <div class="quiz-card-title">${q.title}</div>
+          <div class="quiz-card-sub">
+            <span class="badge">${q.quiz_type}</span>
+            <span class="badge">${q.difficulty}</span>
+            ${q.timer_minutes > 0 ? `<span class="badge">${q.timer_minutes}min</span>` : ''}
+            ${q.submission_count} submissions · ${date}
+          </div>
+        </div>
+        <div class="quiz-card-actions">
+          <button class="btn-ghost" onclick="navigator.clipboard.writeText('${link}')">copy link</button>
+          <button class="btn-ghost" onclick="viewResults('${q.id}')">results</button>
+          <button class="btn-danger" onclick="deleteQuiz('${q.id}')">delete</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  async function deleteQuiz(id) {
+    if (!confirm('Delete this quiz and all submissions?')) return;
+    await fetch(`${API}/teacher/quiz/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+    loadQuizzes();
+    document.getElementById('results-panel').classList.add('hidden');
+  }
+
+  // ── RESULTS ──
+  async function viewResults(quizId) {
+    const res = await fetch(`${API}/teacher/quiz/${quizId}/results`, { headers: { 'Authorization': `Bearer ${token}` } });
+    const data = await res.json();
+    if (data.error) return;
+
+    const panel = document.getElementById('results-panel');
+    const content = document.getElementById('results-content');
+    document.getElementById('results-title').textContent = `results — ${data.quiz.title}`;
+
+    if (!data.submissions.length) {
+      content.innerHTML = '<div style="color:var(--text-dim);font-size:12px">No submissions yet.</div>';
+      panel.classList.remove('hidden');
+      return;
+    }
+
+    let html = `<table>
+      <thead><tr><th>#</th><th>Student</th><th>Score</th><th>%</th><th>Time</th><th>Details</th></tr></thead>
+      <tbody>`;
+
+    data.submissions.forEach((s, i) => {
+      const time = new Date(s.submitted_at).toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+      const color = s.pct >= 75 ? 'var(--green)' : s.pct >= 50 ? 'var(--blue)' : 'var(--red)';
+
+      // Build detail for each question
+      let detail = '';
+      const answers = s.answers || {};
+      data.quiz.questions.forEach((q, qi) => {
+        const isMatch = q.quiz_type === 'matching';
+        let status = '—';
+        if (isMatch) {
+          const ans = answers[qi];
+          if (ans && typeof ans === 'object') {
+            status = ans.correct === ans.total ? '<span style="color:var(--green)">OK</span>' : '<span style="color:var(--red)">FAIL</span>';
+          }
+        } else {
+          const chosen = answers[qi];
+          if (chosen !== undefined) {
+            status = chosen === q.correct_index
+              ? '<span style="color:var(--green)">OK</span>'
+              : '<span style="color:var(--red)">FAIL</span>';
+          }
+        }
+        detail += `Q${qi+1}:${status} `;
+      });
+
+      html += `<tr>
+        <td style="color:var(--muted)">${i+1}</td>
+        <td>${s.student_name}</td>
+        <td><strong>${s.score}/${s.total}</strong></td>
+        <td style="color:${color};font-weight:700">${s.pct}%</td>
+        <td style="color:var(--text-dim);font-size:10px">${time}</td>
+        <td style="font-size:10px">${detail}</td>
+      </tr>`;
+    });
+
+    html += '</tbody></table>';
+
+    // Export CSV button
+    html += `<div style="margin-top:12px">
+      <button class="btn-ghost" onclick="exportCSV('${quizId}')">Export CSV</button>
+    </div>`;
+
+    content.innerHTML = html;
+    panel.classList.remove('hidden');
+  }
+
+  function exportCSV(quizId) {
+    // Rebuild from DOM data - simple approach
+    const table = document.querySelector('#results-content table');
+    if (!table) return;
+    let csv = '';
+    table.querySelectorAll('tr').forEach(row => {
+      const cells = [...row.querySelectorAll('th, td')].map(c => '"' + c.textContent.replace(/"/g, '""') + '"');
+      csv += cells.join(',') + '\n';
+    });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `results_${quizId}.csv`; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  checkAuth();
+</script>
+</body>
+</html>
