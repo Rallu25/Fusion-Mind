@@ -89,10 +89,15 @@
       <div class="panel-body">
         <div id="auth-forms">
           <div class="grid-2">
-            <div class="field"><label>Username</label><input type="text" id="auth-user"></div>
+            <div class="field"><label>Email</label><input type="email" id="auth-email" placeholder="your@email.com"></div>
             <div class="field"><label>Password</label><input type="password" id="auth-pass"></div>
           </div>
-          <div class="field" id="email-field" style="display:none"><label>Email (optional)</label><input type="email" id="auth-email"></div>
+          <div id="register-fields" style="display:none">
+            <div class="grid-2">
+              <div class="field"><label>Full Name</label><input type="text" id="auth-name" placeholder="John Smith"></div>
+              <div class="field"><label>Institution (optional)</label><input type="text" id="auth-institution" placeholder="University of..."></div>
+            </div>
+          </div>
           <div style="display:flex;gap:10px">
             <button class="btn" id="login-btn" onclick="login()">Login</button>
             <button class="btn-ghost" id="register-toggle" onclick="toggleRegister()">Register instead</button>
@@ -184,8 +189,8 @@
     if (!token) return;
     const res = await fetch(`${API}/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
     const data = await res.json();
-    if (data.username) {
-      showDashboard(data.username);
+    if (data.email) {
+      showDashboard(data.full_name || data.email);
     } else {
       token = ''; localStorage.removeItem('teacherToken');
     }
@@ -193,19 +198,22 @@
 
   function toggleRegister() {
     isRegisterMode = !isRegisterMode;
-    document.getElementById('email-field').style.display = isRegisterMode ? 'block' : 'none';
+    document.getElementById('register-fields').style.display = isRegisterMode ? 'block' : 'none';
     document.getElementById('login-btn').textContent = isRegisterMode ? 'Register' : 'Login';
     document.getElementById('register-toggle').textContent = isRegisterMode ? 'Login instead' : 'Register instead';
   }
 
   async function login() {
-    const username = document.getElementById('auth-user').value.trim();
-    const password = document.getElementById('auth-pass').value;
     const email = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-pass').value;
     const msgEl = document.getElementById('auth-msg');
 
     const endpoint = isRegisterMode ? '/auth/register' : '/auth/login';
-    const body = isRegisterMode ? { username, password, email } : { username, password };
+    let body = { email, password };
+    if (isRegisterMode) {
+      body.full_name = document.getElementById('auth-name').value.trim();
+      body.institution = document.getElementById('auth-institution').value.trim();
+    }
 
     try {
       const res = await fetch(`${API}${endpoint}`, {
@@ -216,16 +224,16 @@
       if (data.error) { msgEl.textContent = data.error; msgEl.className = 'msg err'; msgEl.classList.remove('hidden'); return; }
       token = data.token;
       localStorage.setItem('teacherToken', token);
-      showDashboard(data.username);
+      showDashboard(data.full_name || data.email);
     } catch (e) {
       msgEl.textContent = 'Connection error: ' + e.message; msgEl.className = 'msg err'; msgEl.classList.remove('hidden');
     }
   }
 
-  function showDashboard(username) {
+  function showDashboard(displayName) {
     document.getElementById('auth-section').classList.add('hidden');
     document.getElementById('dashboard-section').classList.remove('hidden');
-    document.getElementById('user-label').textContent = username;
+    document.getElementById('user-label').textContent = displayName;
     document.getElementById('logout-btn').style.display = '';
     loadQuizzes();
   }

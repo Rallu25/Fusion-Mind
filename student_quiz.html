@@ -158,6 +158,11 @@
       if (data.timer_minutes > 0) info += ` · ${data.timer_minutes} min timer`;
       document.getElementById('quiz-info').textContent = info;
       document.getElementById('start-btn').disabled = false;
+
+      // Restore session if page was refreshed mid-quiz
+      if (!restoreSession()) {
+        // No session — show intro as normal
+      }
     } catch (e) {
       showError('Could not load quiz: ' + e.message);
     }
@@ -166,6 +171,58 @@
   function showError(msg) {
     const el = document.getElementById('intro-msg');
     el.textContent = msg; el.classList.remove('hidden');
+  }
+
+  // ── SESSION PERSISTENCE ──
+  const SESSION_KEY = `quiz_session_${QUIZ_ID}`;
+
+  function saveSession() {
+    const data = {
+      studentName: document.getElementById('student-name').value.trim(),
+      answers,
+      current,
+      timeLeft,
+      started: true,
+    };
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(data));
+  }
+
+  function loadSession() {
+    try {
+      const raw = sessionStorage.getItem(SESSION_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch { return null; }
+  }
+
+  function clearSession() {
+    sessionStorage.removeItem(SESSION_KEY);
+  }
+
+  function restoreSession() {
+    const session = loadSession();
+    if (!session || !session.started) return false;
+
+    // Restore state
+    document.getElementById('student-name').value = session.studentName;
+    answers = session.answers || {};
+    current = session.current || 0;
+
+    // Show quiz section
+    document.getElementById('intro-section').classList.add('hidden');
+    document.getElementById('quiz-section').classList.remove('hidden');
+
+    // Restore timer
+    if (quizData.timer_minutes > 0) {
+      timeLeft = session.timeLeft !== undefined ? session.timeLeft : quizData.timer_minutes * 60;
+      if (timeLeft <= 0) { submitQuiz(); return true; }
+      document.getElementById('timer-bar').classList.remove('hidden');
+      timerInterval = setInterval(tickTimer, 1000);
+      tickTimer();
+    }
+
+    renderQ();
+    return true;
   }
 
   function startQuiz() {
@@ -179,6 +236,7 @@
       timerInterval = setInterval(tickTimer, 1000);
       tickTimer();
     }
+    saveSession();
     renderQ();
   }
 
@@ -189,6 +247,8 @@
     el.textContent = `${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
     el.className = 'timer-bar' + (timeLeft <= 60 ? ' danger' : timeLeft <= 180 ? ' warning' : '');
     timeLeft--;
+    // Save timer state every 5 seconds
+    if (timeLeft % 5 === 0) saveSession();
   }
 
   function renderQ() {
@@ -249,12 +309,12 @@
 
   function pick(idx) {
     answers[current] = idx;
-    // Clear all selections, highlight new one
     questions[current].options.forEach((_,i) => {
       const btn = document.getElementById(`opt-${i}`);
       btn.classList.remove('selected');
       if (i === idx) btn.classList.add('selected');
     });
+    saveSession();
     updateSubmitBtn();
   }
 
@@ -291,6 +351,7 @@
       let correct = 0;
       q.terms.forEach((_,i) => { if (matchMap[i] === q.correct_mapping[i]) correct++; });
       answers[current] = { map: {...matchMap}, correct, total: q.terms.length };
+      saveSession();
       updateSubmitBtn();
     }
   }
@@ -309,7 +370,7 @@
   function navigate(dir) {
     const next = current + dir;
     if (next < 0 || next >= questions.length) return;
-    current = next; renderQ();
+    current = next; saveSession(); renderQ();
   }
 
   function updateSubmitBtn() {
@@ -346,6 +407,8 @@
       const data = await res.json();
       if (data.error) console.warn(data.error);
     } catch (e) { console.warn('Submit failed:', e); }
+
+    clearSession();
 
     // Show results
     document.getElementById('quiz-section').classList.add('hidden');

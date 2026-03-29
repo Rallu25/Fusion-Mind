@@ -16,9 +16,10 @@ def init_db():
     conn.executescript("""
         CREATE TABLE IF NOT EXISTS teachers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE NOT NULL,
+            email TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
-            email TEXT,
+            full_name TEXT NOT NULL DEFAULT '',
+            institution TEXT DEFAULT '',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -54,24 +55,24 @@ def init_db():
 
 # ── Teacher CRUD ──
 
-def create_teacher(username: str, password_hash: str, email: str = "") -> int:
+def create_teacher(email: str, password_hash: str, full_name: str = "", institution: str = "") -> int:
     conn = get_db()
     try:
         cur = conn.execute(
-            "INSERT INTO teachers (username, password_hash, email) VALUES (?, ?, ?)",
-            (username, password_hash, email)
+            "INSERT INTO teachers (email, password_hash, full_name, institution) VALUES (?, ?, ?, ?)",
+            (email, password_hash, full_name, institution)
         )
         conn.commit()
         return cur.lastrowid
     except sqlite3.IntegrityError:
-        return -1  # username already exists
+        return -1  # email already exists
     finally:
         conn.close()
 
 
-def get_teacher_by_username(username: str) -> dict | None:
+def get_teacher_by_email(email: str) -> dict | None:
     conn = get_db()
-    row = conn.execute("SELECT * FROM teachers WHERE username = ?", (username,)).fetchone()
+    row = conn.execute("SELECT * FROM teachers WHERE email = ?", (email,)).fetchone()
     conn.close()
     return dict(row) if row else None
 
@@ -81,6 +82,26 @@ def get_teacher_by_id(teacher_id: int) -> dict | None:
     row = conn.execute("SELECT * FROM teachers WHERE id = ?", (teacher_id,)).fetchone()
     conn.close()
     return dict(row) if row else None
+
+
+def update_teacher(teacher_id: int, full_name: str = None, institution: str = None) -> bool:
+    conn = get_db()
+    updates = []
+    params = []
+    if full_name is not None:
+        updates.append("full_name = ?")
+        params.append(full_name)
+    if institution is not None:
+        updates.append("institution = ?")
+        params.append(institution)
+    if not updates:
+        conn.close()
+        return False
+    params.append(teacher_id)
+    conn.execute(f"UPDATE teachers SET {', '.join(updates)} WHERE id = ?", params)
+    conn.commit()
+    conn.close()
+    return True
 
 
 # ── Shared Quiz CRUD ──

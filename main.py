@@ -13,7 +13,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from quizgen import generate_quiz_from_pdf, generate_template_quiz_from_pdf, generate_image_quiz_from_pdf, generate_truefalse_quiz_from_pdf, generate_matching_quiz_from_pdf
 from translator import translate_text
-from database import init_db, create_teacher, get_teacher_by_username, get_teacher_by_id, create_shared_quiz, get_shared_quiz, get_teacher_quizzes, delete_shared_quiz, save_submission, get_quiz_submissions, student_already_submitted
+from database import init_db, create_teacher, get_teacher_by_email, get_teacher_by_id, update_teacher, create_shared_quiz, get_shared_quiz, get_teacher_quizzes, delete_shared_quiz, save_submission, get_quiz_submissions, student_already_submitted
 from auth import hash_password, verify_password, create_token, verify_token
 
 from typing import List, Optional
@@ -366,36 +366,44 @@ def _get_teacher_from_token(authorization: Optional[str]) -> dict | None:
 
 @app.post("/auth/register")
 async def auth_register(payload: dict = Body(...)):
-    username = payload.get("username", "").strip()
+    email = payload.get("email", "").strip().lower()
     password = payload.get("password", "")
-    email = payload.get("email", "").strip()
+    full_name = payload.get("full_name", "").strip()
+    institution = payload.get("institution", "").strip()
 
-    if not username or len(username) < 3:
-        return {"error": "Username must be at least 3 characters."}
+    if not email or "@" not in email:
+        return {"error": "Please enter a valid email address."}
     if not password or len(password) < 4:
         return {"error": "Password must be at least 4 characters."}
+    if not full_name:
+        return {"error": "Please enter your full name."}
 
     pw_hash = hash_password(password)
-    teacher_id = create_teacher(username, pw_hash, email)
+    teacher_id = create_teacher(email, pw_hash, full_name, institution)
 
     if teacher_id == -1:
-        return {"error": "Username already exists."}
+        return {"error": "An account with this email already exists."}
 
     token = create_token(teacher_id)
-    return {"success": True, "token": token, "username": username}
+    return {"success": True, "token": token, "email": email, "full_name": full_name}
 
 
 @app.post("/auth/login")
 async def auth_login(payload: dict = Body(...)):
-    username = payload.get("username", "").strip()
+    email = payload.get("email", "").strip().lower()
     password = payload.get("password", "")
 
-    teacher = get_teacher_by_username(username)
+    teacher = get_teacher_by_email(email)
     if not teacher or not verify_password(password, teacher["password_hash"]):
-        return {"error": "Invalid username or password."}
+        return {"error": "Invalid email or password."}
 
     token = create_token(teacher["id"])
-    return {"success": True, "token": token, "username": teacher["username"]}
+    return {
+        "success": True, "token": token,
+        "email": teacher["email"],
+        "full_name": teacher["full_name"],
+        "institution": teacher.get("institution", ""),
+    }
 
 
 @app.get("/auth/me")
@@ -403,7 +411,23 @@ async def auth_me(authorization: Optional[str] = Header(None)):
     teacher = _get_teacher_from_token(authorization)
     if not teacher:
         return {"error": "Not authenticated."}
-    return {"username": teacher["username"], "email": teacher.get("email", "")}
+    return {
+        "email": teacher["email"],
+        "full_name": teacher["full_name"],
+        "institution": teacher.get("institution", ""),
+    }
+
+
+@app.post("/auth/update-profile")
+async def auth_update_profile(payload: dict = Body(...), authorization: Optional[str] = Header(None)):
+    teacher = _get_teacher_from_token(authorization)
+    if not teacher:
+        return {"error": "Not authenticated."}
+
+    full_name = payload.get("full_name")
+    institution = payload.get("institution")
+    update_teacher(teacher["id"], full_name=full_name, institution=institution)
+    return {"success": True}
 
 
 # ── TEACHER ENDPOINTS ──

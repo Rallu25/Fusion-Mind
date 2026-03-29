@@ -1773,5 +1773,301 @@
     "African Elephant",
     "Tigers Bengal Tiger",
     "Mountain Gorilla"
+  ],
+  "tigris": [
+    "Euphrates rivers"
+  ],
+  "euphrates rivers": [
+    "Tigris"
+  ],
+  "enabling record-keeping": [
+    "trade",
+    "law codes"
+  ],
+  "trade": [
+    "enabling record-keeping",
+    "law codes"
+  ],
+  "law codes": [
+    "enabling record-keeping",
+    "trade"
+  ],
+  "egyptian engineering": [
+    "religious devotion"
+  ],
+  "religious devotion": [
+    "Egyptian engineering"
+  ],
+  "urban planning": [
+    "sewage systems"
+  ],
+  "sewage systems": [
+    "urban planning",
+    "Mohenjo-daro"
+  ],
+  "xia": [
+    "Shang dynasties"
+  ],
+  "shang dynasties": [
+    "Xia"
+  ],
+  "political structures": [
+    "bronze metallurgy"
+  ],
+  "bronze metallurgy": [
+    "political structures"
+  ],
+  "stone heads": [
+    "laid cultural"
+  ],
+  "laid cultural": [
+    "stone heads"
+  ],
+  "later mayan": [
+    "Aztec cultures"
+  ],
+  "aztec cultures": [
+    "later Mayan"
+  ],
+  "competed": [
+    "collaborated"
+  ],
+  "collaborated": [
+    "competed"
+  ],
+  "women": [
+    "slaves were"
+  ],
+  "slaves were": [
+    "women"
+  ],
+  "socrates": [
+    "Plato"
+  ],
+  "plato": [
+    "Socrates"
+  ],
+  "legal codes": [
+    "Senate"
+  ],
+  "senate": [
+    "legal codes"
+  ],
+  "roads": [
+    "aqueducts"
+  ],
+  "aqueducts": [
+    "roads"
+  ],
+  "spanish": [
+    "French",
+    "Italian",
+    "Portuguese"
+  ],
+  "french": [
+    "Spanish",
+    "Italian",
+    "Portuguese"
+  ],
+  "italian": [
+    "Spanish",
+    "French",
+    "Portuguese"
+  ],
+  "portuguese": [
+    "Spanish",
+    "French",
+    "Italian"
+  ],
+  "scholars preserved": [
+    "expanded Greek"
+  ],
+  "expanded greek": [
+    "scholars preserved"
+  ],
+  "astronomy": [
+    "medicine"
+  ],
+  "medicine": [
+    "astronomy"
+  ],
+  "dominant cultural": [
+    "moral"
+  ],
+  "moral": [
+    "dominant cultural"
+  ],
+  "psychological": [
+    "social impact"
+  ],
+  "social impact": [
+    "psychological"
+  ],
+  "uncharted oceans": [
+    "thinkers rediscovered"
+  ],
+  "thinkers rediscovered": [
+    "uncharted oceans"
+  ],
+  "classical world": [
+    "began to"
+  ],
+  "began to": [
+    "classical world"
+  ],
+  "mona lisa": [
+    "designed flying"
+  ],
+  "designed flying": [
+    "Mona Lisa"
+  ],
+  "books affordable": [
+    "ideas unstoppable"
+  ],
+  "ideas unstoppable": [
+    "books affordable"
+  ],
+  "individual conscience": [
+    "literacy"
+  ],
+  "literacy": [
+    "individual conscience"
+  ],
+  "broader education": [
+    "eventually"
+  ],
+  "eventually": [
+    "broader education"
+  ],
+  "understood nature": [
+    "organised society"
+  ],
+  "organised society": [
+    "understood nature"
+  ],
+  "copernicus": [
+    "Galileo",
+    "Kepler"
+  ],
+  "galileo": [
+    "Copernicus",
+    "Kepler"
+  ],
+  "kepler": [
+    "Copernicus",
+    "Galileo"
+  ],
+  "locke": [
+    "Rousseau",
+    "Voltaire",
+    "separat"
+  ],
+  "rousseau": [
+    "Locke",
+    "Voltaire",
+    "separat"
+  ],
+  "child labour": [
+    "urban poverty"
+  ],
+  "urban poverty": [
+    "Child labour"
+  ],
+  "yet productivity": [
+    "living standards"
+  ],
+  "living standards": [
+    "Yet productivity"
+  ],
+  "locomotive": [
+    "telegraph shrank"
+  ],
+  "telegraph shrank": [
+    "locomotive"
+  ],
+  "every border": [
+    "every government"
+  ],
+  "every government": [
+    "every border"
+  ],
+  "entangled alliances": [
+    "imperial rivalries"
+  ],
+  "imperial rivalries": [
+    "entangled alliances"
+  ],
+  "military": [
+    "civilian"
+  ],
+  "civilian": [
+    "military"
+  ],
+  "ottoman": [
+    "Austro-Hungarian",
+    "Russian"
+  ],
+  "austro-hungarian": [
+    "Ottoman",
+    "Russian"
+  ],
+  "russian": [
+    "Ottoman",
+    "Austro-Hungarian"
+  ],
+  "racial supremacy": [
+    "authoritarian rule"
+  ],
+  "authoritarian rule": [
+    "racial supremacy"
+  ],
+  "million jews": [
+    "millions of"
+  ],
+  "millions of": [
+    "million Jews"
+  ],
+  "across asia": [
+    "Africa"
+  ],
+  "africa": [
+    "Across Asia"
+  ],
+  "economic inequality": [
+    "arbitrary borders"
+  ],
+  "arbitrary borders": [
+    "economic inequality"
+  ],
+  "commerce": [
+    "culture"
+  ],
+  "culture": [
+    "commerce"
+  ],
+  "it spirals": [
+    "doubles back"
+  ],
+  "doubles back": [
+    "it spirals"
+  ],
+  "mohenjo-daro": [
+    "sewage systems"
+  ],
+  "potatoes": [
+    "tomatoes"
+  ],
+  "tomatoes": [
+    "potatoes"
+  ],
+  "voltaire": [
+    "Locke",
+    "Rousseau",
+    "separat"
+  ],
+  "separat": [
+    "Voltaire",
+    "Locke",
+    "Rousseau"
   ]
 }
