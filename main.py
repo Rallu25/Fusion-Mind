@@ -8,12 +8,12 @@ load_dotenv()
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-from fastapi import FastAPI, UploadFile, File, Form, Body, Header
+from fastapi import FastAPI, UploadFile, File, Form, Body, Header, Request
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from quizgen import generate_quiz_from_pdf, generate_template_quiz_from_pdf, generate_image_quiz_from_pdf, generate_truefalse_quiz_from_pdf, generate_matching_quiz_from_pdf
 from translator import translate_text
-from database import init_db, create_teacher, get_teacher_by_email, get_teacher_by_id, update_teacher, create_shared_quiz, get_shared_quiz, get_teacher_quizzes, delete_shared_quiz, save_submission, get_quiz_submissions, student_already_submitted
+from database import init_db, create_teacher, get_teacher_by_email, get_teacher_by_id, update_teacher, create_shared_quiz, get_shared_quiz, get_teacher_quizzes, delete_shared_quiz, save_submission, get_quiz_submissions, student_already_submitted, ip_already_submitted
 from auth import hash_password, verify_password, create_token, verify_token
 
 from typing import List, Optional
@@ -39,6 +39,26 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 async def home():
     with open("fusion_mind.html", "r", encoding="utf-8") as f:
         return f.read()
+
+
+def _generate_visual_with_fallback(file_path: str, n_questions: int, difficulty: str) -> dict:
+    """Try visual quiz, fallback to cloze if not enough images."""
+    result = generate_image_quiz_from_pdf(file_path, n_questions=n_questions)
+    if "error" in result:
+        result = generate_quiz_from_pdf(file_path, n_questions=n_questions, difficulty=difficulty)
+        if "questions" in result:
+            result["warning"] = "Not enough images in PDF. Generated cloze quiz instead."
+    return result
+
+
+def _generate_matching_with_fallback(file_path: str, n_questions: int, difficulty: str) -> dict:
+    """Try matching quiz, fallback to template if not enough definitions."""
+    result = generate_matching_quiz_from_pdf(file_path, n_questions=n_questions)
+    if "error" in result:
+        result = generate_template_quiz_from_pdf(file_path, n_questions=n_questions, difficulty=difficulty)
+        if "questions" in result:
+            result["warning"] = "Not enough definitions for matching. Generated full questions instead."
+    return result
 
 
 def _generate_mixed_quiz(file_path: str, n_questions: int, difficulty: str) -> dict:
@@ -99,11 +119,11 @@ async def generate_quiz(
         if quiz_type == "template":
             result = generate_template_quiz_from_pdf(file_path, n_questions=n_questions, difficulty=difficulty)
         elif quiz_type == "visual":
-            result = generate_image_quiz_from_pdf(file_path, n_questions=n_questions)
+            result = _generate_visual_with_fallback(file_path, n_questions=n_questions, difficulty=difficulty)
         elif quiz_type == "truefalse":
             result = generate_truefalse_quiz_from_pdf(file_path, n_questions=n_questions, difficulty=difficulty)
         elif quiz_type == "matching":
-            result = generate_matching_quiz_from_pdf(file_path, n_questions=n_questions)
+            result = _generate_matching_with_fallback(file_path, n_questions=n_questions, difficulty=difficulty)
         elif quiz_type == "mixed":
             result = _generate_mixed_quiz(file_path, n_questions=n_questions, difficulty=difficulty)
         else:
@@ -238,11 +258,11 @@ async def generate_quiz_multi(
             if quiz_type == "template":
                 result = generate_template_quiz_from_pdf(file_path, n_questions=n_questions_per_file, difficulty=difficulty)
             elif quiz_type == "visual":
-                result = generate_image_quiz_from_pdf(file_path, n_questions=n_questions_per_file)
+                result = _generate_visual_with_fallback(file_path, n_questions=n_questions_per_file, difficulty=difficulty)
             elif quiz_type == "truefalse":
                 result = generate_truefalse_quiz_from_pdf(file_path, n_questions=n_questions_per_file, difficulty=difficulty)
             elif quiz_type == "matching":
-                result = generate_matching_quiz_from_pdf(file_path, n_questions=n_questions_per_file)
+                result = _generate_matching_with_fallback(file_path, n_questions=n_questions_per_file, difficulty=difficulty)
             elif quiz_type == "mixed":
                 result = _generate_mixed_quiz(file_path, n_questions=n_questions_per_file, difficulty=difficulty)
             else:
@@ -461,11 +481,11 @@ async def teacher_create_quiz(
         if quiz_type == "template":
             result = generate_template_quiz_from_pdf(file_path, n_questions=n_questions, difficulty=difficulty)
         elif quiz_type == "visual":
-            result = generate_image_quiz_from_pdf(file_path, n_questions=n_questions)
+            result = _generate_visual_with_fallback(file_path, n_questions=n_questions, difficulty=difficulty)
         elif quiz_type == "truefalse":
             result = generate_truefalse_quiz_from_pdf(file_path, n_questions=n_questions, difficulty=difficulty)
         elif quiz_type == "matching":
-            result = generate_matching_quiz_from_pdf(file_path, n_questions=n_questions)
+            result = _generate_matching_with_fallback(file_path, n_questions=n_questions, difficulty=difficulty)
         elif quiz_type == "mixed":
             result = _generate_mixed_quiz(file_path, n_questions=n_questions, difficulty=difficulty)
         else:
@@ -578,7 +598,7 @@ async def get_quiz_for_student(quiz_id: str):
 
 
 @app.post("/quiz/{quiz_id}/submit")
-async def submit_quiz(quiz_id: str, payload: dict = Body(...)):
+async def submit_quiz(quiz_id: str, request: Request, payload: dict = Body(...)):
     quiz = get_shared_quiz(quiz_id)
     if not quiz:
         return {"error": "Quiz not found."}
@@ -587,9 +607,13 @@ async def submit_quiz(quiz_id: str, payload: dict = Body(...)):
     if not student_name:
         return {"error": "Please enter your name."}
 
-    # Check if already submitted
+    client_ip = request.client.host if request.client else ""
+
+    # Check if already submitted (by name or by IP)
     if student_already_submitted(quiz_id, student_name):
         return {"error": "You have already submitted this quiz."}
+    if ip_already_submitted(quiz_id, client_ip):
+        return {"error": "A submission from this device has already been recorded."}
 
     answers = payload.get("answers", {})
     score = payload.get("score", 0)
@@ -597,7 +621,7 @@ async def submit_quiz(quiz_id: str, payload: dict = Body(...)):
     pct = payload.get("pct", 0)
 
     answers_json = json.dumps(answers)
-    save_submission(quiz_id, student_name, answers_json, score, total, pct)
+    save_submission(quiz_id, student_name, answers_json, score, total, pct, ip=client_ip)
 
     return {"success": True, "score": score, "total": total, "pct": pct}
 

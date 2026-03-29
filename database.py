@@ -45,6 +45,7 @@ def init_db():
             score INTEGER NOT NULL,
             total INTEGER NOT NULL,
             pct INTEGER NOT NULL,
+            ip TEXT DEFAULT '',
             submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (quiz_id) REFERENCES shared_quizzes(id)
         );
@@ -161,12 +162,12 @@ def delete_shared_quiz(quiz_id: str, teacher_id: int) -> bool:
 # ── Submission CRUD ──
 
 def save_submission(quiz_id: str, student_name: str, answers_json: str,
-                    score: int, total: int, pct: int) -> int:
+                    score: int, total: int, pct: int, ip: str = "") -> int:
     conn = get_db()
     cur = conn.execute(
-        """INSERT INTO submissions (quiz_id, student_name, answers_json, score, total, pct)
-           VALUES (?, ?, ?, ?, ?, ?)""",
-        (quiz_id, student_name, answers_json, score, total, pct)
+        """INSERT INTO submissions (quiz_id, student_name, answers_json, score, total, pct, ip)
+           VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        (quiz_id, student_name, answers_json, score, total, pct, ip)
     )
     conn.commit()
     sub_id = cur.lastrowid
@@ -189,6 +190,18 @@ def student_already_submitted(quiz_id: str, student_name: str) -> bool:
     row = conn.execute(
         "SELECT id FROM submissions WHERE quiz_id = ? AND student_name = ?",
         (quiz_id, student_name)
+    ).fetchone()
+    conn.close()
+    return row is not None
+
+
+def ip_already_submitted(quiz_id: str, ip: str) -> bool:
+    if not ip:
+        return False
+    conn = get_db()
+    row = conn.execute(
+        "SELECT id FROM submissions WHERE quiz_id = ? AND ip = ?",
+        (quiz_id, ip)
     ).fetchone()
     conn.close()
     return row is not None

@@ -1102,7 +1102,7 @@
               <option value="hard">Hard</option>
             </select>
           </div>
-          <input type="hidden" id="api-url" value="http://127.0.0.1:8000">
+          <input type="hidden" id="api-url" value="">
           <button class="btn-run" id="generate-btn" disabled onclick="startGeneration()">
             ▶ RUN
           </button>
@@ -1321,7 +1321,7 @@
   async function startGeneration() {
     if (!files.length) return;
     const n      = parseInt(document.getElementById('n-questions').value) || 5;
-    const apiUrl = document.getElementById('api-url').value.replace(/\/$/, '');
+    const apiUrl = document.getElementById('api-url').value.replace(/\/$/, '') || window.location.origin;
 
     showSection('loading');
     setMsg('sending files...');
@@ -1761,7 +1761,7 @@
       });
     });
 
-    const apiUrl = document.getElementById('api-url').value.replace(/\/$/, '');
+    const apiUrl = document.getElementById('api-url').value.replace(/\/$/, '') || window.location.origin;
 
     btn.disabled = true;
     btn.textContent = 'sending...';

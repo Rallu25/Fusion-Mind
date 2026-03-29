@@ -220,7 +220,18 @@
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
-      const data = await res.json();
+      if (!res.ok && res.status !== 200) {
+        msgEl.textContent = `Server error: ${res.status} ${res.statusText}`;
+        msgEl.className = 'msg err'; msgEl.classList.remove('hidden'); return;
+      }
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch {
+        msgEl.textContent = `Unexpected response. Make sure the server is running.`;
+        msgEl.className = 'msg err'; msgEl.classList.remove('hidden');
+        console.error('Response was:', text.substring(0, 200));
+        return;
+      }
       if (data.error) { msgEl.textContent = data.error; msgEl.className = 'msg err'; msgEl.classList.remove('hidden'); return; }
       token = data.token;
       localStorage.setItem('teacherToken', token);

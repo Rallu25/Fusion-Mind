@@ -1256,7 +1256,8 @@
     "feature selection",
     "pca",
     "t-sne",
-    "feature extraction"
+    "feature extraction",
+    "recommender systems"
   ],
   "pca": [
     "t-sne",
@@ -2069,5 +2070,338 @@
     "Voltaire",
     "Locke",
     "Rousseau"
+  ],
+  "covering theory": [
+    "algorithms",
+    "architectures"
+  ],
+  "algorithms": [
+    "covering theory",
+    "architectures"
+  ],
+  "architectures": [
+    "covering theory",
+    "algorithms"
+  ],
+  "input": [
+    "desired"
+  ],
+  "desired": [
+    "input"
+  ],
+  "linear algebra": [
+    "calculus",
+    "probability theory"
+  ],
+  "calculus": [
+    "linear algebra",
+    "probability theory"
+  ],
+  "probability theory": [
+    "linear algebra",
+    "calculus"
+  ],
+  "matrix multiplication": [
+    "transposition"
+  ],
+  "transposition": [
+    "matrix multiplication"
+  ],
+  "recommender systems": [
+    "dimensionality reduction"
+  ],
+  "understanding distributions": [
+    "expectations"
+  ],
+  "expectations": [
+    "Understanding distributions"
+  ],
+  "imputed values": [
+    "combine results"
+  ],
+  "combine results": [
+    "imputed values"
+  ],
+  "domain knowledge": [
+    "creativity"
+  ],
+  "creativity": [
+    "domain knowledge"
+  ],
+  "decision trees": [
+    "reducing noise"
+  ],
+  "reducing noise": [
+    "decision trees"
+  ],
+  "feature space": [
+    "predicts based"
+  ],
+  "predicts based": [
+    "feature space"
+  ],
+  "include euclidean": [
+    "Manhattan",
+    "Minkowski"
+  ],
+  "manhattan": [
+    "include Euclidean",
+    "Minkowski"
+  ],
+  "minkowski": [
+    "include Euclidean",
+    "Manhattan"
+  ],
+  "customer segmentation": [
+    "anomaly detection",
+    "topic modeling"
+  ],
+  "anomaly detection": [
+    "customer segmentation",
+    "topic modeling",
+    "demand forecasting",
+    "stock prediction"
+  ],
+  "topic modeling": [
+    "customer segmentation",
+    "anomaly detection"
+  ],
+  "arbitrary shape": [
+    "identifies outliers"
+  ],
+  "identifies outliers": [
+    "arbitrary shape"
+  ],
+  "trees": [
+    "further reduces"
+  ],
+  "further reduces": [
+    "trees"
+  ],
+  "xgboost": [
+    "LightGBM"
+  ],
+  "lightgbm": [
+    "XGBoost"
+  ],
+  "zero mean": [
+    "unit variance"
+  ],
+  "unit variance": [
+    "zero mean"
+  ],
+  "image recognition": [
+    "object detection"
+  ],
+  "object detection": [
+    "image recognition"
+  ],
+  "reset": [
+    "update"
+  ],
+  "update": [
+    "reset"
+  ],
+  "fewer parameters": [
+    "often achieves"
+  ],
+  "often achieves": [
+    "fewer parameters"
+  ],
+  "queries": [
+    "keys"
+  ],
+  "keys": [
+    "Queries"
+  ],
+  "complex reasoning": [
+    "dialogue"
+  ],
+  "dialogue": [
+    "complex reasoning"
+  ],
+  "uses cbow": [
+    "Skip-gram objectives"
+  ],
+  "skip-gram objectives": [
+    "uses CBOW"
+  ],
+  "experience replay": [
+    "target networks"
+  ],
+  "target networks": [
+    "experience replay"
+  ],
+  "action selection": [
+    "evaluation to"
+  ],
+  "evaluation to": [
+    "action selection"
+  ],
+  "policy updates": [
+    "achieving stable",
+    "efficient training"
+  ],
+  "achieving stable": [
+    "policy updates",
+    "efficient training"
+  ],
+  "efficient training": [
+    "policy updates",
+    "achieving stable"
+  ],
+  "mastered go": [
+    "Chess"
+  ],
+  "chess": [
+    "mastered Go"
+  ],
+  "locomotion": [
+    "manipulation"
+  ],
+  "manipulation": [
+    "Locomotion"
+  ],
+  "expanding": [
+    "sliding window"
+  ],
+  "sliding window": [
+    "Expanding"
+  ],
+  "ensure efficient": [
+    "stable training"
+  ],
+  "stable training": [
+    "ensure efficient"
+  ],
+  "evaluation": [
+    "deployment"
+  ],
+  "deployment": [
+    "evaluation"
+  ],
+  "feature computation": [
+    "inference"
+  ],
+  "inference": [
+    "feature computation"
+  ],
+  "graph optimization": [
+    "kernel fusion"
+  ],
+  "kernel fusion": [
+    "graph optimization"
+  ],
+  "actionable": [
+    "intuitive"
+  ],
+  "intuitive": [
+    "actionable"
+  ],
+  "image synthesis": [
+    "text generation",
+    "audio production"
+  ],
+  "text generation": [
+    "image synthesis",
+    "audio production"
+  ],
+  "audio production": [
+    "image synthesis",
+    "text generation"
+  ],
+  "class labels": [
+    "text descriptions"
+  ],
+  "text descriptions": [
+    "class labels"
+  ],
+  "be smooth": [
+    "continuous"
+  ],
+  "continuous": [
+    "be smooth"
+  ],
+  "demand forecasting": [
+    "stock prediction",
+    "anomaly detection"
+  ],
+  "stock prediction": [
+    "demand forecasting",
+    "anomaly detection"
+  ],
+  "capture trend": [
+    "seasonality"
+  ],
+  "seasonality": [
+    "capture trend"
+  ],
+  "simple": [
+    "interpretable"
+  ],
+  "interpretable": [
+    "simple"
+  ],
+  "social networks": [
+    "molecules",
+    "knowledge graphs",
+    "road networks"
+  ],
+  "molecules": [
+    "social networks",
+    "knowledge graphs",
+    "road networks"
+  ],
+  "knowledge graphs": [
+    "social networks",
+    "molecules",
+    "road networks"
+  ],
+  "road networks": [
+    "social networks",
+    "molecules",
+    "knowledge graphs"
+  ],
+  "molecular properties": [
+    "protein-ligand binding"
+  ],
+  "protein-ligand binding": [
+    "molecular properties"
+  ],
+  "self-supervised": [
+    "few-shot learning"
+  ],
+  "few-shot learning": [
+    "Self-supervised"
+  ],
+  "pairs": [
+    "pushes apart"
+  ],
+  "pushes apart": [
+    "pairs"
+  ],
+  "ml competitions": [
+    "production deployments"
+  ],
+  "production deployments": [
+    "ML competitions"
+  ],
+  "future": [
+    "test set"
+  ],
+  "test set": [
+    "future"
+  ],
+  "learning literature": [
+    "practice"
+  ],
+  "practice": [
+    "learning literature"
+  ],
+  "machine learning": [
+    "deep learning"
+  ],
+  "deep learning": [
+    "machine learning"
   ]
 }

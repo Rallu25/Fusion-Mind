@@ -159,6 +159,13 @@
       document.getElementById('quiz-info').textContent = info;
       document.getElementById('start-btn').disabled = false;
 
+      // Check if already submitted from this browser
+      if (localStorage.getItem(`submitted_${QUIZ_ID}`)) {
+        document.getElementById('start-btn').disabled = true;
+        showError('You have already submitted this quiz from this browser.');
+        return;
+      }
+
       // Restore session if page was refreshed mid-quiz
       if (!restoreSession()) {
         // No session — show intro as normal
@@ -409,6 +416,7 @@
     } catch (e) { console.warn('Submit failed:', e); }
 
     clearSession();
+    localStorage.setItem(`submitted_${QUIZ_ID}`, 'true');
 
     // Show results
     document.getElementById('quiz-section').classList.add('hidden');
