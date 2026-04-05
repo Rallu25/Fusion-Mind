@@ -64,12 +64,12 @@ class TestMatchSentence:
 
 class TestCleanSubject:
     def test_strips_article(self):
-        assert clean_subject("The algorithm") == "algorithm"
-        assert clean_subject("A sensor") == "sensor"
-        assert clean_subject("An encoder") == "encoder"
+        assert clean_subject("The algorithm") == "Algorithm"
+        assert clean_subject("A sensor") == "Sensor"
+        assert clean_subject("An encoder") == "Encoder"
 
     def test_strips_punctuation(self):
-        assert clean_subject("algorithm,") == "algorithm"
+        assert clean_subject("algorithm,") == "Algorithm"
 
     def test_preserves_normal(self):
         assert clean_subject("Neural network") == "Neural network"

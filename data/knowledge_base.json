@@ -206,7 +206,8 @@
     "rate",
     "oscillation",
     "cycle",
-    "period"
+    "period",
+    "probability of"
   ],
   "storage": [
     "memory",
@@ -320,13 +321,15 @@
     "emission",
     "signal",
     "wave",
-    "energy"
+    "energy",
+    "elementary particles"
   ],
   "wavelength": [
     "frequency",
     "signal",
     "spectrum",
-    "range"
+    "range",
+    "light intensity"
   ],
   "researchers": [
     "scientists",
@@ -680,7 +683,8 @@
     "velocity",
     "energy",
     "force",
-    "impulse"
+    "impulse",
+    "Adam"
   ],
   "force": [
     "torque",
@@ -698,7 +702,8 @@
     "resistance",
     "drag",
     "inertia",
-    "tension"
+    "tension",
+    "magnetic fields"
   ],
   "inertia": [
     "momentum",
@@ -986,7 +991,9 @@
     "decision tree",
     "gradient boosting",
     "bagging",
-    "neural network"
+    "neural network",
+    "Logistic Regression",
+    "Naive Bayes"
   ],
   "gradient boosting": [
     "random forest",
@@ -998,7 +1005,8 @@
     "linear regression",
     "neural network",
     "svm",
-    "naive bayes"
+    "naive bayes",
+    "Random Forest"
   ],
   "linear regression": [
     "logistic regression",
@@ -1623,7 +1631,9 @@
     "finance",
     "accounting",
     "business",
-    "commerce"
+    "commerce",
+    "psychology",
+    "neuroscience"
   ],
   "inflation": [
     "deflation",
@@ -2403,5 +2413,1382 @@
   ],
   "deep learning": [
     "machine learning"
+  ],
+  "annotated diagrams": [
+    "charts"
+  ],
+  "charts": [
+    "annotated diagrams"
+  ],
+  "output layers": [
+    "gates"
+  ],
+  "gates": [
+    "output layers"
+  ],
+  "plot training": [
+    "validation loss"
+  ],
+  "validation loss": [
+    "plot training"
+  ],
+  "naive bayes": [
+    "Random Forest",
+    "Logistic Regression"
+  ],
+  "nearest centroid": [
+    "updating centroids"
+  ],
+  "updating centroids": [
+    "nearest centroid"
+  ],
+  "adam": [
+    "Momentum"
+  ],
+  "aids interpretability": [
+    "feature selection"
+  ],
+  "feature selection": [
+    "aids interpretability"
+  ],
+  "numerical measurements": [
+    "chemical symbols"
+  ],
+  "chemical symbols": [
+    "numerical measurements"
+  ],
+  "product stability": [
+    "microbial safety"
+  ],
+  "microbial safety": [
+    "product stability"
+  ],
+  "bacterial growth": [
+    "shelf life"
+  ],
+  "shelf life": [
+    "bacterial growth"
+  ],
+  "predictable movement": [
+    "safe operation"
+  ],
+  "safe operation": [
+    "predictable movement"
+  ],
+  "light intensity": [
+    "wavelength"
+  ],
+  "integrates sensors": [
+    "actuators"
+  ],
+  "actuators": [
+    "integrates sensors"
+  ],
+  "textual explanations": [
+    "symbolic representations"
+  ],
+  "symbolic representations": [
+    "textual explanations"
+  ],
+  "numerical thresholds": [
+    "measurement units"
+  ],
+  "measurement units": [
+    "numerical thresholds"
+  ],
+  "people": [
+    "activities"
+  ],
+  "activities": [
+    "people"
+  ],
+  "design": [
+    "management of"
+  ],
+  "management of": [
+    "design"
+  ],
+  "fourth": [
+    "sold in"
+  ],
+  "sold in": [
+    "fourth"
+  ],
+  "sourcing": [
+    "transportation"
+  ],
+  "transportation": [
+    "sourcing"
+  ],
+  "silk": [
+    "spices"
+  ],
+  "spices": [
+    "silk"
+  ],
+  "logistical challenges": [
+    "opportunities"
+  ],
+  "opportunities": [
+    "logistical challenges"
+  ],
+  "artificial intelligence": [
+    "cloud computing",
+    "robotics",
+    "IoT",
+    "blockchain"
+  ],
+  "cloud computing": [
+    "artificial intelligence",
+    "robotics"
+  ],
+  "robotics": [
+    "artificial intelligence",
+    "cloud computing",
+    "IoT",
+    "blockchain"
+  ],
+  "raw materials": [
+    "components into",
+    "components",
+    "manufacturing",
+    "warehousing"
+  ],
+  "components into": [
+    "raw materials"
+  ],
+  "production planning": [
+    "quality control",
+    "assembly"
+  ],
+  "quality control": [
+    "production planning",
+    "assembly",
+    "production scheduling",
+    "testing"
+  ],
+  "assembly": [
+    "production planning",
+    "quality control",
+    "production scheduling",
+    "testing"
+  ],
+  "consumer electronics": [
+    "apparel",
+    "fashion apparel"
+  ],
+  "apparel": [
+    "consumer electronics"
+  ],
+  "place in-house": [
+    "be outsourced"
+  ],
+  "be outsourced": [
+    "place in-house"
+  ],
+  "eliminating waste": [
+    "maximizing efficiency"
+  ],
+  "maximizing efficiency": [
+    "Eliminating waste"
+  ],
+  "automated storage": [
+    "retrieval systems"
+  ],
+  "retrieval systems": [
+    "automated storage"
+  ],
+  "conveyor belts": [
+    "barcode scanners"
+  ],
+  "barcode scanners": [
+    "conveyor belts"
+  ],
+  "own inventory": [
+    "set prices"
+  ],
+  "set prices": [
+    "own inventory"
+  ],
+  "retailer orders": [
+    "distributor purchasing"
+  ],
+  "distributor purchasing": [
+    "retailer orders"
+  ],
+  "understanding": [
+    "accurately forecasting"
+  ],
+  "accurately forecasting": [
+    "Understanding"
+  ],
+  "different industries": [
+    "products"
+  ],
+  "products": [
+    "Different industries"
+  ],
+  "commodity chemicals": [
+    "bulk foods"
+  ],
+  "bulk foods": [
+    "commodity chemicals"
+  ],
+  "high efficiency": [
+    "low per-unit"
+  ],
+  "low per-unit": [
+    "high efficiency"
+  ],
+  "maximizing throughput": [
+    "minimizing downtime"
+  ],
+  "minimizing downtime": [
+    "maximizing throughput"
+  ],
+  "life cycles": [
+    "rapidly changing"
+  ],
+  "rapidly changing": [
+    "life cycles"
+  ],
+  "fashion apparel": [
+    "consumer electronics"
+  ],
+  "source": [
+    "produce"
+  ],
+  "produce": [
+    "source"
+  ],
+  "industrial machinery": [
+    "aircraft"
+  ],
+  "aircraft": [
+    "industrial machinery"
+  ],
+  "modular production": [
+    "multi-sourcing strategies"
+  ],
+  "multi-sourcing strategies": [
+    "modular production"
+  ],
+  "product characteristics": [
+    "demand patterns",
+    "competitive environment"
+  ],
+  "demand patterns": [
+    "product characteristics",
+    "competitive environment"
+  ],
+  "competitive environment": [
+    "product characteristics",
+    "demand patterns"
+  ],
+  "plan resources": [
+    "manage risks"
+  ],
+  "manage risks": [
+    "plan resources"
+  ],
+  "costly overstock": [
+    "damaging stockouts"
+  ],
+  "damaging stockouts": [
+    "costly overstock"
+  ],
+  "key customers": [
+    "suppliers"
+  ],
+  "suppliers": [
+    "key customers"
+  ],
+  "involves identifying": [
+    "evaluating"
+  ],
+  "evaluating": [
+    "involves identifying"
+  ],
+  "components": [
+    "raw materials"
+  ],
+  "balance cost": [
+    "quality",
+    "reliability"
+  ],
+  "quality": [
+    "balance cost",
+    "reliability"
+  ],
+  "reliability": [
+    "balance cost",
+    "quality"
+  ],
+  "production scheduling": [
+    "quality control",
+    "assembly",
+    "testing"
+  ],
+  "testing": [
+    "production scheduling",
+    "quality control",
+    "assembly"
+  ],
+  "minimizing waste": [
+    "downtime"
+  ],
+  "downtime": [
+    "minimizing waste"
+  ],
+  "encompasses transportation": [
+    "warehousing",
+    "order fulfillment"
+  ],
+  "warehousing": [
+    "encompasses transportation",
+    "order fulfillment",
+    "offer transportation",
+    "freight forwarding",
+    "customs brokerage",
+    "raw materials"
+  ],
+  "order fulfillment": [
+    "encompasses transportation",
+    "warehousing"
+  ],
+  "disposing of": [
+    "recycling items"
+  ],
+  "recycling items": [
+    "disposing of"
+  ],
+  "physical movement": [
+    "storage of"
+  ],
+  "storage of": [
+    "physical movement"
+  ],
+  "offer transportation": [
+    "warehousing",
+    "freight forwarding",
+    "customs brokerage"
+  ],
+  "freight forwarding": [
+    "offer transportation",
+    "warehousing",
+    "customs brokerage"
+  ],
+  "customs brokerage": [
+    "offer transportation",
+    "warehousing",
+    "freight forwarding"
+  ],
+  "capacity quickly": [
+    "access expertise",
+    "technology"
+  ],
+  "access expertise": [
+    "capacity quickly",
+    "technology"
+  ],
+  "technology": [
+    "capacity quickly",
+    "access expertise"
+  ],
+  "art": [
+    "science of"
+  ],
+  "science of": [
+    "art"
+  ],
+  "demand spikes": [
+    "supply delays"
+  ],
+  "supply delays": [
+    "demand spikes"
+  ],
+  "total ordering": [
+    "holding costs"
+  ],
+  "holding costs": [
+    "total ordering"
+  ],
+  "until sold": [
+    "used"
+  ],
+  "used": [
+    "until sold"
+  ],
+  "inventory levels": [
+    "order status"
+  ],
+  "order status": [
+    "inventory levels"
+  ],
+  "including receiving": [
+    "put-away",
+    "picking",
+    "packing"
+  ],
+  "put-away": [
+    "including receiving",
+    "picking",
+    "packing",
+    "receiving"
+  ],
+  "picking": [
+    "including receiving",
+    "put-away",
+    "packing",
+    "receiving"
+  ],
+  "packing": [
+    "including receiving",
+    "put-away",
+    "picking",
+    "receiving"
+  ],
+  "carrier selection": [
+    "load optimization",
+    "route planning",
+    "freight payment"
+  ],
+  "load optimization": [
+    "carrier selection",
+    "route planning",
+    "freight payment"
+  ],
+  "route planning": [
+    "carrier selection",
+    "load optimization",
+    "freight payment"
+  ],
+  "freight payment": [
+    "carrier selection",
+    "load optimization",
+    "route planning"
+  ],
+  "sensors": [
+    "RFID tags",
+    "GPS trackers"
+  ],
+  "rfid tags": [
+    "sensors",
+    "GPS trackers"
+  ],
+  "gps trackers": [
+    "sensors",
+    "RFID tags"
+  ],
+  "enhance traceability": [
+    "transparency in"
+  ],
+  "transparency in": [
+    "enhance traceability"
+  ],
+  "perform picking": [
+    "packing tasks"
+  ],
+  "packing tasks": [
+    "perform picking"
+  ],
+  "order processing": [
+    "invoice matching"
+  ],
+  "invoice matching": [
+    "order processing",
+    "purchase order processing"
+  ],
+  "lower-cost labor": [
+    "materials in"
+  ],
+  "materials in": [
+    "lower-cost labor"
+  ],
+  "reducing tariffs": [
+    "trade barriers"
+  ],
+  "trade barriers": [
+    "reducing tariffs"
+  ],
+  "cost": [
+    "complexity of"
+  ],
+  "complexity of": [
+    "cost"
+  ],
+  "internet": [
+    "communication technologies"
+  ],
+  "communication technologies": [
+    "Internet"
+  ],
+  "product category": [
+    "country of"
+  ],
+  "country of": [
+    "product category"
+  ],
+  "shipping costs": [
+    "insurance"
+  ],
+  "insurance": [
+    "shipping costs",
+    "lottery tickets"
+  ],
+  "buyer": [
+    "seller"
+  ],
+  "seller": [
+    "buyer"
+  ],
+  "specific countries": [
+    "entities"
+  ],
+  "entities": [
+    "specific countries"
+  ],
+  "be imported": [
+    "stored"
+  ],
+  "stored": [
+    "be imported"
+  ],
+  "natural disasters": [
+    "geopolitical conflicts"
+  ],
+  "geopolitical conflicts": [
+    "natural disasters"
+  ],
+  "shifted suddenly": [
+    "dramatically as"
+  ],
+  "dramatically as": [
+    "shifted suddenly"
+  ],
+  "buying services": [
+    "began buying"
+  ],
+  "began buying": [
+    "buying services"
+  ],
+  "chain visibility": [
+    "multi-sourcing"
+  ],
+  "multi-sourcing": [
+    "chain visibility"
+  ],
+  "faster detection": [
+    "response to"
+  ],
+  "response to": [
+    "faster detection"
+  ],
+  "regularly developing": [
+    "stress-testing contingency"
+  ],
+  "stress-testing contingency": [
+    "Regularly developing"
+  ],
+  "consumer expectations": [
+    "regulatory requirements",
+    "investor pressure",
+    "geopolitical shifts"
+  ],
+  "regulatory requirements": [
+    "Consumer expectations",
+    "investor pressure"
+  ],
+  "investor pressure": [
+    "Consumer expectations",
+    "regulatory requirements"
+  ],
+  "toward recyclable": [
+    "biodegradable"
+  ],
+  "biodegradable": [
+    "toward recyclable"
+  ],
+  "labor rights": [
+    "fair wages"
+  ],
+  "fair wages": [
+    "Labor rights"
+  ],
+  "keeping products": [
+    "materials"
+  ],
+  "materials": [
+    "keeping products"
+  ],
+  "easily disassembled": [
+    "recycled at"
+  ],
+  "recycled at": [
+    "easily disassembled"
+  ],
+  "product returns": [
+    "refurbishment"
+  ],
+  "refurbishment": [
+    "product returns"
+  ],
+  "extracting": [
+    "reusing valuable"
+  ],
+  "reusing valuable": [
+    "Extracting"
+  ],
+  "geopolitical shifts": [
+    "consumer expectations"
+  ],
+  "adjusting orders": [
+    "rerouting shipments"
+  ],
+  "rerouting shipments": [
+    "adjusting orders"
+  ],
+  "sensor networks": [
+    "computing power"
+  ],
+  "computing power": [
+    "sensor networks"
+  ],
+  "within cities": [
+    "neighborhoods"
+  ],
+  "neighborhoods": [
+    "within cities"
+  ],
+  "autonomous vehicles": [
+    "drones"
+  ],
+  "drones": [
+    "autonomous vehicles"
+  ],
+  "spare parts": [
+    "customized products"
+  ],
+  "customized products": [
+    "spare parts"
+  ],
+  "supply chains": [
+    "reduce inventory"
+  ],
+  "reduce inventory": [
+    "supply chains"
+  ],
+  "distributing production": [
+    "sourcing across"
+  ],
+  "sourcing across": [
+    "distributing production"
+  ],
+  "consumers reliably": [
+    "affordably"
+  ],
+  "affordably": [
+    "consumers reliably"
+  ],
+  "covid-19 pandemic": [
+    "geopolitical tensions"
+  ],
+  "geopolitical tensions": [
+    "COVID-19 pandemic"
+  ],
+  "iot": [
+    "Artificial intelligence",
+    "blockchain",
+    "robotics"
+  ],
+  "blockchain": [
+    "Artificial intelligence",
+    "IoT",
+    "robotics"
+  ],
+  "receiving": [
+    "put-away",
+    "picking",
+    "packing"
+  ],
+  "historical sales": [
+    "weather patterns",
+    "social media trends"
+  ],
+  "weather patterns": [
+    "historical sales",
+    "social media trends"
+  ],
+  "social media trends": [
+    "historical sales",
+    "weather patterns"
+  ],
+  "purchase order processing": [
+    "invoice matching"
+  ],
+  "material suppliers": [
+    "manufacturers",
+    "distributors",
+    "retailers"
+  ],
+  "manufacturers": [
+    "material suppliers",
+    "distributors",
+    "retailers"
+  ],
+  "distributors": [
+    "material suppliers",
+    "manufacturers",
+    "retailers"
+  ],
+  "retailers": [
+    "material suppliers",
+    "manufacturers",
+    "distributors"
+  ],
+  "manufacturing": [
+    "raw materials",
+    "warehousing"
+  ],
+  "real-time tracking": [
+    "e-commerce"
+  ],
+  "e-commerce": [
+    "real-time tracking"
+  ],
+  "rate negotiation": [
+    "shipment tracking"
+  ],
+  "shipment tracking": [
+    "rate negotiation"
+  ],
+  "production": [
+    "inventory",
+    "finance"
+  ],
+  "inventory": [
+    "production",
+    "finance"
+  ],
+  "finance": [
+    "production",
+    "inventory"
+  ],
+  "sap": [
+    "Oracle"
+  ],
+  "oracle": [
+    "SAP"
+  ],
+  "high value": [
+    "tight control"
+  ],
+  "tight control": [
+    "high value",
+    "items (high value",
+    "loo"
+  ],
+  "low value": [
+    "loose control"
+  ],
+  "loose control": [
+    "low value"
+  ],
+  "vietnam": [
+    "India",
+    "Mexico"
+  ],
+  "india": [
+    "Vietnam",
+    "Mexico"
+  ],
+  "mexico": [
+    "Vietnam",
+    "India"
+  ],
+  "credit lines": [
+    "supplier financing programs"
+  ],
+  "supplier financing programs": [
+    "credit lines"
+  ],
+  "items (high value": [
+    "tight control",
+    "loo"
+  ],
+  "loo": [
+    "items (high value",
+    "tight control"
+  ],
+  "naftausmca": [
+    "EU Single Market",
+    "tra"
+  ],
+  "eu single market": [
+    "NAFTA/USMCA",
+    "tra"
+  ],
+  "tra": [
+    "NAFTA/USMCA",
+    "EU Single Market"
+  ],
+  "lean manufacturing principles": [
+    "circular economy models"
+  ],
+  "circular economy models": [
+    "Lean manufacturing principles"
+  ],
+  "career moves": [
+    "financial investments"
+  ],
+  "financial investments": [
+    "career moves"
+  ],
+  "philosophers": [
+    "economists assumed"
+  ],
+  "economists assumed": [
+    "philosophers"
+  ],
+  "possible outcome": [
+    "act accordingly"
+  ],
+  "act accordingly": [
+    "possible outcome"
+  ],
+  "classical economics": [
+    "dominated thinking"
+  ],
+  "dominated thinking": [
+    "classical economics"
+  ],
+  "daniel kahneman": [
+    "Amos Tversky",
+    "Richard Thaler",
+    "Robert Cialdini",
+    "Antonio Damasio"
+  ],
+  "amos tversky": [
+    "Daniel Kahneman",
+    "Richard Thaler",
+    "Robert Cialdini",
+    "Antonio Damasio"
+  ],
+  "irrational choices": [
+    "markets behave"
+  ],
+  "markets behave": [
+    "irrational choices"
+  ],
+  "psychology": [
+    "neuroscience",
+    "economics",
+    "philosophy",
+    "changed economics"
+  ],
+  "neuroscience": [
+    "psychology",
+    "economics",
+    "philosophy"
+  ],
+  "philosophy": [
+    "psychology",
+    "neuroscience",
+    "economics"
+  ],
+  "understand markets": [
+    "policy"
+  ],
+  "policy": [
+    "understand markets"
+  ],
+  "richard thaler": [
+    "Daniel Kahneman",
+    "Amos Tversky",
+    "Robert Cialdini",
+    "Antonio Damasio",
+    "Cass Sunstein"
+  ],
+  "robert cialdini": [
+    "Daniel Kahneman",
+    "Amos Tversky",
+    "Richard Thaler",
+    "Antonio Damasio"
+  ],
+  "antonio damasio": [
+    "Daniel Kahneman",
+    "Amos Tversky",
+    "Richard Thaler",
+    "Robert Cialdini"
+  ],
+  "decision maker": [
+    "replaced it"
+  ],
+  "replaced it": [
+    "decision maker"
+  ],
+  "book thinking": [
+    "Fast",
+    "Slow"
+  ],
+  "fast": [
+    "book Thinking",
+    "Slow"
+  ],
+  "slow": [
+    "book Thinking",
+    "Fast"
+  ],
+  "different characteristics": [
+    "strengths"
+  ],
+  "strengths": [
+    "different characteristics"
+  ],
+  "operates automatically": [
+    "quickly"
+  ],
+  "quickly": [
+    "operates automatically"
+  ],
+  "complex calculations": [
+    "logical reasoning",
+    "careful planning"
+  ],
+  "logical reasoning": [
+    "complex calculations",
+    "careful planning"
+  ],
+  "careful planning": [
+    "complex calculations",
+    "logical reasoning"
+  ],
+  "pros": [
+    "cons of"
+  ],
+  "cons of": [
+    "pros"
+  ],
+  "requires awareness": [
+    "motivation"
+  ],
+  "motivation": [
+    "requires awareness"
+  ],
+  "attendant biases": [
+    "shortcuts"
+  ],
+  "shortcuts": [
+    "attendant biases"
+  ],
+  "mental shortcuts": [
+    "emotional reasoning"
+  ],
+  "emotional reasoning": [
+    "mental shortcuts"
+  ],
+  "already think": [
+    "dismiss or"
+  ],
+  "dismiss or": [
+    "already think"
+  ],
+  "political polarization": [
+    "investment decisions"
+  ],
+  "investment decisions": [
+    "political polarization"
+  ],
+  "david dunning": [
+    "Justin Kruger"
+  ],
+  "justin kruger": [
+    "David Dunning"
+  ],
+  "hiring decisions": [
+    "performance evaluations"
+  ],
+  "performance evaluations": [
+    "hiring decisions"
+  ],
+  "cognitive shortcuts": [
+    "rules of"
+  ],
+  "rules of": [
+    "cognitive shortcuts"
+  ],
+  "kahneman": [
+    "Tversky identified",
+    "Tversky showed"
+  ],
+  "tversky identified": [
+    "Kahneman"
+  ],
+  "highly intelligent": [
+    "politically active"
+  ],
+  "politically active": [
+    "highly intelligent"
+  ],
+  "probability of": [
+    "frequency"
+  ],
+  "shark attacks": [
+    "plane crashes"
+  ],
+  "plane crashes": [
+    "shark attacks"
+  ],
+  "car travel": [
+    "heart disease"
+  ],
+  "heart disease": [
+    "car travel"
+  ],
+  "cass sunstein": [
+    "Richard Thaler"
+  ],
+  "something unsolicited": [
+    "unwanted"
+  ],
+  "unwanted": [
+    "something unsolicited"
+  ],
+  "free samples": [
+    "gifts"
+  ],
+  "gifts": [
+    "free samples"
+  ],
+  "under risk": [
+    "uncertainty"
+  ],
+  "uncertainty": [
+    "under risk",
+    "time pressure"
+  ],
+  "evaluate gambles": [
+    "investments"
+  ],
+  "investments": [
+    "evaluate gambles"
+  ],
+  "changed economics": [
+    "psychology"
+  ],
+  "tversky showed": [
+    "Kahneman"
+  ],
+  "evaluate gains": [
+    "losses"
+  ],
+  "losses": [
+    "evaluate gains"
+  ],
+  "countless financial": [
+    "personal"
+  ],
+  "personal": [
+    "countless financial"
+  ],
+  "lottery tickets": [
+    "insurance"
+  ],
+  "financial decisions": [
+    "insurance markets"
+  ],
+  "insurance markets": [
+    "financial decisions"
+  ],
+  "judicial sentencing": [
+    "financial advising"
+  ],
+  "financial advising": [
+    "judicial sentencing"
+  ],
+  "decision quality": [
+    "satisfaction"
+  ],
+  "satisfaction": [
+    "decision quality"
+  ],
+  "daily decision": [
+    "preserve cognitive"
+  ],
+  "preserve cognitive": [
+    "daily decision"
+  ],
+  "barack obama": [
+    "Mark Zuckerberg"
+  ],
+  "mark zuckerberg": [
+    "Barack Obama"
+  ],
+  "is right": [
+    "wrong"
+  ],
+  "wrong": [
+    "is right"
+  ],
+  "be considered": [
+    "competing values"
+  ],
+  "competing values": [
+    "be considered"
+  ],
+  "different individuals": [
+    "cultures weight"
+  ],
+  "cultures weight": [
+    "Different individuals"
+  ],
+  "confirmation bias": [
+    "surfaces risks"
+  ],
+  "surfaces risks": [
+    "confirmation bias"
+  ],
+  "creates accountability": [
+    "enables genuine"
+  ],
+  "enables genuine": [
+    "creates accountability"
+  ],
+  "important decisions": [
+    "creating time"
+  ],
+  "creating time": [
+    "important decisions"
+  ],
+  "improved clarity": [
+    "insight upon"
+  ],
+  "insight upon": [
+    "improved clarity"
+  ],
+  "present emotions": [
+    "short-term thinking"
+  ],
+  "short-term thinking": [
+    "present emotions"
+  ],
+  "time pressure": [
+    "uncertainty"
+  ],
+  "fascinating": [
+    "humbling portrait"
+  ],
+  "humbling portrait": [
+    "fascinating"
+  ],
+  "remarkably sophisticated": [
+    "systematically flawed"
+  ],
+  "systematically flawed": [
+    "remarkably sophisticated"
+  ],
+  "dual-process theory": [
+    "cognitive biases"
+  ],
+  "cognitive biases": [
+    "dual-process theory"
+  ],
+  "prospect theory": [
+    "emotional influences"
+  ],
+  "emotional influences": [
+    "prospect theory"
+  ],
+  "high-stakes decisions": [
+    "emotional intelligence"
+  ],
+  "emotional intelligence": [
+    "high-stakes decisions"
+  ],
+  "nobel laureates": [
+    "corporate executives"
+  ],
+  "corporate executives": [
+    "Nobel laureates"
+  ],
+  "meals": [
+    "clothing",
+    "exercise"
+  ],
+  "clothing": [
+    "meals",
+    "exercise"
+  ],
+  "exercise": [
+    "meals",
+    "clothing"
+  ],
+  "pattern-recognizing": [
+    "emotion-guided"
+  ],
+  "emotion-guided": [
+    "pattern-recognizing"
+  ],
+  "time": [
+    "matter"
+  ],
+  "matter": [
+    "time"
+  ],
+  "black holes": [
+    "Fate",
+    "first",
+    "stellar-mass black holes"
+  ],
+  "fate": [
+    "Black Holes"
+  ],
+  "robert oppenheimer": [
+    "Hartland Snyder"
+  ],
+  "hartland snyder": [
+    "Robert Oppenheimer"
+  ],
+  "general relativity": [
+    "opened an",
+    "quantum mechanics"
+  ],
+  "opened an": [
+    "general relativity"
+  ],
+  "spiral together": [
+    "merge"
+  ],
+  "merge": [
+    "spiral together"
+  ],
+  "theoretically infinite": [
+    "curvature"
+  ],
+  "curvature": [
+    "theoretically infinite"
+  ],
+  "gas": [
+    "dust"
+  ],
+  "dust": [
+    "Gas"
+  ],
+  "magnetic fields": [
+    "Friction"
+  ],
+  "mass": [
+    "spin"
+  ],
+  "spin": [
+    "mass"
+  ],
+  "star clusters": [
+    "dwarf galaxies"
+  ],
+  "dwarf galaxies": [
+    "star clusters"
+  ],
+  "still exist": [
+    "might constitute"
+  ],
+  "might constitute": [
+    "still exist"
+  ],
+  "planetary orbits": [
+    "tides"
+  ],
+  "tides": [
+    "planetary orbits"
+  ],
+  "quantum mechanics": [
+    "general relativity"
+  ],
+  "becomes infinite": [
+    "equations"
+  ],
+  "equations": [
+    "becomes infinite"
+  ],
+  "something finite": [
+    "physically meaningful"
+  ],
+  "physically meaningful": [
+    "something finite"
+  ],
+  "string theory": [
+    "loop quantum"
+  ],
+  "loop quantum": [
+    "string theory"
+  ],
+  "keck observatory": [
+    "European Southern"
+  ],
+  "european southern": [
+    "Keck Observatory"
+  ],
+  "andrea ghez": [
+    "Reinhard Genzel"
+  ],
+  "reinhard genzel": [
+    "Andrea Ghez"
+  ],
+  "ligo": [
+    "Virgo observatories"
+  ],
+  "virgo observatories": [
+    "LIGO"
+  ],
+  "provide masses": [
+    "spins"
+  ],
+  "spins": [
+    "provide masses"
+  ],
+  "distorted arcs": [
+    "multiple images"
+  ],
+  "multiple images": [
+    "distorted arcs"
+  ],
+  "past": [
+    "present"
+  ],
+  "present": [
+    "past"
+  ],
+  "black hole": [
+    "galaxy grew"
+  ],
+  "galaxy grew": [
+    "black hole"
+  ],
+  "galaxies grow": [
+    "evolve"
+  ],
+  "evolve": [
+    "galaxies grow"
+  ],
+  "elementary particles": [
+    "radiation"
+  ],
+  "first": [
+    "black holes"
+  ],
+  "far stranger": [
+    "far richer"
+  ],
+  "far richer": [
+    "far stranger"
+  ],
+  "chandra": [
+    "XMM-Newton"
+  ],
+  "xmm-newton": [
+    "Chandra"
+  ],
+  "stellar-mass black holes": [
+    "Black holes"
   ]
 }

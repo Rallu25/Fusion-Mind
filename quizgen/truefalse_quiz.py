@@ -6,9 +6,7 @@ from .preprocess import split_sentences
 from .tfidf_rank import rank_sentences
 from .distractors import build_vocab, normalize_word, KNOWLEDGE_BASE
 from .kb_expand import expand_knowledge_base
-
-
-BAD_STARTS = {"it", "they", "this", "that", "these", "those", "as", "such"}
+from .utils import BAD_STARTS
 
 # Strategies for making a sentence false
 # 1. Swap a key term with a distractor from knowledge base
@@ -72,8 +70,22 @@ def _swap_number(sentence: str) -> tuple[str, bool]:
         return sentence, False
 
     # Generate a plausible but wrong number
-    multipliers = [0.5, 0.75, 1.5, 2.0, 0.1, 10.0]
-    fake_num = original_num * random.choice(multipliers)
+    multipliers = [0.5, 0.75, 1.25, 1.5, 2.0]
+
+    # Detect if context suggests a percentage
+    is_percentage = "%" in sentence[m.end():m.end()+3] or "percent" in sentence.lower()
+
+    random.shuffle(multipliers)
+    fake_num = None
+    for mult in multipliers:
+        candidate = original_num * mult
+        if is_percentage and (candidate > 100 or candidate < 0):
+            continue
+        fake_num = candidate
+        break
+
+    if fake_num is None:
+        return sentence, False
 
     # Keep same format
     if "." in m.group(1):
@@ -208,7 +220,13 @@ def generate_truefalse_quiz_from_pdf(pdf_path: str, n_questions: int = 10, seed:
         make_true = random.random() < 0.5
 
         if make_true:
-            # TRUE question — use original sentence
+            # TRUE question — only use sentences with specific factual claims
+            # (numbers, KB terms, causal language) so they actually test knowledge
+            has_number = bool(re.search(r"\b\d+\.?\d*\b", sentence))
+            has_kb_term = any(normalize_word(w) in KNOWLEDGE_BASE for w in sentence.split())
+            has_causal = bool(re.search(r"\b(?:because|causes?|leads?\s+to|results?\s+in|due\s+to|prevents?)\b", sentence, re.IGNORECASE))
+            if not (has_number or has_kb_term or has_causal):
+                continue  # skip generic sentences that are obviously true
             candidates.append({
                 "question": sentence,
                 "options": ["True", "False"],

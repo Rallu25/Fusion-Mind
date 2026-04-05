@@ -89,20 +89,20 @@
       <div class="panel-body">
         <div id="auth-forms">
           <div class="grid-2">
-            <div class="field"><label>Email</label><input type="email" id="auth-email" placeholder="your@email.com"></div>
-            <div class="field"><label>Password</label><input type="password" id="auth-pass"></div>
+            <div class="field"><label for="auth-email">Email</label><input type="email" id="auth-email" placeholder="your@email.com" aria-required="true"></div>
+            <div class="field"><label for="auth-pass">Password</label><input type="password" id="auth-pass" aria-required="true"></div>
           </div>
           <div id="register-fields" style="display:none">
             <div class="grid-2">
-              <div class="field"><label>Full Name</label><input type="text" id="auth-name" placeholder="John Smith"></div>
-              <div class="field"><label>Institution (optional)</label><input type="text" id="auth-institution" placeholder="University of..."></div>
+              <div class="field"><label for="auth-name">Full Name</label><input type="text" id="auth-name" placeholder="John Smith" aria-required="true"></div>
+              <div class="field"><label for="auth-institution">Institution (optional)</label><input type="text" id="auth-institution"></div>
             </div>
           </div>
           <div style="display:flex;gap:10px">
             <button class="btn" id="login-btn" onclick="login()">Login</button>
             <button class="btn-ghost" id="register-toggle" onclick="toggleRegister()">Register instead</button>
           </div>
-          <div id="auth-msg" class="msg err hidden"></div>
+          <div id="auth-msg" class="msg err hidden" role="alert"></div>
         </div>
       </div>
     </div>
@@ -121,7 +121,7 @@
         </div>
         <div class="field">
           <label>PDF File</label>
-          <input type="file" id="quiz-file" accept=".pdf" style="padding:8px">
+          <input type="file" id="quiz-file" accept=".pdf" style="padding:8px" aria-required="true" aria-label="Upload PDF file">
         </div>
         <div class="grid-3">
           <div class="field"><label>Quiz Type</label>
@@ -155,8 +155,8 @@
             </select>
           </div>
         </div>
-        <button class="btn" id="create-btn" onclick="createQuiz()">Generate & Share</button>
-        <div id="create-msg" class="hidden"></div>
+        <button class="btn" id="create-btn" onclick="createQuiz()" aria-label="Generate quiz and create share link">Generate & Share</button>
+        <div id="create-msg" class="hidden" role="alert"></div>
         <div id="share-link" class="hidden"></div>
       </div>
     </div>
@@ -324,9 +324,9 @@
           </div>
         </div>
         <div class="quiz-card-actions">
-          <button class="btn-ghost" onclick="navigator.clipboard.writeText('${link}')">copy link</button>
-          <button class="btn-ghost" onclick="viewResults('${q.id}')">results</button>
-          <button class="btn-danger" onclick="deleteQuiz('${q.id}')">delete</button>
+          <button class="btn-ghost" onclick="navigator.clipboard.writeText('${link}')" aria-label="Copy share link for ${q.title}">copy link</button>
+          <button class="btn-ghost" onclick="viewResults('${q.id}')" aria-label="View results for ${q.title}">results</button>
+          <button class="btn-danger" onclick="deleteQuiz('${q.id}')" aria-label="Delete quiz ${q.title}">delete</button>
         </div>
       </div>`;
     }).join('');

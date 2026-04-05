@@ -56,15 +56,43 @@ def normalize_text(text: str) -> str:
     return text
 
 
+def _fix_glued_sentences(text: str) -> str:
+    """Insert period where two sentences are glued without punctuation.
+    Detects patterns like '...lowercase word Uppercase word...' mid-text
+    where a sentence boundary is missing."""
+    # Match: lowercase word followed by space and uppercase word that starts a new sentence
+    # Avoid splitting on acronyms, proper nouns after articles, etc.
+    _GLUE_PAT = re.compile(
+        r'([a-z]{2,})\s+((?:The|A|An|This|These|That|Those|It|They|In|On|As|'
+        r'Modern|Most|Many|Some|Each|Every|However|Furthermore|Moreover|'
+        r'Although|Because|Since|While|After|Before|During|Between|'
+        r'According|Recently|Currently|Today|Now)\s+[A-Za-z])'
+    )
+    return _GLUE_PAT.sub(r'\1. \2', text)
+
+
 def split_sentences(text: str) -> list[str]:
     text = normalize_text(text)
+    text = _fix_glued_sentences(text)
     sentences = _SENT_SPLIT.split(text)
+
+    # Heading labels to strip from start of sentences
+    _HEADING_LABELS = re.compile(
+        r"^(?:Key\s+Insight|Note|Example|Definition|Important|Summary|"
+        r"Tip|Warning|Reminder|Observation|Conclusion|Overview|"
+        r"Fun\s+Fact|Did\s+You\s+Know|Quick\s+Review)\s*:\s*",
+        re.IGNORECASE
+    )
 
     result = []
     for sentence in sentences:
-        sentence = sentence.strip()
+        # Strip normal and non-breaking whitespace
+        sentence = sentence.strip().strip("\xa0\u200b\ufeff")
 
-        if not (40 <= len(sentence) <= 220):
+        # Remove heading labels from start of sentence
+        sentence = _HEADING_LABELS.sub("", sentence).strip()
+
+        if not (30 <= len(sentence) <= 300):
             continue
 
         if "Test PDF for Quiz Generator" in sentence:

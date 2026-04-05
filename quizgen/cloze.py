@@ -52,10 +52,10 @@ def pick_target_word(sentence: str, doc_vocab: set[str]) -> str | None:
 
         # penalizează primul cuvânt dacă pare doar introductiv
         if idx == 0 and lw not in PREFERRED_TARGETS:
-            score -= 20
+            score -= 5
 
-        # preferă termeni mai lungi
-        score += len(lw)
+        # preferă termeni mai lungi, dar cu plafon
+        score += min(len(lw), 12)
 
         # preferă termeni cu cifre/simboluri utile în documente tehnice
         if any(ch.isdigit() for ch in w):

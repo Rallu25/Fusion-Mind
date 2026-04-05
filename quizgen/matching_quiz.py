@@ -4,7 +4,7 @@ import re
 from .pdf_text import extract_text_from_pdf
 from .preprocess import split_sentences
 from .tfidf_rank import rank_sentences
-from .template_patterns import clean_subject, clean_answer, _subject_valid
+from .template_patterns import clean_subject, clean_answer, _subject_valid, _strip_trailing_prepositions
 from .kb_expand import expand_knowledge_base
 
 # Patterns that extract term-definition pairs
@@ -13,28 +13,28 @@ _DEFINITION_PATTERNS = [
     re.compile(
         r"(?P<subject>[A-Za-z][A-Za-z0-9°µ\-/]+(?:\s+[A-Za-z0-9°µ\-/]+){0,3})"
         r"\s+(?:is|are)\s+"
-        r"(?P<object>(?:a|an|the)\s+[^.;]{5,120})",
+        r"(?P<object>(?:a|an|the)\s+[^.;]{5,200})",
         re.IGNORECASE
     ),
     # "X refers to / is defined as / is known as Y"
     re.compile(
-        r"(?P<subject>[A-Z][A-Za-z0-9°µ\-/]+(?:\s+[A-Za-z0-9°µ\-/]+){0,3})"
+        r"(?P<subject>[A-Za-z][A-Za-z0-9°µ\-/]+(?:\s+[A-Za-z0-9°µ\-/]+){0,3})"
         r"\s+(?:refers?\s+to|is\s+defined\s+as|is\s+known\s+as|is\s+called)\s+"
-        r"(?P<object>[^.;]{5,120})",
+        r"(?P<object>[^.;]{5,200})",
         re.IGNORECASE
     ),
     # "X consists of / is composed of / is made of Y"
     re.compile(
-        r"(?P<subject>[A-Z][A-Za-z0-9°µ\-/]+(?:\s+[A-Za-z0-9°µ\-/]+){0,3})"
+        r"(?P<subject>[A-Za-z][A-Za-z0-9°µ\-/]+(?:\s+[A-Za-z0-9°µ\-/]+){0,3})"
         r"\s+(?:consists?\s+of|is\s+composed\s+of|is\s+made\s+(?:up\s+)?of)\s+"
-        r"(?P<object>[^.;]{5,120})",
+        r"(?P<object>[^.;]{5,200})",
         re.IGNORECASE
     ),
     # "X is used for/to Y"
     re.compile(
-        r"(?P<subject>[A-Z][A-Za-z0-9°µ\-/]+(?:\s+[A-Za-z0-9°µ\-/]+){0,3})"
+        r"(?P<subject>[A-Za-z][A-Za-z0-9°µ\-/]+(?:\s+[A-Za-z0-9°µ\-/]+){0,3})"
         r"\s+(?:is|are)\s+used\s+(?:for|to|in)\s+"
-        r"(?P<object>[^.;]{5,120})",
+        r"(?P<object>[^.;]{5,200})",
         re.IGNORECASE
     ),
 ]
@@ -69,6 +69,11 @@ def _extract_pairs(sentences: list[str], ranked: list[tuple[str, float]]) -> lis
 
             term = clean_subject(m.group("subject"))
             definition = clean_answer(m.group("object"))
+
+            # Truncate long definitions at word boundary
+            if len(definition) > 120:
+                truncated = definition[:120].rsplit(" ", 1)[0]
+                definition = _strip_trailing_prepositions(truncated)
 
             if not term or len(term) < 2:
                 continue

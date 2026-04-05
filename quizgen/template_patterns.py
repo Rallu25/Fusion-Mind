@@ -25,6 +25,24 @@ class PatternRule:
     extract_subject: Callable[[re.Match], str]
 
 
+_TRAILING_WORDS = {
+    "a", "an", "the", "of", "to", "in", "for", "and", "or", "by", "with",
+    "from", "as", "at", "on", "is", "are", "that", "which", "it",
+    "was", "were", "has", "have", "had", "been", "being", "having",
+    "becomes", "become", "became", "where", "when", "but", "not",
+    "through", "into", "about", "between", "during", "after", "before",
+    "without", "within", "upon", "than", "whether", "while",
+}
+
+
+def _strip_trailing_prepositions(text: str) -> str:
+    """Remove trailing articles, prepositions, and conjunctions."""
+    words = text.split()
+    while words and words[-1].lower() in _TRAILING_WORDS:
+        words.pop()
+    return " ".join(words)
+
+
 def clean_answer(text: str) -> str:
     """Curăță un răspuns extras: strip, elimină punct final, limitează lungimea."""
     text = text.strip()
@@ -33,14 +51,20 @@ def clean_answer(text: str) -> str:
         # trunchiază pe limită de cuvânt
         cut = text[:100].rsplit(" ", 1)
         text = cut[0] if len(cut) > 1 else text[:100]
+    text = _strip_trailing_prepositions(text)
     return text
 
 
 def clean_subject(text: str) -> str:
     """Curăță subiectul extras."""
     text = text.strip()
+    # Strip leading dashes, bullets, special chars
+    text = re.sub(r"^[\-–—•*·/\\]+\s*", "", text).strip()
     text = re.sub(r"[,;:]+$", "", text).strip()
     text = re.sub(r"^(?:A|An|The)\s+", "", text, flags=re.IGNORECASE)
+    # Capitalize first letter of each word (for terms like "long-term vision")
+    if text and text[0].islower():
+        text = text[0].upper() + text[1:]
     return text
 
 
@@ -55,9 +79,18 @@ _SINGULAR_S_WORDS = {
 }
 
 
+_IRREGULAR_PLURALS = {
+    "people", "children", "men", "women", "feet", "teeth", "mice", "geese",
+    "oxen", "criteria", "phenomena", "data", "media", "bacteria", "alumni",
+    "fungi", "cacti", "stimuli", "nuclei", "radii", "formulae",
+}
+
+
 def _is_plural(subject: str) -> bool:
     """Euristică simplă pentru detectarea pluralului."""
     last_word = subject.strip().split()[-1].lower() if subject.strip().split() else ""
+    if last_word in _IRREGULAR_PLURALS:
+        return True
     if last_word in _SINGULAR_S_WORDS:
         return False
     if last_word.endswith("sis") or last_word.endswith("us"):
@@ -135,15 +168,17 @@ def _subject_valid(match: re.Match) -> bool:
 # PATTERN A: Definiție — "X is/are a/an/the Y"
 # ═══════════════════════════════════════════════════════════
 _pat_definition = re.compile(
-    rf"{_SUBJ}\s+(?:is|are)\s+(?P<object>(?:a|an|the)\s+[^.;]{{5,100}})",
+    rf"{_SUBJ}\s+(?:is|are)\s+(?P<object>(?:a|an|the)\s+[^.;]{{5,200}})",
     re.IGNORECASE
 )
 
 
 def _q_definition(m: re.Match) -> str:
-    subj = clean_subject(m.group("subject"))
+    raw_subj = m.group("subject")
+    subj = clean_subject(raw_subj)
+    subj_q = _format_subj(subj, raw_subj)
     verb = "are" if _is_plural(subj) else "is"
-    return f"What {verb} {subj}?"
+    return f"What {verb} {subj_q}?"
 
 
 def _a_definition(m: re.Match) -> str:
@@ -158,7 +193,7 @@ def _s_definition(m: re.Match) -> str:
 # PATTERN B: Proprietate — "X has/contains/includes Y"
 # ═══════════════════════════════════════════════════════════
 _pat_property = re.compile(
-    rf"{_SUBJ}\s+(?P<verb>has|have|contains?|includes?)\s+(?P<object>[^.;]{{5,100}})",
+    rf"{_SUBJ}\s+(?P<verb>has|have|contains?|includes?)\s+(?P<object>[^.;]{{5,200}})",
     re.IGNORECASE
 )
 
@@ -174,10 +209,31 @@ def _verb_base(verb: str) -> str:
     return v
 
 
+def _does_or_do(subject: str) -> str:
+    """Return 'do' for plural subjects, 'does' for singular."""
+    return "do" if _is_plural(subject) else "does"
+
+
+def _format_subj(subject: str, original_text: str) -> str:
+    """Re-add article 'a/an' if the original had one and subject is a common noun phrase.
+    E.g., original 'A solar-mass black hole' → subject 'Solar-mass black hole'
+    → returns 'a solar-mass black hole' for use in questions."""
+    orig_lower = original_text.strip().lower()
+    subj_lower = subject.lower()
+    # Check if original started with article that was stripped
+    for article in ("a ", "an "):
+        if orig_lower.startswith(article + subj_lower):
+            # It's a common noun phrase, re-add article (lowercase)
+            return article + subject[0].lower() + subject[1:]
+    return subject
+
+
 def _q_property(m: re.Match) -> str:
-    subj = clean_subject(m.group("subject"))
+    raw_subj = m.group("subject")
+    subj = clean_subject(raw_subj)
+    subj_q = _format_subj(subj, raw_subj)
     verb = _verb_base(m.group("verb"))
-    return f"What does {subj} {verb}?"
+    return f"What {_does_or_do(subj)} {subj_q} {verb}?"
 
 
 def _a_property(m: re.Match) -> str:
@@ -192,16 +248,18 @@ def _s_property(m: re.Match) -> str:
 # PATTERN C: Funcție/Scop — "X is used for/to/in Y"
 # ═══════════════════════════════════════════════════════════
 _pat_function = re.compile(
-    rf"{_SUBJ}\s+(?:is|are)\s+used\s+(?P<prep>for|to|in)\s+(?P<object>[^.;]{{5,100}})",
+    rf"{_SUBJ}\s+(?:is|are)\s+used\s+(?P<prep>for|to|in)\s+(?P<object>[^.;]{{5,200}})",
     re.IGNORECASE
 )
 
 
 def _q_function(m: re.Match) -> str:
-    subj = clean_subject(m.group("subject"))
+    raw_subj = m.group("subject")
+    subj = clean_subject(raw_subj)
+    subj_q = _format_subj(subj, raw_subj)
     prep = m.group("prep").lower()
     verb = "are" if _is_plural(subj) else "is"
-    return f"What {verb} {subj} used {prep}?"
+    return f"What {verb} {subj_q} used {prep}?"
 
 
 def _a_function(m: re.Match) -> str:
@@ -216,7 +274,7 @@ def _s_function(m: re.Match) -> str:
 # PATTERN D: Cauză-Efect — "X causes/leads to/results in/produces Y"
 # ═══════════════════════════════════════════════════════════
 _pat_cause = re.compile(
-    rf"{_SUBJ}\s+(?P<verb>causes?|leads?\s+to|results?\s+in|produces?)\s+(?P<object>[^.;]{{5,100}})",
+    rf"{_SUBJ}\s+(?P<verb>causes?|leads?\s+to|results?\s+in|produces?)\s+(?P<object>[^.;]{{5,200}})",
     re.IGNORECASE
 )
 
@@ -233,9 +291,11 @@ def _verb_question_form(verb: str) -> str:
 
 
 def _q_cause(m: re.Match) -> str:
-    subj = clean_subject(m.group("subject"))
+    raw_subj = m.group("subject")
+    subj = clean_subject(raw_subj)
+    subj_q = _format_subj(subj, raw_subj)
     verb = _verb_question_form(m.group("verb"))
-    return f"What does {subj} {verb}?"
+    return f"What {_does_or_do(subj)} {subj_q} {verb}?"
 
 
 def _a_cause(m: re.Match) -> str:
@@ -250,15 +310,17 @@ def _s_cause(m: re.Match) -> str:
 # PATTERN E: Locație — "X is found/located/present/stored in Y"
 # ═══════════════════════════════════════════════════════════
 _pat_location = re.compile(
-    rf"{_SUBJ}\s+(?:is|are)\s+(?:found|located|present|stored)\s+in\s+(?P<object>[^.;]{{5,100}})",
+    rf"{_SUBJ}\s+(?:is|are)\s+(?:found|located|present|stored)\s+in\s+(?P<object>[^.;]{{5,200}})",
     re.IGNORECASE
 )
 
 
 def _q_location(m: re.Match) -> str:
-    subj = clean_subject(m.group("subject"))
+    raw_subj = m.group("subject")
+    subj = clean_subject(raw_subj)
+    subj_q = _format_subj(subj, raw_subj)
     verb = "are" if _is_plural(subj) else "is"
-    return f"Where {verb} {subj} found?"
+    return f"Where {verb} {subj_q} found?"
 
 
 def _a_location(m: re.Match) -> str:
@@ -273,14 +335,16 @@ def _s_location(m: re.Match) -> str:
 # PATTERN F: Compoziție — "X consists of / is made of / is composed of Y"
 # ═══════════════════════════════════════════════════════════
 _pat_composition = re.compile(
-    rf"{_SUBJ}\s+(?:consists?\s+of|is\s+made\s+(?:up\s+)?of|is\s+composed\s+of)\s+(?P<object>[^.;]{{5,100}})",
+    rf"{_SUBJ}\s+(?:consists?\s+of|is\s+made\s+(?:up\s+)?of|is\s+composed\s+of)\s+(?P<object>[^.;]{{5,200}})",
     re.IGNORECASE
 )
 
 
 def _q_composition(m: re.Match) -> str:
-    subj = clean_subject(m.group("subject"))
-    return f"What does {subj} consist of?"
+    raw_subj = m.group("subject")
+    subj = clean_subject(raw_subj)
+    subj_q = _format_subj(subj, raw_subj)
+    return f"What {_does_or_do(subj)} {subj_q} consist of?"
 
 
 def _a_composition(m: re.Match) -> str:
@@ -315,8 +379,10 @@ _pat_value = re.compile(
 
 def _q_value(m: re.Match) -> str:
     measure = m.group("measure").strip()
-    subj = clean_subject(m.group("subject"))
-    return f"What is the {measure} of {subj}?"
+    raw_subj = m.group("subject")
+    subj = clean_subject(raw_subj)
+    subj_q = _format_subj(subj, raw_subj)
+    return f"What is the {measure} of {subj_q}?"
 
 
 def _a_value(m: re.Match) -> str:
@@ -368,7 +434,7 @@ _ACTION_VERBS = (
 
 _pat_action = re.compile(
     rf"(?P<subject>[A-Z][A-Za-z0-9°µ₂₆₁₃\-/]+(?:\s+[A-Za-z0-9°µ₂₆₁₃\-/]+){{0,4}})"
-    rf"\s+(?P<verb>{_ACTION_VERBS})\s+(?P<object>[^.;]{{5,100}})"
+    rf"\s+(?P<verb>{_ACTION_VERBS})\s+(?P<object>[^.;]{{5,200}})"
 )
 
 
@@ -385,9 +451,11 @@ def _verb_to_base(verb: str) -> str:
 
 
 def _q_action(m: re.Match) -> str:
-    subj = clean_subject(m.group("subject"))
+    raw_subj = m.group("subject")
+    subj = clean_subject(raw_subj)
+    subj_q = _format_subj(subj, raw_subj)
     verb = _verb_to_base(m.group("verb"))
-    return f"What does {subj} {verb}?"
+    return f"What {_does_or_do(subj)} {subj_q} {verb}?"
 
 
 def _a_action(m: re.Match) -> str:
@@ -403,14 +471,16 @@ def _s_action(m: re.Match) -> str:
 # ═══════════════════════════════════════════════════════════
 _pat_purpose = re.compile(
     rf"{_SUBJ_CAP}\s+(?:is|are)\s+(?:designed|meant|intended|built)\s+"
-    r"(?:to|in order to)\s+(?P<object>[^.;]{5,100})",
+    r"(?:to|in order to)\s+(?P<object>[^.;]{5,200})",
     re.IGNORECASE
 )
 
 
 def _q_purpose(m: re.Match) -> str:
-    subj = clean_subject(m.group("subject"))
-    return f"What is the purpose of {subj}?"
+    raw_subj = m.group("subject")
+    subj = clean_subject(raw_subj)
+    subj_q = _format_subj(subj, raw_subj)
+    return f"What is the purpose of {subj_q}?"
 
 
 def _a_purpose(m: re.Match) -> str:
@@ -426,14 +496,16 @@ def _s_purpose(m: re.Match) -> str:
 # ═══════════════════════════════════════════════════════════
 _pat_refers = re.compile(
     rf"{_SUBJ_CAP}\s+(?:refers?\s+to|is\s+known\s+as|is\s+called|is\s+defined\s+as)\s+"
-    r"(?P<object>[^.;]{5,100})",
+    r"(?P<object>[^.;]{5,200})",
     re.IGNORECASE
 )
 
 
 def _q_refers(m: re.Match) -> str:
-    subj = clean_subject(m.group("subject"))
-    return f"What does {subj} refer to?"
+    raw_subj = m.group("subject")
+    subj = clean_subject(raw_subj)
+    subj_q = _format_subj(subj, raw_subj)
+    return f"What {_does_or_do(subj)} {subj_q} refer to?"
 
 
 def _a_refers(m: re.Match) -> str:
@@ -449,15 +521,17 @@ def _s_refers(m: re.Match) -> str:
 # ═══════════════════════════════════════════════════════════
 _pat_enables = re.compile(
     rf"{_SUBJ}\s+(?P<verb>allows?|enables?|helps?|permits?|facilitates?|supports?)\s+"
-    r"(?P<object>[^.;]{5,100})",
+    r"(?P<object>[^.;]{5,200})",
     re.IGNORECASE
 )
 
 
 def _q_enables(m: re.Match) -> str:
-    subj = clean_subject(m.group("subject"))
+    raw_subj = m.group("subject")
+    subj = clean_subject(raw_subj)
+    subj_q = _format_subj(subj, raw_subj)
     verb = _verb_to_base(m.group("verb"))
-    return f"What does {subj} {verb}?"
+    return f"What {_does_or_do(subj)} {subj_q} {verb}?"
 
 
 def _a_enables(m: re.Match) -> str:

@@ -1063,7 +1063,7 @@
       </div>
       <div class="panel-body">
         <div class="drop-zone" id="drop-zone">
-          <input type="file" id="file-input" accept=".pdf" multiple>
+          <input type="file" id="file-input" accept=".pdf" multiple aria-label="Upload PDF files">
           <span class="dz-icon">⬡</span>
           <div class="dz-title">Drag PDFs into this area</div>
           <div class="dz-sub">or click to select — supports multiple files</div>
@@ -1103,17 +1103,17 @@
             </select>
           </div>
           <input type="hidden" id="api-url" value="">
-          <button class="btn-run" id="generate-btn" disabled onclick="startGeneration()">
+          <button class="btn-run" id="generate-btn" disabled onclick="startGeneration()" aria-label="Generate quiz from uploaded PDFs">
             ▶ RUN
           </button>
         </div>
-        <div class="error-msg" id="error-box"></div>
+        <div class="error-msg" id="error-box" role="alert"></div>
       </div>
     </div>
   </div>
 
   <!-- LOADING -->
-  <div id="loading">
+  <div id="loading" role="status" aria-live="polite">
     <div class="loading-ascii">[ PROCESSING PDF ]</div>
     <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
     <div id="loading-msg">analyzing documents...</div>
@@ -1323,6 +1323,10 @@
     const n      = parseInt(document.getElementById('n-questions').value) || 5;
     const apiUrl = document.getElementById('api-url').value.replace(/\/$/, '') || window.location.origin;
 
+    const genBtn = document.getElementById('generate-btn');
+    genBtn.disabled = true;
+    genBtn.textContent = 'GENERATING...';
+
     showSection('loading');
     setMsg('sending files...');
 
@@ -1348,6 +1352,8 @@
       startQuiz();
     } catch (err) {
       showSection('upload');
+      genBtn.disabled = false;
+      genBtn.textContent = '▶ RUN';
       const box = document.getElementById('error-box');
       box.style.display = 'block';
       box.textContent = err.message;

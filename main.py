@@ -12,27 +12,89 @@ from fastapi import FastAPI, UploadFile, File, Form, Body, Header, Request
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from quizgen import generate_quiz_from_pdf, generate_template_quiz_from_pdf, generate_image_quiz_from_pdf, generate_truefalse_quiz_from_pdf, generate_matching_quiz_from_pdf
-from translator import translate_text
-from database import init_db, create_teacher, get_teacher_by_email, get_teacher_by_id, update_teacher, create_shared_quiz, get_shared_quiz, get_teacher_quizzes, delete_shared_quiz, save_submission, get_quiz_submissions, student_already_submitted, ip_already_submitted
+from database import init_db, create_teacher, get_teacher_by_email, get_teacher_by_id, update_teacher, create_shared_quiz, get_shared_quiz, get_teacher_quizzes, delete_shared_quiz, save_submission, get_quiz_submissions, student_already_submitted, ip_already_submitted, record_quiz_start, get_quiz_start_time
 from auth import hash_password, verify_password, create_token, verify_token
 
 from typing import List, Optional
 from fastapi.middleware.cors import CORSMiddleware
 import json
+import time
+from collections import defaultdict
 
 app = FastAPI(title="NLP Disertatie Quiz Generator")
 
+
+# ── In-memory rate limiter ──
+
+_login_attempts: dict[str, list[float]] = defaultdict(list)
+LOGIN_RATE_LIMIT = 5          # max attempts
+LOGIN_RATE_WINDOW = 300       # per 5 minutes (seconds)
+
+
+def _is_rate_limited(ip: str) -> bool:
+    """Return True if IP has exceeded login rate limit."""
+    now = time.time()
+    attempts = _login_attempts[ip]
+    # Remove old attempts outside the window
+    _login_attempts[ip] = [t for t in attempts if now - t < LOGIN_RATE_WINDOW]
+    return len(_login_attempts[ip]) >= LOGIN_RATE_LIMIT
+
+
+def _record_login_attempt(ip: str):
+    _login_attempts[ip].append(time.time())
+
 # Initialize database on startup
 init_db()
+ALLOWED_ORIGINS = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:8000,http://127.0.0.1:8000"
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=[o.strip() for o in ALLOWED_ORIGINS],
+    allow_methods=["GET", "POST", "DELETE"],
+    allow_headers=["Content-Type", "Authorization"],
+    allow_credentials=True,
 )
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+VALID_QUIZ_TYPES = {"cloze", "template", "visual", "truefalse", "matching", "mixed"}
+VALID_DIFFICULTIES = {"easy", "medium", "hard"}
+MAX_QUESTIONS = 50
+MAX_FILE_SIZE = 20 * 1024 * 1024  # 20 MB
+
+
+def _validate_quiz_params(n_questions: int, quiz_type: str, difficulty: str) -> str | None:
+    """Return error message if params are invalid, None if OK."""
+    if n_questions < 1 or n_questions > MAX_QUESTIONS:
+        return f"n_questions must be between 1 and {MAX_QUESTIONS}."
+    if quiz_type not in VALID_QUIZ_TYPES:
+        return f"Invalid quiz_type. Must be one of: {', '.join(sorted(VALID_QUIZ_TYPES))}."
+    if difficulty not in VALID_DIFFICULTIES:
+        return f"Invalid difficulty. Must be one of: {', '.join(sorted(VALID_DIFFICULTIES))}."
+    return None
+
+
+def _validate_pdf(content: bytes, filename: str) -> str | None:
+    """Return error message if file is not a valid PDF, None if OK."""
+    if not filename.lower().endswith(".pdf"):
+        return "Please upload a PDF file."
+    if not content.startswith(b"%PDF-"):
+        return "File does not appear to be a valid PDF (invalid header)."
+    if len(content) > MAX_FILE_SIZE:
+        return f"File too large. Maximum size is {MAX_FILE_SIZE // (1024*1024)} MB."
+    return None
+
+
+def _safe_remove(path: str):
+    """Remove a file, ignoring errors if it doesn't exist."""
+    try:
+        os.remove(path)
+    except OSError:
+        pass
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -59,6 +121,22 @@ def _generate_matching_with_fallback(file_path: str, n_questions: int, difficult
         if "questions" in result:
             result["warning"] = "Not enough definitions for matching. Generated full questions instead."
     return result
+
+
+def _generate_quiz_by_type(file_path: str, quiz_type: str, n_questions: int, difficulty: str) -> dict:
+    """Route quiz generation to the correct generator based on quiz_type."""
+    if quiz_type == "template":
+        return generate_template_quiz_from_pdf(file_path, n_questions=n_questions, difficulty=difficulty)
+    elif quiz_type == "visual":
+        return _generate_visual_with_fallback(file_path, n_questions=n_questions, difficulty=difficulty)
+    elif quiz_type == "truefalse":
+        return generate_truefalse_quiz_from_pdf(file_path, n_questions=n_questions, difficulty=difficulty)
+    elif quiz_type == "matching":
+        return _generate_matching_with_fallback(file_path, n_questions=n_questions, difficulty=difficulty)
+    elif quiz_type == "mixed":
+        return _generate_mixed_quiz(file_path, n_questions=n_questions, difficulty=difficulty)
+    else:
+        return generate_quiz_from_pdf(file_path, n_questions=n_questions, difficulty=difficulty)
 
 
 def _generate_mixed_quiz(file_path: str, n_questions: int, difficulty: str) -> dict:
@@ -105,31 +183,25 @@ async def generate_quiz(
     quiz_type: str = Form("cloze"),
     difficulty: str = Form("medium")
 ):
-    if not file.filename.lower().endswith(".pdf"):
-        return {"error": "Please upload a PDF file."}
+    param_err = _validate_quiz_params(n_questions, quiz_type, difficulty)
+    if param_err:
+        return {"error": param_err}
+
+    content = await file.read()
+    pdf_err = _validate_pdf(content, file.filename)
+    if pdf_err:
+        return {"error": pdf_err}
 
     filename = f"{uuid.uuid4().hex}.pdf"
     file_path = os.path.join(UPLOAD_DIR, filename)
 
-    content = await file.read()
     with open(file_path, "wb") as f:
         f.write(content)
 
     try:
-        if quiz_type == "template":
-            result = generate_template_quiz_from_pdf(file_path, n_questions=n_questions, difficulty=difficulty)
-        elif quiz_type == "visual":
-            result = _generate_visual_with_fallback(file_path, n_questions=n_questions, difficulty=difficulty)
-        elif quiz_type == "truefalse":
-            result = generate_truefalse_quiz_from_pdf(file_path, n_questions=n_questions, difficulty=difficulty)
-        elif quiz_type == "matching":
-            result = _generate_matching_with_fallback(file_path, n_questions=n_questions, difficulty=difficulty)
-        elif quiz_type == "mixed":
-            result = _generate_mixed_quiz(file_path, n_questions=n_questions, difficulty=difficulty)
-        else:
-            result = generate_quiz_from_pdf(file_path, n_questions=n_questions, difficulty=difficulty)
+        result = _generate_quiz_by_type(file_path, quiz_type, n_questions, difficulty)
     finally:
-        os.remove(file_path)
+        _safe_remove(file_path)
     return result
 
 
@@ -140,11 +212,20 @@ async def generate_quiz_two_pdfs(
     n_questions_file1: int = Form(10),
     n_questions_file2: int = Form(10)
 ):
-    if not file1.filename.lower().endswith(".pdf"):
-        return {"error": "The first file is not a PDF."}
+    if n_questions_file1 < 1 or n_questions_file1 > MAX_QUESTIONS:
+        return {"error": f"n_questions_file1 must be between 1 and {MAX_QUESTIONS}."}
+    if n_questions_file2 < 1 or n_questions_file2 > MAX_QUESTIONS:
+        return {"error": f"n_questions_file2 must be between 1 and {MAX_QUESTIONS}."}
 
-    if not file2.filename.lower().endswith(".pdf"):
-        return {"error": "The second file is not a PDF."}
+    content1 = await file1.read()
+    pdf_err1 = _validate_pdf(content1, file1.filename)
+    if pdf_err1:
+        return {"error": f"File 1: {pdf_err1}"}
+
+    content2 = await file2.read()
+    pdf_err2 = _validate_pdf(content2, file2.filename)
+    if pdf_err2:
+        return {"error": f"File 2: {pdf_err2}"}
 
     filename1 = f"{uuid.uuid4().hex}_1.pdf"
     filename2 = f"{uuid.uuid4().hex}_2.pdf"
@@ -152,11 +233,9 @@ async def generate_quiz_two_pdfs(
     file_path1 = os.path.join(UPLOAD_DIR, filename1)
     file_path2 = os.path.join(UPLOAD_DIR, filename2)
 
-    content1 = await file1.read()
     with open(file_path1, "wb") as f:
         f.write(content1)
 
-    content2 = await file2.read()
     with open(file_path2, "wb") as f:
         f.write(content2)
 
@@ -164,8 +243,8 @@ async def generate_quiz_two_pdfs(
         result1 = generate_quiz_from_pdf(file_path1, n_questions=n_questions_file1)
         result2 = generate_quiz_from_pdf(file_path2, n_questions=n_questions_file2)
     finally:
-        os.remove(file_path1)
-        os.remove(file_path2)
+        _safe_remove(file_path1)
+        _safe_remove(file_path2)
 
     questions1 = result1.get("questions", [])
     questions2 = result2.get("questions", [])
@@ -206,28 +285,6 @@ async def generate_quiz_two_pdfs(
     }
 
 
-@app.post("/translate-quiz")
-async def translate_quiz(payload: dict = Body(...)):
-    questions = payload.get("questions", [])
-    target_language = payload.get("target_language", "ro")
-
-    translated_questions = []
-
-    for q in questions:
-        translated_question = translate_text(q["question"], target_language)
-        translated_evidence = translate_text(q.get("evidence", ""), target_language)
-
-        translated_questions.append({
-            "question": translated_question,
-            "options": q["options"],
-            "correct_index": q["correct_index"],
-            "evidence": translated_evidence
-        })
-
-    return {
-        "target_language": target_language,
-        "questions": translated_questions
-    }
 
 @app.post("/generate-quiz-multi")
 async def generate_quiz_multi(
@@ -239,36 +296,30 @@ async def generate_quiz_multi(
     if not files:
         return {"error": "No files were sent."}
 
+    param_err = _validate_quiz_params(n_questions_per_file, quiz_type, difficulty)
+    if param_err:
+        return {"error": param_err}
+
     results_by_file = []
     all_questions = []
     seen = set()
 
     for file in files:
-        if not file.filename.lower().endswith(".pdf"):
-            return {"error": f"File '{file.filename}' is not a PDF."}
+        content = await file.read()
+        pdf_err = _validate_pdf(content, file.filename)
+        if pdf_err:
+            return {"error": f"File '{file.filename}': {pdf_err}"}
 
         filename = f"{uuid.uuid4().hex}.pdf"
         file_path = os.path.join(UPLOAD_DIR, filename)
 
-        content = await file.read()
         with open(file_path, "wb") as f:
             f.write(content)
 
         try:
-            if quiz_type == "template":
-                result = generate_template_quiz_from_pdf(file_path, n_questions=n_questions_per_file, difficulty=difficulty)
-            elif quiz_type == "visual":
-                result = _generate_visual_with_fallback(file_path, n_questions=n_questions_per_file, difficulty=difficulty)
-            elif quiz_type == "truefalse":
-                result = generate_truefalse_quiz_from_pdf(file_path, n_questions=n_questions_per_file, difficulty=difficulty)
-            elif quiz_type == "matching":
-                result = _generate_matching_with_fallback(file_path, n_questions=n_questions_per_file, difficulty=difficulty)
-            elif quiz_type == "mixed":
-                result = _generate_mixed_quiz(file_path, n_questions=n_questions_per_file, difficulty=difficulty)
-            else:
-                result = generate_quiz_from_pdf(file_path, n_questions=n_questions_per_file, difficulty=difficulty)
+            result = _generate_quiz_by_type(file_path, quiz_type, n_questions_per_file, difficulty)
         finally:
-            os.remove(file_path)
+            _safe_remove(file_path)
         questions = result.get("questions", [])
 
         results_by_file.append({
@@ -409,12 +460,18 @@ async def auth_register(payload: dict = Body(...)):
 
 
 @app.post("/auth/login")
-async def auth_login(payload: dict = Body(...)):
+async def auth_login(request: Request, payload: dict = Body(...)):
+    client_ip = request.client.host if request.client else "unknown"
+
+    if _is_rate_limited(client_ip):
+        return {"error": "Too many login attempts. Please try again in a few minutes."}
+
     email = payload.get("email", "").strip().lower()
     password = payload.get("password", "")
 
     teacher = get_teacher_by_email(email)
     if not teacher or not verify_password(password, teacher["password_hash"]):
+        _record_login_attempt(client_ip)
         return {"error": "Invalid email or password."}
 
     token = create_token(teacher["id"])
@@ -467,31 +524,25 @@ async def teacher_create_quiz(
     if not teacher:
         return {"error": "Not authenticated."}
 
-    if not file.filename.lower().endswith(".pdf"):
-        return {"error": "Please upload a PDF file."}
+    param_err = _validate_quiz_params(n_questions, quiz_type, difficulty)
+    if param_err:
+        return {"error": param_err}
+
+    content = await file.read()
+    pdf_err = _validate_pdf(content, file.filename)
+    if pdf_err:
+        return {"error": pdf_err}
 
     filename = f"{uuid.uuid4().hex}.pdf"
     file_path = os.path.join(UPLOAD_DIR, filename)
 
-    content = await file.read()
     with open(file_path, "wb") as f:
         f.write(content)
 
     try:
-        if quiz_type == "template":
-            result = generate_template_quiz_from_pdf(file_path, n_questions=n_questions, difficulty=difficulty)
-        elif quiz_type == "visual":
-            result = _generate_visual_with_fallback(file_path, n_questions=n_questions, difficulty=difficulty)
-        elif quiz_type == "truefalse":
-            result = generate_truefalse_quiz_from_pdf(file_path, n_questions=n_questions, difficulty=difficulty)
-        elif quiz_type == "matching":
-            result = _generate_matching_with_fallback(file_path, n_questions=n_questions, difficulty=difficulty)
-        elif quiz_type == "mixed":
-            result = _generate_mixed_quiz(file_path, n_questions=n_questions, difficulty=difficulty)
-        else:
-            result = generate_quiz_from_pdf(file_path, n_questions=n_questions, difficulty=difficulty)
+        result = _generate_quiz_by_type(file_path, quiz_type, n_questions, difficulty)
     finally:
-        os.remove(file_path)
+        _safe_remove(file_path)
 
     if "error" in result:
         return result
@@ -597,6 +648,18 @@ async def get_quiz_for_student(quiz_id: str):
     }
 
 
+@app.post("/quiz/{quiz_id}/start")
+async def start_quiz(quiz_id: str, request: Request):
+    """Record that a student started this quiz (for server-side timer validation)."""
+    quiz = get_shared_quiz(quiz_id)
+    if not quiz:
+        return {"error": "Quiz not found."}
+
+    client_ip = request.client.host if request.client else ""
+    record_quiz_start(quiz_id, client_ip)
+    return {"success": True}
+
+
 @app.post("/quiz/{quiz_id}/submit")
 async def submit_quiz(quiz_id: str, request: Request, payload: dict = Body(...)):
     quiz = get_shared_quiz(quiz_id)
@@ -614,6 +677,19 @@ async def submit_quiz(quiz_id: str, request: Request, payload: dict = Body(...))
         return {"error": "You have already submitted this quiz."}
     if ip_already_submitted(quiz_id, client_ip):
         return {"error": "A submission from this device has already been recorded."}
+
+    # Server-side timer validation
+    timer_minutes = quiz.get("timer_minutes", 0)
+    if timer_minutes > 0:
+        from datetime import datetime
+        started_at_str = get_quiz_start_time(quiz_id, client_ip)
+        if started_at_str:
+            started_at = datetime.strptime(started_at_str, "%Y-%m-%d %H:%M:%S")
+            elapsed_seconds = (datetime.utcnow() - started_at).total_seconds()
+            # Allow 30 seconds grace period for network latency
+            allowed_seconds = timer_minutes * 60 + 30
+            if elapsed_seconds > allowed_seconds:
+                return {"error": "Time expired. Your submission was not accepted."}
 
     answers = payload.get("answers", {})
     score = payload.get("score", 0)

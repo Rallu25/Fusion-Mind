@@ -2,7 +2,7 @@
 These tests use the generate_*_from_pdf functions with a sample text.
 Since we don't have a test PDF, we test the internal logic with mock data.
 """
-from quizgen import _filter_by_difficulty
+from quizgen.utils import filter_by_difficulty as _filter_by_difficulty
 
 
 class TestFilterByDifficulty:

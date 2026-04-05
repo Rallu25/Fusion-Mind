@@ -8,7 +8,12 @@ GENERIC_WORDS = {
     "process", "model", "models", "data", "system", "systems", "result", "results",
     "method", "methods", "structure", "energy", "learning", "rules", "cells",
     "plant", "plants", "human", "brain", "noise", "random", "tasks", "branch",
-    "object", "objects", "study", "problem", "information", "science", "space"
+    "object", "objects", "study", "problem", "information", "science", "space",
+    "term", "concept", "phenomenon", "substance", "element", "unit",
+    "property", "characteristic", "feature", "aspect", "attribute",
+    "type", "kind", "form", "category", "class",
+    "theory", "principle", "law", "rule", "mechanism",
+    "example", "case", "instance", "factor", "component",
 }
 
 # sufixe comune pentru detectarea rădăcinii comune
@@ -252,8 +257,22 @@ def grammatical_filter(correct: str, distractors: list[str],
     correct_plural = _is_likely_plural(correct_lower)
 
     filtered = []
+    correct_word_count = len(correct.split())
+
     for d in distractors:
         d_lower = d.lower()
+
+        # 0. Multi-word distractors for single-word targets (and vice versa) are suspicious
+        d_word_count = len(d.split())
+        if correct_word_count == 1 and d_word_count > 1:
+            continue
+        if correct_word_count > 1 and d_word_count == 1:
+            continue
+
+        # 0b. Reject gerund phrases as distractors for non-gerund targets
+        if d_lower.split()[0].endswith("ing") and not correct_lower.split()[0].endswith("ing"):
+            if d_word_count > 1:
+                continue
 
         # 1. Article agreement: "a" + consonant, "an" + vowel
         if preceding == "a" and d_lower and d_lower[0] in _VOWELS:
@@ -278,9 +297,18 @@ def grammatical_filter(correct: str, distractors: list[str],
                     continue
 
         # 4. Don't use common verbs as distractors for nouns
-        if preceding in ("the", "a", "an", "this", "that", "each", "every"):
+        _NOUN_CONTEXT = {"the", "a", "an", "this", "that", "each", "every",
+                         "in", "of", "for", "by", "with", "from", "on", "at",
+                         "through", "between", "during", "about", "into"}
+        if preceding in _NOUN_CONTEXT:
             if d_lower in _COMMON_VERBS:
                 continue
+            # Also reject past tenses and adjectives after prepositions
+            if preceding in ("in", "of", "for", "by", "with", "from", "on", "at",
+                             "through", "between", "during", "about", "into"):
+                d_type_check = _guess_word_type(d_lower)
+                if d_type_check in ("verb", "adjective") and d_lower.endswith(("ed", "er", "est")):
+                    continue
 
         # 5. Adverbs should not be distractors for non-adverbs
         if d_lower.endswith("ly") and not correct_lower.endswith("ly"):

@@ -108,29 +108,29 @@
       <div id="quiz-info" style="font-size:13px;color:var(--text-dim);margin-bottom:16px"></div>
       <div class="field">
         <label>Your Name</label>
-        <input type="text" id="student-name" placeholder="Enter your full name">
+        <input type="text" id="student-name" placeholder="Enter your full name" aria-required="true" aria-label="Student name">
       </div>
-      <div id="intro-msg" class="msg err hidden"></div>
-      <button class="btn" id="start-btn" onclick="startQuiz()" disabled>Start Quiz</button>
+      <div id="intro-msg" class="msg err hidden" role="alert"></div>
+      <button class="btn" id="start-btn" onclick="startQuiz()" disabled aria-label="Start quiz">Start Quiz</button>
     </div></div>
   </div>
 
   <!-- QUIZ -->
   <div id="quiz-section" class="hidden">
-    <div id="timer-bar" class="timer-bar hidden"></div>
+    <div id="timer-bar" class="timer-bar hidden" role="timer" aria-live="polite" aria-label="Time remaining"></div>
     <div class="progress-wrap"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
     <div id="question-container"></div>
     <div class="nav">
-      <button class="btn-ghost" id="prev-btn" onclick="navigate(-1)" disabled>← prev</button>
-      <span class="nav-counter" id="nav-counter"></span>
-      <button class="btn-ghost" id="next-btn" onclick="navigate(1)">next →</button>
+      <button class="btn-ghost" id="prev-btn" onclick="navigate(-1)" disabled aria-label="Previous question">← prev</button>
+      <span class="nav-counter" id="nav-counter" aria-live="polite"></span>
+      <button class="btn-ghost" id="next-btn" onclick="navigate(1)" aria-label="Next question">next →</button>
     </div>
   </div>
 
   <!-- RESULTS -->
   <div id="results-section" class="hidden">
     <div class="panel"><div class="panel-body score-panel">
-      <div class="score-big" id="score-big">—</div>
+      <div class="score-big" id="score-big" aria-live="assertive">—</div>
       <span class="score-label">your score</span>
       <p class="score-msg" id="score-msg"></p>
     </div></div>
@@ -232,9 +232,15 @@
     return true;
   }
 
-  function startQuiz() {
+  async function startQuiz() {
     const name = document.getElementById('student-name').value.trim();
     if (!name) { showError('Please enter your name.'); return; }
+
+    // Record start time on server for timer validation
+    try {
+      await fetch(`${API}/quiz/${QUIZ_ID}/start`, { method: 'POST' });
+    } catch (e) { /* non-blocking */ }
+
     document.getElementById('intro-section').classList.add('hidden');
     document.getElementById('quiz-section').classList.remove('hidden');
     if (quizData.timer_minutes > 0) {

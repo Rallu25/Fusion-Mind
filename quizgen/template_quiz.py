@@ -7,18 +7,7 @@ from .tfidf_rank import rank_sentences
 from .distractors import build_vocab, normalize_word, shares_stem, KNOWLEDGE_BASE
 from .template_patterns import match_sentence, clean_answer
 from .kb_expand import expand_knowledge_base
-
-# Import shared difficulty filter (will be available after __init__ loads)
-def _filter_by_difficulty(candidates, difficulty, n):
-    sorted_c = sorted(candidates, key=lambda x: x["quality_score"], reverse=True)
-    if difficulty == "easy":
-        return sorted_c[:n]
-    elif difficulty == "hard":
-        return sorted_c[-n:] if len(sorted_c) >= n else sorted_c
-    else:
-        mid = len(sorted_c) // 4
-        end = mid + n
-        return sorted_c[mid:end] if end <= len(sorted_c) else sorted_c[mid:]
+from .utils import filter_by_difficulty
 
 
 # Regex simplu pentru extragerea sintagmelor nominale (fallback distractors)
@@ -327,6 +316,19 @@ def generate_template_quiz_from_pdf(pdf_path: str, n_questions: int = 10, seed: 
         if not answer or len(answer) < 3:
             continue
 
+        # Skip present perfect: "X has/have + past participle" produces bad questions
+        # e.g., "Research has identified..." → "What does Research have?" + "identified..."
+        if rule.name == "property":
+            verb_text = m.group("verb").lower()
+            if verb_text in ("has", "have"):
+                first_answer_word = answer.split()[0].lower() if answer.split() else ""
+                if (first_answer_word.endswith("ed") or first_answer_word.endswith("en")
+                        or first_answer_word in ("been", "become", "begun", "broken",
+                        "chosen", "done", "driven", "eaten", "fallen", "given", "gone",
+                        "grown", "known", "made", "met", "run", "seen", "shown",
+                        "spoken", "taken", "thought", "told", "understood", "written")):
+                    continue
+
         if not question_text or len(question_text) < 10:
             continue
 
@@ -336,6 +338,12 @@ def generate_template_quiz_from_pdf(pdf_path: str, n_questions: int = 10, seed: 
 
         # respinge întrebări unde subiectul pare trunchiat sau invalid
         if subject and len(subject) < 3:
+            continue
+
+        # respinge subiecte cu paranteze neîmpereechiate sau caractere stray
+        if subject.count("(") != subject.count(")"):
+            continue
+        if any(ch in subject for ch in "=+^{}[]<>"):
             continue
 
         # respinge subiecte prea lungi (>5 cuvinte = probabil fragment de propoziție)
@@ -442,7 +450,7 @@ def generate_template_quiz_from_pdf(pdf_path: str, n_questions: int = 10, seed: 
     MIN_QUALITY_SCORE = 20 if difficulty == "hard" else 30 if difficulty == "medium" else 40
     filtered = [q for q in candidates if q["quality_score"] >= MIN_QUALITY_SCORE]
 
-    questions = _filter_by_difficulty(filtered, difficulty, n_questions)
+    questions = filter_by_difficulty(filtered, difficulty, n_questions)
 
     clean_questions = []
     for q in questions:

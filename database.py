@@ -37,6 +37,14 @@ def init_db():
             FOREIGN KEY (teacher_id) REFERENCES teachers(id)
         );
 
+        CREATE TABLE IF NOT EXISTS quiz_starts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            quiz_id TEXT NOT NULL,
+            student_ip TEXT NOT NULL,
+            started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(quiz_id, student_ip)
+        );
+
         CREATE TABLE IF NOT EXISTS submissions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             quiz_id TEXT NOT NULL,
@@ -49,6 +57,10 @@ def init_db():
             submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (quiz_id) REFERENCES shared_quizzes(id)
         );
+
+        CREATE INDEX IF NOT EXISTS idx_quizzes_teacher ON shared_quizzes(teacher_id);
+        CREATE INDEX IF NOT EXISTS idx_submissions_quiz ON submissions(quiz_id);
+        CREATE INDEX IF NOT EXISTS idx_quiz_starts_quiz ON quiz_starts(quiz_id, student_ip);
     """)
     conn.commit()
     conn.close()
@@ -148,15 +160,20 @@ def get_teacher_quizzes(teacher_id: int) -> list[dict]:
 
 def delete_shared_quiz(quiz_id: str, teacher_id: int) -> bool:
     conn = get_db()
-    conn.execute("DELETE FROM submissions WHERE quiz_id = ?", (quiz_id,))
-    cur = conn.execute(
-        "DELETE FROM shared_quizzes WHERE id = ? AND teacher_id = ?",
-        (quiz_id, teacher_id)
-    )
-    conn.commit()
-    deleted = cur.rowcount > 0
-    conn.close()
-    return deleted
+    try:
+        conn.execute("DELETE FROM quiz_starts WHERE quiz_id = ?", (quiz_id,))
+        conn.execute("DELETE FROM submissions WHERE quiz_id = ?", (quiz_id,))
+        cur = conn.execute(
+            "DELETE FROM shared_quizzes WHERE id = ? AND teacher_id = ?",
+            (quiz_id, teacher_id)
+        )
+        conn.commit()
+        return cur.rowcount > 0
+    except Exception:
+        conn.rollback()
+        return False
+    finally:
+        conn.close()
 
 
 # ── Submission CRUD ──
@@ -205,3 +222,32 @@ def ip_already_submitted(quiz_id: str, ip: str) -> bool:
     ).fetchone()
     conn.close()
     return row is not None
+
+
+# ── Quiz Start Tracking ──
+
+def record_quiz_start(quiz_id: str, student_ip: str) -> bool:
+    """Record when a student started a quiz. Returns False if already started."""
+    conn = get_db()
+    try:
+        conn.execute(
+            "INSERT OR IGNORE INTO quiz_starts (quiz_id, student_ip) VALUES (?, ?)",
+            (quiz_id, student_ip)
+        )
+        conn.commit()
+        return True
+    except Exception:
+        return False
+    finally:
+        conn.close()
+
+
+def get_quiz_start_time(quiz_id: str, student_ip: str) -> str | None:
+    """Return the started_at timestamp for this student/quiz, or None."""
+    conn = get_db()
+    row = conn.execute(
+        "SELECT started_at FROM quiz_starts WHERE quiz_id = ? AND student_ip = ?",
+        (quiz_id, student_ip)
+    ).fetchone()
+    conn.close()
+    return row["started_at"] if row else None

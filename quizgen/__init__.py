@@ -11,11 +11,7 @@ from .image_quiz import generate_image_quiz_from_pdf
 from .truefalse_quiz import generate_truefalse_quiz_from_pdf
 from .matching_quiz import generate_matching_quiz_from_pdf
 from .kb_expand import expand_knowledge_base
-
-
-BAD_STARTS = {
-    "it", "they", "this", "that", "these", "those", "as", "such"
-}
+from .utils import BAD_STARTS, filter_by_difficulty
 
 WEAK_TARGETS = {
     "solar", "optical", "electric", "predictable", "surface",
@@ -78,28 +74,6 @@ def score_question(sentence: str, target: str, options: list[str]) -> int:
             break
 
     return score
-
-
-def _filter_by_difficulty(candidates: list[dict], difficulty: str, n: int) -> list[dict]:
-    """Select questions based on difficulty level.
-    Easy = highest quality scores (clearest questions).
-    Hard = lowest quality scores (trickier/more nuanced).
-    Medium = middle range.
-    """
-    if not candidates:
-        return []
-
-    sorted_c = sorted(candidates, key=lambda x: x["quality_score"], reverse=True)
-
-    if difficulty == "easy":
-        return sorted_c[:n]
-    elif difficulty == "hard":
-        # Take from the bottom but still above minimum threshold
-        return sorted_c[-n:] if len(sorted_c) >= n else sorted_c
-    else:  # medium
-        mid = len(sorted_c) // 4
-        end = mid + n
-        return sorted_c[mid:end] if end <= len(sorted_c) else sorted_c[mid:]
 
 
 def generate_quiz_from_pdf(pdf_path: str, n_questions: int = 10, seed: int = 42, difficulty: str = "medium") -> dict:
@@ -182,7 +156,7 @@ def generate_quiz_from_pdf(pdf_path: str, n_questions: int = 10, seed: int = 42,
     MIN_QUALITY_SCORE = 40 if difficulty == "hard" else 50 if difficulty == "medium" else 60
     filtered_candidates = [q for q in candidates if q["quality_score"] >= MIN_QUALITY_SCORE]
 
-    questions = _filter_by_difficulty(filtered_candidates, difficulty, n_questions)
+    questions = filter_by_difficulty(filtered_candidates, difficulty, n_questions)
 
     clean_questions = []
     for q in questions:

@@ -179,6 +179,46 @@ def _extract_is_found_in(sentences: list[str]) -> list[tuple[str, str]]:
     return results
 
 
+def _extract_parenthetical(sentences: list[str]) -> list[list[str]]:
+    """Extract 'X (A, B, C)' patterns → A, B, C are mutual distractors."""
+    results = []
+    pat = re.compile(
+        r"[A-Za-z][\w\s\-]*?\s*\(([^)]{5,80})\)"
+    )
+    for sent in sentences:
+        for m in pat.finditer(sent):
+            inside = m.group(1)
+            # Only process if it looks like a list (has commas or "and")
+            if "," not in inside and " and " not in inside:
+                continue
+            parts = re.split(r"\s*,\s*|\s+and\s+|\s+or\s+", inside)
+            terms = [_clean_term(p) for p in parts if _clean_term(p)]
+            terms = [t for t in terms if _is_valid_term(t)]
+            if len(terms) >= 2:
+                results.append(terms[:5])
+    return results
+
+
+def _extract_colon_list(sentences: list[str]) -> list[list[str]]:
+    """Extract 'X: A, B, C' patterns → A, B, C are mutual distractors."""
+    results = []
+    pat = re.compile(
+        r"[A-Za-z][\w\s\-]*?:\s*([^.;]{5,80})"
+    )
+    for sent in sentences:
+        for m in pat.finditer(sent):
+            rest = m.group(1)
+            # Only process if it looks like a list
+            if "," not in rest and " and " not in rest:
+                continue
+            parts = re.split(r"\s*,\s*|\s+and\s+|\s+or\s+", rest)
+            terms = [_clean_term(p) for p in parts if _clean_term(p)]
+            terms = [t for t in terms if _is_valid_term(t)]
+            if len(terms) >= 2:
+                results.append(terms[:5])
+    return results
+
+
 def _extract_definitions(sentences: list[str]) -> list[tuple[str, str]]:
     """Extract 'X is/are the Y' patterns to find related category terms."""
     results = []
@@ -232,6 +272,32 @@ def extract_new_terms(sentences: list[str]) -> dict[str, list[str]]:
             if not key or len(key) < MIN_TERM_LEN:
                 continue
             others = [c for j, c in enumerate(children) if j != i]
+            if key not in new_entries:
+                new_entries[key] = []
+            for other in others:
+                if other.lower() not in [x.lower() for x in new_entries[key]]:
+                    new_entries[key].append(other)
+
+    # From parenthetical lists: "X (A, B, C)" → mutual distractors
+    for group in _extract_parenthetical(sentences):
+        for i, term in enumerate(group):
+            key = _make_key(term)
+            if not key or len(key) < MIN_TERM_LEN:
+                continue
+            others = [g for j, g in enumerate(group) if j != i]
+            if key not in new_entries:
+                new_entries[key] = []
+            for other in others:
+                if other.lower() not in [x.lower() for x in new_entries[key]]:
+                    new_entries[key].append(other)
+
+    # From colon lists: "X: A, B, C" → mutual distractors
+    for group in _extract_colon_list(sentences):
+        for i, term in enumerate(group):
+            key = _make_key(term)
+            if not key or len(key) < MIN_TERM_LEN:
+                continue
+            others = [g for j, g in enumerate(group) if j != i]
             if key not in new_entries:
                 new_entries[key] = []
             for other in others:
