@@ -144,6 +144,7 @@
   let quizData = null, questions = [], answers = {}, current = 0;
   let timerInterval = null, timeLeft = 0;
   let matchSel = { type: null, idx: null }, matchMap = {};
+  let sessionToken = null;
 
   // Load quiz data
   async function loadQuiz() {
@@ -190,6 +191,7 @@
       current,
       timeLeft,
       started: true,
+      sessionToken,
     };
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(data));
   }
@@ -214,6 +216,7 @@
     document.getElementById('student-name').value = session.studentName;
     answers = session.answers || {};
     current = session.current || 0;
+    sessionToken = session.sessionToken || null;
 
     // Show quiz section
     document.getElementById('intro-section').classList.add('hidden');
@@ -236,10 +239,17 @@
     const name = document.getElementById('student-name').value.trim();
     if (!name) { showError('Please enter your name.'); return; }
 
-    // Record start time on server for timer validation
+    // Record start time on server and obtain anti-fraud session token
     try {
-      await fetch(`${API}/quiz/${QUIZ_ID}/start`, { method: 'POST' });
-    } catch (e) { /* non-blocking */ }
+      const res = await fetch(`${API}/quiz/${QUIZ_ID}/start`, { method: 'POST' });
+      const data = await res.json();
+      if (data.error) { showError(data.error); return; }
+      sessionToken = data.session_token || null;
+      if (!sessionToken) { showError('Could not start a secure session. Please reload the page.'); return; }
+    } catch (e) {
+      showError('Could not start quiz: ' + e.message);
+      return;
+    }
 
     document.getElementById('intro-section').classList.add('hidden');
     document.getElementById('quiz-section').classList.remove('hidden');
@@ -414,12 +424,19 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           student_name: document.getElementById('student-name').value.trim(),
-          answers, score: ok, total, pct
+          answers, score: ok, total, pct,
+          session_token: sessionToken,
         })
       });
       const data = await res.json();
-      if (data.error) console.warn(data.error);
-    } catch (e) { console.warn('Submit failed:', e); }
+      if (data.error) {
+        alert(data.error);
+        return;
+      }
+    } catch (e) {
+      alert('Submit failed: ' + e.message);
+      return;
+    }
 
     clearSession();
     localStorage.setItem(`submitted_${QUIZ_ID}`, 'true');

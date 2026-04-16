@@ -503,7 +503,8 @@
     "rna",
     "protein",
     "chromosome",
-    "gene"
+    "gene",
+    "into chromosomes"
   ],
   "rna": [
     "dna",
@@ -3790,5 +3791,50 @@
   ],
   "stellar-mass black holes": [
     "Black holes"
+  ],
+  "into chromosomes": [
+    "DNA"
+  ],
+  "converts glucose": [
+    "oxygen into"
+  ],
+  "oxygen into": [
+    "converts glucose"
+  ],
+  "carbon dioxide": [
+    "water",
+    "ATP energy"
+  ],
+  "water": [
+    "carbon dioxide",
+    "ATP energy"
+  ],
+  "atp energy": [
+    "carbon dioxide",
+    "water"
+  ],
+  "apparatus modifies": [
+    "sorts",
+    "packages proteins"
+  ],
+  "sorts": [
+    "apparatus modifies",
+    "packages proteins"
+  ],
+  "packages proteins": [
+    "apparatus modifies",
+    "sorts"
+  ],
+  "waste materials": [
+    "cellular debris"
+  ],
+  "cellular debris": [
+    "waste materials"
+  ],
+  "gas exchange": [
+    "transpiration"
+  ],
+  "transpiration": [
+    "gas exchange"
   ]
 }

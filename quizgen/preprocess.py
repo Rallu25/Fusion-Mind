@@ -76,18 +76,19 @@ def split_sentences(text: str) -> list[str]:
     text = _fix_glued_sentences(text)
     sentences = _SENT_SPLIT.split(text)
 
-    # Heading labels to strip from start of sentences
+    # Strip heading-like labels at start of sentences: "Word Word: rest of sentence"
+    # Matches 1-4 capitalized words followed by colon, e.g. "Key Insight:", "Cost Arbitrage:"
     _HEADING_LABELS = re.compile(
-        r"^(?:Key\s+Insight|Note|Example|Definition|Important|Summary|"
-        r"Tip|Warning|Reminder|Observation|Conclusion|Overview|"
-        r"Fun\s+Fact|Did\s+You\s+Know|Quick\s+Review)\s*:\s*",
-        re.IGNORECASE
+        r"^(?:[A-Z][A-Za-z\-]*\s+){0,3}[A-Z][A-Za-z\-]*\s*:\s*",
     )
 
     result = []
     for sentence in sentences:
         # Strip normal and non-breaking whitespace
         sentence = sentence.strip().strip("\xa0\u200b\ufeff")
+
+        # Strip leading bullets, dashes, numbers, symbols
+        sentence = re.sub(r"^[\s\-–—•*·▪►◦○●■□▸\d.)\]]+\s*", "", sentence).strip()
 
         # Remove heading labels from start of sentence
         sentence = _HEADING_LABELS.sub("", sentence).strip()

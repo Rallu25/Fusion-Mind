@@ -282,7 +282,8 @@ def generate_template_quiz_from_pdf(pdf_path: str, n_questions: int = 10, seed: 
     try:
         expand_knowledge_base(sentences)
     except Exception:
-        pass
+        from logging_config import get_logger
+        get_logger().exception("kb.expand.failed", extra={"event": "kb.expand.failed"})
 
     ranked_sentences = rank_sentences(sentences, top_k=220)
 

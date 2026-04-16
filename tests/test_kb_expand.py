@@ -172,3 +172,36 @@ class TestExtractNewTerms:
         sents = ["The cat sat on the mat.", "It was a good day."]
         terms = extract_new_terms(sents)
         assert len(terms) == 0
+
+
+class TestConcurrentExpand:
+    """Verify that parallel expand_knowledge_base calls do not lose updates."""
+
+    def test_parallel_writes_preserve_all_terms(self, tmp_path, monkeypatch):
+        import json
+        import threading
+        from quizgen import kb_expand
+
+        kb_file = tmp_path / "knowledge_base.json"
+        monkeypatch.setattr(kb_expand, "KNOWLEDGE_BASE_PATH", str(kb_file))
+        monkeypatch.setattr(kb_expand, "KB_LOCK_PATH", str(kb_file) + ".lock")
+
+        # Each worker adds a distinct coordination pattern to the KB
+        sentence_batches = [
+            [f"{letter}lpha{i}, {letter}eta{i}, and {letter}amma{i} are similar concepts."]
+            for i, letter in enumerate(["A", "B", "C", "D", "E", "F", "G", "H"])
+        ]
+
+        def worker(sents):
+            kb_expand.expand_knowledge_base(sents)
+
+        threads = [threading.Thread(target=worker, args=(b,)) for b in sentence_batches]
+        for t in threads: t.start()
+        for t in threads: t.join()
+
+        with open(kb_file, "r", encoding="utf-8") as f:
+            kb = json.load(f)
+
+        # Without the lock, threads overwrite each other and we'd see only
+        # ~1 batch worth of terms. With the lock, every batch survives.
+        assert len(kb) >= 8, f"Expected >=8 distinct terms, got {len(kb)}: {list(kb.keys())}"

@@ -7,13 +7,19 @@ from dotenv import load_dotenv
 load_dotenv()
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email_validator import validate_email, EmailNotValidError
 
 from fastapi import FastAPI, UploadFile, File, Form, Body, Header, Request
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from quizgen import generate_quiz_from_pdf, generate_template_quiz_from_pdf, generate_image_quiz_from_pdf, generate_truefalse_quiz_from_pdf, generate_matching_quiz_from_pdf
-from database import init_db, create_teacher, get_teacher_by_email, get_teacher_by_id, update_teacher, create_shared_quiz, get_shared_quiz, get_teacher_quizzes, delete_shared_quiz, save_submission, get_quiz_submissions, student_already_submitted, ip_already_submitted, record_quiz_start, get_quiz_start_time
-from auth import hash_password, verify_password, create_token, verify_token
+from database import init_db, create_teacher, get_teacher_by_email, get_teacher_by_id, update_teacher, create_shared_quiz, get_shared_quiz, get_teacher_quizzes, delete_shared_quiz, save_submission, get_quiz_submissions, student_already_submitted, ip_already_submitted, record_quiz_start, get_quiz_start_time, create_quiz_session, consume_quiz_session
+from auth import hash_password, verify_password, create_token, verify_token, create_session_token, verify_session_token, ua_fingerprint
+from logging_config import get_logger
+
+log = get_logger()
+from quiz_export import generate_quiz_pdf
+from quiz_gift import generate_gift
 
 from typing import List, Optional
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,22 +32,32 @@ app = FastAPI(title="NLP Disertatie Quiz Generator")
 
 # ── In-memory rate limiter ──
 
-_login_attempts: dict[str, list[float]] = defaultdict(list)
-LOGIN_RATE_LIMIT = 5          # max attempts
-LOGIN_RATE_WINDOW = 300       # per 5 minutes (seconds)
+_rate_buckets: dict[tuple[str, str], list[float]] = defaultdict(list)
+
+RATE_LIMITS: dict[str, tuple[int, int]] = {
+    "login":    (5, 300),   # 5 attempts / 5 minutes
+    "generate": (5, 60),    # 5 PDF generations / minute
+    "submit":   (10, 60),   # 10 quiz submissions / minute
+    "email":    (5, 60),    # 5 result emails / minute
+}
 
 
-def _is_rate_limited(ip: str) -> bool:
-    """Return True if IP has exceeded login rate limit."""
+def _is_rate_limited(ip: str, bucket: str = "login") -> bool:
+    """Return True if IP has exceeded the rate limit for the given bucket."""
+    limit, window = RATE_LIMITS[bucket]
     now = time.time()
-    attempts = _login_attempts[ip]
-    # Remove old attempts outside the window
-    _login_attempts[ip] = [t for t in attempts if now - t < LOGIN_RATE_WINDOW]
-    return len(_login_attempts[ip]) >= LOGIN_RATE_LIMIT
+    key = (bucket, ip)
+    attempts = [t for t in _rate_buckets[key] if now - t < window]
+    _rate_buckets[key] = attempts
+    return len(attempts) >= limit
+
+
+def _record_attempt(ip: str, bucket: str = "login"):
+    _rate_buckets[(bucket, ip)].append(time.time())
 
 
 def _record_login_attempt(ip: str):
-    _login_attempts[ip].append(time.time())
+    _record_attempt(ip, "login")
 
 # Initialize database on startup
 init_db()
@@ -178,11 +194,17 @@ def _generate_mixed_quiz(file_path: str, n_questions: int, difficulty: str) -> d
 
 @app.post("/generate-quiz")
 async def generate_quiz(
+    request: Request,
     file: UploadFile = File(...),
     n_questions: int = Form(10),
     quiz_type: str = Form("cloze"),
     difficulty: str = Form("medium")
 ):
+    client_ip = request.client.host if request.client else "unknown"
+    if _is_rate_limited(client_ip, "generate"):
+        return {"error": "Too many quiz generations. Please wait a minute and try again."}
+    _record_attempt(client_ip, "generate")
+
     param_err = _validate_quiz_params(n_questions, quiz_type, difficulty)
     if param_err:
         return {"error": param_err}
@@ -207,11 +229,17 @@ async def generate_quiz(
 
 @app.post("/generate-quiz-two-pdfs")
 async def generate_quiz_two_pdfs(
+    request: Request,
     file1: UploadFile = File(...),
     file2: UploadFile = File(...),
     n_questions_file1: int = Form(10),
     n_questions_file2: int = Form(10)
 ):
+    client_ip = request.client.host if request.client else "unknown"
+    if _is_rate_limited(client_ip, "generate"):
+        return {"error": "Too many quiz generations. Please wait a minute and try again."}
+    _record_attempt(client_ip, "generate")
+
     if n_questions_file1 < 1 or n_questions_file1 > MAX_QUESTIONS:
         return {"error": f"n_questions_file1 must be between 1 and {MAX_QUESTIONS}."}
     if n_questions_file2 < 1 or n_questions_file2 > MAX_QUESTIONS:
@@ -288,11 +316,17 @@ async def generate_quiz_two_pdfs(
 
 @app.post("/generate-quiz-multi")
 async def generate_quiz_multi(
+    request: Request,
     files: List[UploadFile] = File(...),
     n_questions_per_file: int = Form(10),
     quiz_type: str = Form("cloze"),
     difficulty: str = Form("medium")
 ):
+    client_ip = request.client.host if request.client else "unknown"
+    if _is_rate_limited(client_ip, "generate"):
+        return {"error": "Too many quiz generations. Please wait a minute and try again."}
+    _record_attempt(client_ip, "generate")
+
     if not files:
         return {"error": "No files were sent."}
 
@@ -345,26 +379,33 @@ async def generate_quiz_multi(
 
 # ── EMAIL RESULTS ──
 
-SMTP_HOST = os.getenv("SMTP_HOST", "smtp.mail.yahoo.com")
+SMTP_HOST = os.getenv("SMTP_HOST", "")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USER = os.getenv("SMTP_USER", "ralucaosman@yahoo.com")
+SMTP_USER = os.getenv("SMTP_USER", "")
 SMTP_PASS = os.getenv("SMTP_PASS", "")
-SMTP_FROM = os.getenv("SMTP_FROM", "ralucaosman@yahoo.com")
+SMTP_FROM = os.getenv("SMTP_FROM", "")
 
 
 @app.post("/send-results-email")
-async def send_results_email(payload: dict = Body(...)):
+async def send_results_email(request: Request, payload: dict = Body(...)):
+    client_ip = request.client.host if request.client else "unknown"
+    if _is_rate_limited(client_ip, "email"):
+        return {"success": False, "error": "Too many email requests. Please wait a minute and try again."}
+    _record_attempt(client_ip, "email")
+
     to_email = payload.get("email", "")
     score = payload.get("score", 0)
     total = payload.get("total", 0)
     pct = payload.get("pct", 0)
     rows = payload.get("rows", [])
 
-    if not to_email or "@" not in to_email:
+    try:
+        to_email = validate_email(to_email, check_deliverability=False).normalized
+    except EmailNotValidError:
         return {"success": False, "error": "Invalid email address."}
 
-    if not SMTP_USER or not SMTP_PASS:
-        return {"success": False, "error": "Email not configured. Set SMTP_USER and SMTP_PASS environment variables."}
+    if not SMTP_HOST or not SMTP_USER or not SMTP_PASS:
+        return {"success": False, "error": "Email not configured. Set SMTP_HOST, SMTP_USER and SMTP_PASS environment variables."}
 
     # Build HTML email
     rows_html = ""
@@ -418,9 +459,54 @@ async def send_results_email(payload: dict = Body(...)):
             server.starttls()
             server.login(SMTP_USER, SMTP_PASS)
             server.send_message(msg)
+        log.info("email.sent", extra={"event": "email.sent", "to": to_email, "score": score, "total": total})
         return {"success": True}
     except Exception as e:
+        log.exception("email.failed", extra={"event": "email.failed", "to": to_email})
         return {"success": False, "error": str(e)}
+
+
+# ── EXPORT QUIZ AS PDF ──
+
+@app.post("/export-quiz-pdf")
+async def export_quiz_pdf(payload: dict = Body(...)):
+    questions = payload.get("questions", [])
+    title = payload.get("title", "Quiz")
+
+    if not questions:
+        return {"error": "No questions to export."}
+
+    try:
+        filepath = generate_quiz_pdf(questions, title=title)
+        return FileResponse(
+            filepath,
+            media_type="application/pdf",
+            filename=f"{title.replace(' ', '_')}.pdf",
+        )
+    except Exception as e:
+        log.exception("export.pdf.failed", extra={"event": "export.pdf.failed", "title": title})
+        return {"error": f"PDF generation failed: {str(e)}"}
+
+
+@app.post("/export-quiz-gift")
+async def export_quiz_gift(payload: dict = Body(...)):
+    questions = payload.get("questions", [])
+    title = payload.get("title", "Quiz")
+
+    if not questions:
+        return {"error": "No questions to export."}
+
+    gift_text = generate_gift(questions, title=title)
+    # Write to temp file and return
+    import tempfile
+    tmp = tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False, encoding="utf-8")
+    tmp.write(gift_text)
+    tmp.close()
+    return FileResponse(
+        tmp.name,
+        media_type="text/plain",
+        filename=f"{title.replace(' ', '_')}_GIFT.txt",
+    )
 
 
 # ── AUTH ENDPOINTS ──
@@ -442,7 +528,9 @@ async def auth_register(payload: dict = Body(...)):
     full_name = payload.get("full_name", "").strip()
     institution = payload.get("institution", "").strip()
 
-    if not email or "@" not in email:
+    try:
+        email = validate_email(email, check_deliverability=False).normalized.lower()
+    except EmailNotValidError:
         return {"error": "Please enter a valid email address."}
     if not password or len(password) < 4:
         return {"error": "Password must be at least 4 characters."}
@@ -453,9 +541,11 @@ async def auth_register(payload: dict = Body(...)):
     teacher_id = create_teacher(email, pw_hash, full_name, institution)
 
     if teacher_id == -1:
+        log.info("auth.register.duplicate", extra={"event": "auth.register.duplicate", "email": email})
         return {"error": "An account with this email already exists."}
 
     token = create_token(teacher_id)
+    log.info("auth.register.ok", extra={"event": "auth.register.ok", "teacher_id": teacher_id, "email": email})
     return {"success": True, "token": token, "email": email, "full_name": full_name}
 
 
@@ -464,6 +554,7 @@ async def auth_login(request: Request, payload: dict = Body(...)):
     client_ip = request.client.host if request.client else "unknown"
 
     if _is_rate_limited(client_ip):
+        log.warning("auth.login.rate_limited", extra={"event": "auth.login.rate_limited", "ip": client_ip})
         return {"error": "Too many login attempts. Please try again in a few minutes."}
 
     email = payload.get("email", "").strip().lower()
@@ -472,9 +563,11 @@ async def auth_login(request: Request, payload: dict = Body(...)):
     teacher = get_teacher_by_email(email)
     if not teacher or not verify_password(password, teacher["password_hash"]):
         _record_login_attempt(client_ip)
+        log.warning("auth.login.failed", extra={"event": "auth.login.failed", "email": email, "ip": client_ip})
         return {"error": "Invalid email or password."}
 
     token = create_token(teacher["id"])
+    log.info("auth.login.ok", extra={"event": "auth.login.ok", "teacher_id": teacher["id"], "ip": client_ip})
     return {
         "success": True, "token": token,
         "email": teacher["email"],
@@ -575,6 +668,99 @@ async def teacher_create_quiz(
     }
 
 
+@app.post("/teacher/generate-quiz")
+async def teacher_generate_quiz(
+    request: Request,
+    file: UploadFile = File(...),
+    quiz_type: str = Form("cloze"),
+    difficulty: str = Form("medium"),
+    n_questions: int = Form(10),
+    authorization: Optional[str] = Header(None)
+):
+    """Generate quiz questions and return them for review (no saving)."""
+    teacher = _get_teacher_from_token(authorization)
+    if not teacher:
+        return {"error": "Not authenticated."}
+
+    client_ip = request.client.host if request.client else "unknown"
+    if _is_rate_limited(client_ip, "generate"):
+        return {"error": "Too many quiz generations. Please wait a minute and try again."}
+    _record_attempt(client_ip, "generate")
+
+    param_err = _validate_quiz_params(n_questions, quiz_type, difficulty)
+    if param_err:
+        return {"error": param_err}
+
+    content = await file.read()
+    pdf_err = _validate_pdf(content, file.filename)
+    if pdf_err:
+        return {"error": pdf_err}
+
+    filename = f"{uuid.uuid4().hex}.pdf"
+    file_path = os.path.join(UPLOAD_DIR, filename)
+
+    with open(file_path, "wb") as f:
+        f.write(content)
+
+    try:
+        result = _generate_quiz_by_type(file_path, quiz_type, n_questions, difficulty)
+    finally:
+        _safe_remove(file_path)
+
+    if "error" in result:
+        return result
+
+    questions = result.get("questions", [])
+    if not questions:
+        return {"error": "No questions generated."}
+
+    return {"success": True, "questions": questions}
+
+
+@app.post("/teacher/save-quiz")
+async def teacher_save_quiz(payload: dict = Body(...), authorization: Optional[str] = Header(None)):
+    """Save edited questions as a shared quiz."""
+    teacher = _get_teacher_from_token(authorization)
+    if not teacher:
+        return {"error": "Not authenticated."}
+
+    questions = payload.get("questions", [])
+    title = payload.get("title", "Quiz")
+    quiz_type = payload.get("quiz_type", "mixed")
+    difficulty = payload.get("difficulty", "medium")
+    timer_minutes = payload.get("timer_minutes", 0)
+    show_answers = payload.get("show_answers", 0)
+
+    if not questions:
+        return {"error": "No questions to save."}
+
+    quiz_id = uuid.uuid4().hex[:12]
+    questions_json = json.dumps(questions)
+
+    ok = create_shared_quiz(
+        quiz_id=quiz_id,
+        teacher_id=teacher["id"],
+        title=title,
+        quiz_type=quiz_type,
+        difficulty=difficulty,
+        questions_json=questions_json,
+        timer_minutes=timer_minutes,
+        show_answers=show_answers,
+    )
+
+    if not ok:
+        log.error("quiz.save.failed", extra={
+            "event": "quiz.save.failed", "teacher_id": teacher["id"], "quiz_id": quiz_id,
+        })
+        return {"error": "Failed to save quiz."}
+
+    log.info("quiz.save.ok", extra={
+        "event": "quiz.save.ok", "teacher_id": teacher["id"], "quiz_id": quiz_id,
+        "quiz_type": quiz_type, "question_count": len(questions),
+    })
+    return {"success": True, "quiz_id": quiz_id, "question_count": len(questions)}
+
+
 @app.get("/teacher/my-quizzes")
 async def teacher_my_quizzes(authorization: Optional[str] = Header(None)):
     teacher = _get_teacher_from_token(authorization)
@@ -650,18 +836,28 @@ async def get_quiz_for_student(quiz_id: str):
 
 @app.post("/quiz/{quiz_id}/start")
 async def start_quiz(quiz_id: str, request: Request):
-    """Record that a student started this quiz (for server-side timer validation)."""
+    """Record that a student started this quiz and issue an anti-fraud session token."""
     quiz = get_shared_quiz(quiz_id)
     if not quiz:
         return {"error": "Quiz not found."}
 
     client_ip = request.client.host if request.client else ""
+    ua_fp = ua_fingerprint(request.headers.get("user-agent", ""))
+
     record_quiz_start(quiz_id, client_ip)
-    return {"success": True}
+    token, nonce = create_session_token(quiz_id, client_ip, ua_fp)
+    create_quiz_session(nonce, quiz_id, client_ip, ua_fp)
+
+    return {"success": True, "session_token": token}
 
 
 @app.post("/quiz/{quiz_id}/submit")
 async def submit_quiz(quiz_id: str, request: Request, payload: dict = Body(...)):
+    client_ip = request.client.host if request.client else "unknown"
+    if _is_rate_limited(client_ip, "submit"):
+        return {"error": "Too many submissions. Please wait a minute and try again."}
+    _record_attempt(client_ip, "submit")
+
     quiz = get_shared_quiz(quiz_id)
     if not quiz:
         return {"error": "Quiz not found."}
@@ -670,12 +866,35 @@ async def submit_quiz(quiz_id: str, request: Request, payload: dict = Body(...))
     if not student_name:
         return {"error": "Please enter your name."}
 
-    client_ip = request.client.host if request.client else ""
+    # Verify session token (binds this submission to the original /start)
+    session_token = payload.get("session_token", "")
+    ua_fp = ua_fingerprint(request.headers.get("user-agent", ""))
+    session = verify_session_token(session_token, quiz_id, client_ip, ua_fp)
+    if not session:
+        log.warning("quiz.submit.invalid_session", extra={
+            "event": "quiz.submit.invalid_session",
+            "quiz_id": quiz_id, "ip": client_ip,
+        })
+        return {"error": "Invalid or expired session. Please restart the quiz."}
+    if not consume_quiz_session(session["nonce"]):
+        log.warning("quiz.submit.replay", extra={
+            "event": "quiz.submit.replay",
+            "quiz_id": quiz_id, "ip": client_ip, "nonce": session["nonce"],
+        })
+        return {"error": "This session has already been used. Please restart the quiz."}
 
     # Check if already submitted (by name or by IP)
     if student_already_submitted(quiz_id, student_name):
+        log.info("quiz.submit.duplicate_name", extra={
+            "event": "quiz.submit.duplicate_name",
+            "quiz_id": quiz_id, "student_name": student_name,
+        })
         return {"error": "You have already submitted this quiz."}
     if ip_already_submitted(quiz_id, client_ip):
+        log.info("quiz.submit.duplicate_ip", extra={
+            "event": "quiz.submit.duplicate_ip",
+            "quiz_id": quiz_id, "ip": client_ip,
+        })
         return {"error": "A submission from this device has already been recorded."}
 
     # Server-side timer validation
@@ -699,6 +918,11 @@ async def submit_quiz(quiz_id: str, request: Request, payload: dict = Body(...))
     answers_json = json.dumps(answers)
     save_submission(quiz_id, student_name, answers_json, score, total, pct, ip=client_ip)
 
+    log.info("quiz.submit.ok", extra={
+        "event": "quiz.submit.ok",
+        "quiz_id": quiz_id, "student_name": student_name,
+        "score": score, "total": total, "pct": pct, "ip": client_ip,
+    })
     return {"success": True, "score": score, "total": total, "pct": pct}
 
 

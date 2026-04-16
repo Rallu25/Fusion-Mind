@@ -91,7 +91,8 @@ def generate_quiz_from_pdf(pdf_path: str, n_questions: int = 10, seed: int = 42,
     try:
         expand_knowledge_base(sentences)
     except Exception:
-        pass  # don't fail quiz generation if KB expansion fails
+        from logging_config import get_logger
+        get_logger().exception("kb.expand.failed", extra={"event": "kb.expand.failed"})
 
     vocab = build_vocab(sentences)
     ranked_sentences = rank_sentences(sentences, top_k=220)

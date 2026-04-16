@@ -67,6 +67,34 @@
   th { text-align: left; padding: 8px 10px; font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
   td { padding: 8px 10px; border-bottom: 1px solid rgba(30,45,61,0.5); }
 
+  .analytics { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  @media (max-width: 600px) { .analytics { grid-template-columns: 1fr; } }
+  .analytics-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 14px; }
+  .analytics-title { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+  .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .bar-label { font-size: 10px; color: var(--text-dim); min-width: 50px; text-align: right; }
+  .bar-track { flex: 1; height: 16px; background: var(--bg); border-radius: 2px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
+  .bar-value { font-size: 10px; color: var(--text-dim); min-width: 25px; }
+  .stat-big { font-family: var(--sans); font-size: 28px; font-weight: 800; color: var(--green); }
+  .stat-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+  .stat-row { display: flex; gap: 24px; margin-bottom: 12px; }
+  .missed-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 11px; }
+  .missed-item:last-child { border: none; }
+  .missed-pct { color: var(--red); font-weight: 700; }
+
+  .edit-q { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; margin-bottom: 10px; }
+  .edit-q:hover { border-color: var(--text-dim); }
+  .edit-q-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .edit-q-num { font-size: 10px; color: var(--muted); letter-spacing: 2px; }
+  .edit-q textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 2px; color: var(--text); font-family: var(--mono); font-size: 12px; padding: 8px; resize: vertical; min-height: 40px; }
+  .edit-q textarea:focus { border-color: var(--green-dim); outline: none; }
+  .edit-opt { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+  .edit-opt input[type=text] { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 2px; color: var(--text); font-family: var(--mono); font-size: 11px; padding: 6px 8px; }
+  .edit-opt input[type=text]:focus { border-color: var(--green-dim); outline: none; }
+  .edit-opt input[type=radio] { accent-color: var(--green); }
+  .edit-opt label { font-size: 10px; color: var(--muted); }
+
   .hidden { display: none; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 </style>
@@ -155,9 +183,24 @@
             </select>
           </div>
         </div>
-        <button class="btn" id="create-btn" onclick="createQuiz()" aria-label="Generate quiz and create share link">Generate & Share</button>
+        <button class="btn" id="create-btn" onclick="generateForReview()" aria-label="Generate quiz for review">Generate & Review</button>
         <div id="create-msg" class="hidden" role="alert"></div>
         <div id="share-link" class="hidden"></div>
+      </div>
+    </div>
+
+    <!-- EDIT QUESTIONS (shown after generation) -->
+    <div id="edit-panel" class="panel hidden">
+      <div class="panel-bar">
+        <span class="panel-label">review & edit questions</span>
+        <span style="margin-left:auto;font-size:10px;color:var(--text-dim)" id="edit-count"></span>
+      </div>
+      <div class="panel-body">
+        <div id="edit-list"></div>
+        <div style="display:flex;gap:10px;margin-top:16px">
+          <button class="btn" id="share-btn" onclick="shareEditedQuiz()" aria-label="Share quiz with students">Share Quiz</button>
+          <button class="btn-ghost" onclick="document.getElementById('edit-panel').classList.add('hidden')">Cancel</button>
+        </div>
       </div>
     </div>
 
@@ -254,8 +297,10 @@
     location.reload();
   }
 
-  // ── CREATE QUIZ ──
-  async function createQuiz() {
+  // ── GENERATE & REVIEW ──
+  let pendingQuestions = [];
+
+  async function generateForReview() {
     const fileInput = document.getElementById('quiz-file');
     if (!fileInput.files.length) { showCreateMsg('Please select a PDF file.', true); return; }
 
@@ -264,32 +309,132 @@
 
     const fd = new FormData();
     fd.append('file', fileInput.files[0]);
-    fd.append('title', document.getElementById('quiz-title').value);
     fd.append('quiz_type', document.getElementById('quiz-type').value);
     fd.append('difficulty', document.getElementById('quiz-diff').value);
     fd.append('n_questions', document.getElementById('quiz-n').value);
-    fd.append('timer_minutes', document.getElementById('quiz-timer').value);
-    fd.append('show_answers', document.getElementById('quiz-show-answers').value);
 
     try {
-      const res = await fetch(`${API}/teacher/create-quiz`, {
+      const res = await fetch(`${API}/teacher/generate-quiz`, {
         method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: fd
       });
       const data = await res.json();
       if (data.error) { showCreateMsg(data.error, true); return; }
 
+      pendingQuestions = data.questions;
+      showCreateMsg(`${pendingQuestions.length} questions generated. Review and edit below.`, false);
+      renderEditPanel();
+    } catch (e) {
+      showCreateMsg('Error: ' + e.message, true);
+    }
+    btn.disabled = false; btn.textContent = 'Generate & Review';
+  }
+
+  function renderEditPanel() {
+    const list = document.getElementById('edit-list');
+    const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+    list.innerHTML = pendingQuestions.map((q, qi) => {
+      const isMatch = q.quiz_type === 'matching';
+      const isTF = q.options && q.options.length === 2 && q.options[0] === 'True' && q.options[1] === 'False';
+
+      let html = `<div class="edit-q" id="eq-${qi}">
+        <div class="edit-q-header">
+          <span class="edit-q-num">Q${qi + 1}${isMatch ? ' (MATCHING)' : isTF ? ' (T/F)' : ''}</span>
+          <button class="btn-danger" onclick="deleteQuestion(${qi})" aria-label="Delete question ${qi + 1}">delete</button>
+        </div>
+        <textarea id="eq-text-${qi}" rows="2">${q.question.replace(/</g, '&lt;')}</textarea>`;
+
+      if (isMatch) {
+        html += `<div style="font-size:10px;color:var(--text-dim);margin-top:6px">Matching questions cannot be edited inline. Delete if unwanted.</div>`;
+      } else {
+        q.options.forEach((opt, oi) => {
+          const checked = oi === q.correct_index ? 'checked' : '';
+          html += `<div class="edit-opt">
+            <input type="radio" name="eq-correct-${qi}" value="${oi}" ${checked} id="eq-r-${qi}-${oi}">
+            <label for="eq-r-${qi}-${oi}">${letters[oi] || oi}</label>
+            <input type="text" value="${String(opt).replace(/"/g, '&quot;')}" id="eq-opt-${qi}-${oi}">
+          </div>`;
+        });
+      }
+
+      html += `</div>`;
+      return html;
+    }).join('');
+
+    document.getElementById('edit-count').textContent = `${pendingQuestions.length} questions`;
+    document.getElementById('edit-panel').classList.remove('hidden');
+  }
+
+  function deleteQuestion(idx) {
+    pendingQuestions.splice(idx, 1);
+    if (pendingQuestions.length === 0) {
+      document.getElementById('edit-panel').classList.add('hidden');
+      showCreateMsg('All questions deleted. Generate again.', true);
+      return;
+    }
+    renderEditPanel();
+  }
+
+  function collectEditedQuestions() {
+    return pendingQuestions.map((q, qi) => {
+      const textEl = document.getElementById(`eq-text-${qi}`);
+      if (!textEl) return q;
+
+      const edited = { ...q, question: textEl.value };
+
+      if (q.quiz_type !== 'matching') {
+        const newOptions = [];
+        for (let oi = 0; oi < q.options.length; oi++) {
+          const optEl = document.getElementById(`eq-opt-${qi}-${oi}`);
+          newOptions.push(optEl ? optEl.value : q.options[oi]);
+        }
+        edited.options = newOptions;
+
+        const checkedRadio = document.querySelector(`input[name="eq-correct-${qi}"]:checked`);
+        if (checkedRadio) edited.correct_index = parseInt(checkedRadio.value);
+      }
+
+      return edited;
+    });
+  }
+
+  async function shareEditedQuiz() {
+    const questions = collectEditedQuestions();
+    if (!questions.length) { showCreateMsg('No questions to share.', true); return; }
+
+    const btn = document.getElementById('share-btn');
+    btn.disabled = true; btn.textContent = 'Saving...';
+
+    try {
+      const res = await fetch(`${API}/teacher/save-quiz`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({
+          questions,
+          title: document.getElementById('quiz-title').value,
+          quiz_type: document.getElementById('quiz-type').value,
+          difficulty: document.getElementById('quiz-diff').value,
+          timer_minutes: parseInt(document.getElementById('quiz-timer').value) || 0,
+          show_answers: parseInt(document.getElementById('quiz-show-answers').value) || 0,
+        })
+      });
+      const data = await res.json();
+      if (data.error) { showCreateMsg(data.error, true); return; }
+
       const link = `${window.location.origin}/student/${data.quiz_id}`;
-      showCreateMsg(`Quiz created! ${data.question_count} questions.`, false);
+      showCreateMsg(`Quiz shared! ${data.question_count} questions.`, false);
       document.getElementById('share-link').innerHTML = `
         <div class="link-box" onclick="navigator.clipboard.writeText('${link}');this.style.borderColor='var(--green)'"
              title="Click to copy">${link}</div>
         <div style="font-size:10px;color:var(--text-dim);margin-top:4px">Click the link to copy it</div>`;
       document.getElementById('share-link').classList.remove('hidden');
+      document.getElementById('edit-panel').classList.add('hidden');
+      pendingQuestions = [];
       loadQuizzes();
     } catch (e) {
       showCreateMsg('Error: ' + e.message, true);
     }
-    btn.disabled = false; btn.textContent = 'Generate & Share';
+    btn.disabled = false; btn.textContent = 'Share Quiz';
   }
 
   function showCreateMsg(text, isErr) {
@@ -326,6 +471,8 @@
         <div class="quiz-card-actions">
           <button class="btn-ghost" onclick="navigator.clipboard.writeText('${link}')" aria-label="Copy share link for ${q.title}">copy link</button>
           <button class="btn-ghost" onclick="viewResults('${q.id}')" aria-label="View results for ${q.title}">results</button>
+          <button class="btn-ghost" onclick="exportQuizPDF('${q.id}')" aria-label="Export ${q.title} as PDF">PDF</button>
+          <button class="btn-ghost" onclick="exportQuizGIFT('${q.id}')" aria-label="Export ${q.title} as Moodle GIFT">GIFT</button>
           <button class="btn-danger" onclick="deleteQuiz('${q.id}')" aria-label="Delete quiz ${q.title}">delete</button>
         </div>
       </div>`;
@@ -355,18 +502,97 @@
       return;
     }
 
-    let html = `<table>
+    const subs = data.submissions;
+    const questions = data.quiz.questions;
+
+    // ── ANALYTICS ──
+    const scores = subs.map(s => s.pct);
+    const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+    const highest = Math.max(...scores);
+    const lowest = Math.min(...scores);
+
+    // Score distribution buckets
+    const buckets = { '0-24': 0, '25-49': 0, '50-74': 0, '75-89': 0, '90-100': 0 };
+    const bucketColors = { '0-24': 'var(--red)', '25-49': '#ff8c42', '50-74': 'var(--yellow)', '75-89': 'var(--blue)', '90-100': 'var(--green)' };
+    scores.forEach(s => {
+      if (s >= 90) buckets['90-100']++;
+      else if (s >= 75) buckets['75-89']++;
+      else if (s >= 50) buckets['50-74']++;
+      else if (s >= 25) buckets['25-49']++;
+      else buckets['0-24']++;
+    });
+    const maxBucket = Math.max(...Object.values(buckets), 1);
+
+    // Most missed questions
+    const missCount = {};
+    questions.forEach((q, qi) => { missCount[qi] = 0; });
+    subs.forEach(s => {
+      const answers = s.answers || {};
+      questions.forEach((q, qi) => {
+        if (q.quiz_type === 'matching') {
+          const ans = answers[qi];
+          if (!ans || typeof ans !== 'object' || ans.correct !== ans.total) missCount[qi]++;
+        } else {
+          if (answers[qi] !== q.correct_index) missCount[qi]++;
+        }
+      });
+    });
+    const mostMissed = Object.entries(missCount)
+      .map(([qi, count]) => ({ qi: parseInt(qi), count, pct: Math.round(count / subs.length * 100) }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5)
+      .filter(m => m.count > 0);
+
+    let html = `<div class="analytics">
+      <div class="analytics-card">
+        <div class="analytics-title">Score Distribution</div>
+        <div class="stat-row">
+          <div><div class="stat-big">${avg}%</div><div class="stat-label">Average</div></div>
+          <div><div class="stat-big" style="font-size:20px;color:var(--blue)">${highest}%</div><div class="stat-label">Highest</div></div>
+          <div><div class="stat-big" style="font-size:20px;color:var(--red)">${lowest}%</div><div class="stat-label">Lowest</div></div>
+        </div>
+        ${Object.entries(buckets).map(([label, count]) => `
+          <div class="bar-row">
+            <span class="bar-label">${label}%</span>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:${count/maxBucket*100}%;background:${bucketColors[label]}"></div>
+            </div>
+            <span class="bar-value">${count}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div class="analytics-card">
+        <div class="analytics-title">Most Missed Questions</div>
+        ${mostMissed.length === 0 ? '<div style="color:var(--text-dim);font-size:11px">No missed questions!</div>' :
+          mostMissed.map(m => {
+            const qText = questions[m.qi].question.substring(0, 80) + (questions[m.qi].question.length > 80 ? '...' : '');
+            return `<div class="missed-item">
+              <span>Q${m.qi + 1}: ${qText}</span>
+              <span class="missed-pct">${m.pct}% wrong</span>
+            </div>`;
+          }).join('')
+        }
+        <div style="margin-top:10px">
+          <div class="stat-row">
+            <div><div class="stat-big" style="font-size:20px">${subs.length}</div><div class="stat-label">Submissions</div></div>
+            <div><div class="stat-big" style="font-size:20px">${questions.length}</div><div class="stat-label">Questions</div></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+    // ── SUBMISSIONS TABLE ──
+    html += `<table>
       <thead><tr><th>#</th><th>Student</th><th>Score</th><th>%</th><th>Time</th><th>Details</th></tr></thead>
       <tbody>`;
 
-    data.submissions.forEach((s, i) => {
+    subs.forEach((s, i) => {
       const time = new Date(s.submitted_at).toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
       const color = s.pct >= 75 ? 'var(--green)' : s.pct >= 50 ? 'var(--blue)' : 'var(--red)';
 
-      // Build detail for each question
       let detail = '';
       const answers = s.answers || {};
-      data.quiz.questions.forEach((q, qi) => {
+      questions.forEach((q, qi) => {
         const isMatch = q.quiz_type === 'matching';
         let status = '—';
         if (isMatch) {
@@ -397,7 +623,6 @@
 
     html += '</tbody></table>';
 
-    // Export CSV button
     html += `<div style="margin-top:12px">
       <button class="btn-ghost" onclick="exportCSV('${quizId}')">Export CSV</button>
     </div>`;
@@ -420,6 +645,64 @@
     const a = document.createElement('a');
     a.href = url; a.download = `results_${quizId}.csv`; a.click();
     URL.revokeObjectURL(url);
+  }
+
+  async function exportQuizGIFT(quizId) {
+    try {
+      const res = await fetch(`${API}/teacher/quiz/${quizId}/results`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.error || !data.quiz) return;
+
+      const giftRes = await fetch(`${API}/export-quiz-gift`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          questions: data.quiz.questions,
+          title: data.quiz.title
+        })
+      });
+      if (!giftRes.ok) throw new Error('Export failed');
+      const blob = await giftRes.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${data.quiz.title.replace(/\s+/g, '_')}_GIFT.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      alert('GIFT export failed: ' + e.message);
+    }
+  }
+
+  async function exportQuizPDF(quizId) {
+    try {
+      const res = await fetch(`${API}/teacher/quiz/${quizId}/results`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.error || !data.quiz) return;
+
+      const pdfRes = await fetch(`${API}/export-quiz-pdf`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          questions: data.quiz.questions,
+          title: data.quiz.title
+        })
+      });
+      if (!pdfRes.ok) throw new Error('Export failed');
+      const blob = await pdfRes.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${data.quiz.title.replace(/\s+/g, '_')}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      alert('PDF export failed: ' + e.message);
+    }
   }
 
   checkAuth();

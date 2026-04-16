@@ -45,6 +45,16 @@ def init_db():
             UNIQUE(quiz_id, student_ip)
         );
 
+        CREATE TABLE IF NOT EXISTS quiz_sessions (
+            nonce TEXT PRIMARY KEY,
+            quiz_id TEXT NOT NULL,
+            ip TEXT NOT NULL,
+            ua_fp TEXT NOT NULL,
+            issued_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            consumed_at TIMESTAMP DEFAULT NULL,
+            FOREIGN KEY (quiz_id) REFERENCES shared_quizzes(id)
+        );
+
         CREATE TABLE IF NOT EXISTS submissions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             quiz_id TEXT NOT NULL,
@@ -61,6 +71,7 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_quizzes_teacher ON shared_quizzes(teacher_id);
         CREATE INDEX IF NOT EXISTS idx_submissions_quiz ON submissions(quiz_id);
         CREATE INDEX IF NOT EXISTS idx_quiz_starts_quiz ON quiz_starts(quiz_id, student_ip);
+        CREATE INDEX IF NOT EXISTS idx_quiz_sessions_quiz ON quiz_sessions(quiz_id);
     """)
     conn.commit()
     conn.close()
@@ -162,6 +173,7 @@ def delete_shared_quiz(quiz_id: str, teacher_id: int) -> bool:
     conn = get_db()
     try:
         conn.execute("DELETE FROM quiz_starts WHERE quiz_id = ?", (quiz_id,))
+        conn.execute("DELETE FROM quiz_sessions WHERE quiz_id = ?", (quiz_id,))
         conn.execute("DELETE FROM submissions WHERE quiz_id = ?", (quiz_id,))
         cur = conn.execute(
             "DELETE FROM shared_quizzes WHERE id = ? AND teacher_id = ?",
@@ -251,3 +263,45 @@ def get_quiz_start_time(quiz_id: str, student_ip: str) -> str | None:
     ).fetchone()
     conn.close()
     return row["started_at"] if row else None
+
+
+# ── Quiz Session (anti-fraud) ──
+
+def create_quiz_session(nonce: str, quiz_id: str, ip: str, ua_fp: str) -> bool:
+    conn = get_db()
+    try:
+        conn.execute(
+            "INSERT INTO quiz_sessions (nonce, quiz_id, ip, ua_fp) VALUES (?, ?, ?, ?)",
+            (nonce, quiz_id, ip, ua_fp)
+        )
+        conn.commit()
+        return True
+    except Exception:
+        return False
+    finally:
+        conn.close()
+
+
+def get_quiz_session(nonce: str) -> dict | None:
+    conn = get_db()
+    row = conn.execute(
+        "SELECT * FROM quiz_sessions WHERE nonce = ?",
+        (nonce,)
+    ).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def consume_quiz_session(nonce: str) -> bool:
+    """Mark a session nonce as consumed. Returns False if already consumed."""
+    conn = get_db()
+    try:
+        cur = conn.execute(
+            "UPDATE quiz_sessions SET consumed_at = CURRENT_TIMESTAMP "
+            "WHERE nonce = ? AND consumed_at IS NULL",
+            (nonce,)
+        )
+        conn.commit()
+        return cur.rowcount > 0
+    finally:
+        conn.close()

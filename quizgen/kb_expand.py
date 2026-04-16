@@ -13,7 +13,12 @@ import json
 import os
 import re
 
+from filelock import FileLock, Timeout
+
 from .distractors import KNOWLEDGE_BASE_PATH, normalize_word
+
+KB_LOCK_PATH = KNOWLEDGE_BASE_PATH + ".lock"
+KB_LOCK_TIMEOUT = 10  # seconds
 
 
 # Minimum word length to be considered a term
@@ -344,35 +349,44 @@ def expand_knowledge_base(sentences: list[str]) -> int:
     """
     Extract new terms from sentences and add them to knowledge_base.json.
     Returns the number of new terms added.
+
+    Concurrent-safe: serialized by a cross-process file lock and persisted
+    via atomic rename so a reader never sees a half-written file.
     """
-    # Load current KB
-    if os.path.exists(KNOWLEDGE_BASE_PATH):
-        with open(KNOWLEDGE_BASE_PATH, "r", encoding="utf-8") as f:
-            kb = json.load(f)
-    else:
-        kb = {}
-
     new_terms = extract_new_terms(sentences)
-    added = 0
+    if not new_terms:
+        return 0
 
-    for term, distractors in new_terms.items():
-        if not distractors:
-            continue
+    try:
+        with FileLock(KB_LOCK_PATH, timeout=KB_LOCK_TIMEOUT):
+            if os.path.exists(KNOWLEDGE_BASE_PATH):
+                with open(KNOWLEDGE_BASE_PATH, "r", encoding="utf-8") as f:
+                    kb = json.load(f)
+            else:
+                kb = {}
 
-        if term in kb:
-            # Add new distractors to existing entry (avoid duplicates)
-            existing = {d.lower() for d in kb[term]}
-            for d in distractors:
-                if d.lower() not in existing and len(kb[term]) < 6:
-                    kb[term].append(d)
-                    existing.add(d.lower())
-        else:
-            # New entry
-            kb[term] = distractors
-            added += 1
+            added = 0
+            for term, distractors in new_terms.items():
+                if not distractors:
+                    continue
 
-    # Save updated KB
-    with open(KNOWLEDGE_BASE_PATH, "w", encoding="utf-8") as f:
-        json.dump(kb, f, indent=2, ensure_ascii=False)
+                if term in kb:
+                    existing = {d.lower() for d in kb[term]}
+                    for d in distractors:
+                        if d.lower() not in existing and len(kb[term]) < 6:
+                            kb[term].append(d)
+                            existing.add(d.lower())
+                else:
+                    kb[term] = distractors
+                    added += 1
 
-    return added
+            tmp_path = KNOWLEDGE_BASE_PATH + ".tmp"
+            with open(tmp_path, "w", encoding="utf-8") as f:
+                json.dump(kb, f, indent=2, ensure_ascii=False)
+            os.replace(tmp_path, KNOWLEDGE_BASE_PATH)
+
+            return added
+    except Timeout:
+        # Another worker is holding the lock; skip this expansion
+        # rather than blocking the request indefinitely.
+        return 0
